@@ -1,0 +1,80 @@
+@import "tailwindcss";
+
+/* ── Transcend Infinity — Design Tokens ───────────────────────────────────── */
+
+@theme inline {
+  /* Colors */
+  --color-void:        rgb(6, 7, 15);
+  --color-card:        rgb(10, 10, 22);
+  --color-amber:       rgb(200, 155, 60);
+  --color-amber-dim:   rgba(200, 155, 60, 0.55);
+  --color-amber-glow:  rgba(200, 155, 60, 0.15);
+  --color-cream:       rgb(232, 217, 160);
+  --color-cream-muted: rgba(232, 217, 160, 0.65);
+  --color-violet:      rgb(122, 111, 160);
+  --color-violet-dim:  rgba(122, 111, 160, 0.5);
+
+  /* Semantic gameplay — NUNCA alterar */
+  --color-rarity-comum:    rgb(150, 150, 150);
+  --color-rarity-incomum:  rgb(80, 200, 100);
+  --color-rarity-raro:     rgb(60, 120, 220);
+  --color-rarity-epico:    rgb(160, 80, 220);
+  --color-rarity-lendario: rgb(255, 160, 40);
+  --color-rarity-mitico:   rgb(255, 60, 60);
+  --color-rarity-ancestral:rgb(255, 220, 60);
+
+  /* Easing */
+  --ease-out-strong:   cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out-strong:cubic-bezier(0.77, 0, 0.175, 1);
+
+  /* Font */
+  --font-display: var(--font-cinzel);
+  --font-sans:    var(--font-inter);
+}
+
+/* ── Base ─────────────────────────────────────────────────────────────────── */
+
+:root {
+  color-scheme: dark;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background-color: rgb(6, 7, 15);
+  color: rgb(232, 217, 160);
+  font-family: var(--font-inter), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Scrollbar ────────────────────────────────────────────────────────────── */
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: rgba(6, 7, 15, 0.8); }
+::-webkit-scrollbar-thumb {
+  background: rgba(200, 155, 60, 0.35);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(200, 155, 60, 0.6); }
+
+/* ── Input overrides ──────────────────────────────────────────────────────── */
+
+input, textarea {
+  outline: none;
+  caret-color: rgb(200, 155, 60);
+}
+
+input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0px 1000px rgb(6, 7, 15) inset;
+  -webkit-text-fill-color: rgb(232, 217, 160);
+}
+
+/* ── Selection ────────────────────────────────────────────────────────────── */
+
+::selection {
+  background: rgba(200, 155, 60, 0.3);
+  color: rgb(232, 217, 160);
+}
