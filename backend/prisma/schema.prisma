@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  username     String   @unique
+  passwordHash String
+  level        Int      @default(1)
+  xp           Int      @default(0)
+  gold         Int      @default(100)
+  selos        Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  cards        UserCard[]
+}
+
+model Card {
+  id          String   @id @default(cuid())
+  name        String
+  description String   @default("")
+  rarity      Rarity   @default(COMUM)
+  attack      Int      @default(10)
+  defense     Int      @default(10)
+  imageUrl    String   @default("")
+  createdAt   DateTime @default(now())
+
+  userCards   UserCard[]
+}
+
+model UserCard {
+  id        String   @id @default(cuid())
+  userId    String
+  cardId    String
+  level     Int      @default(1)
+  obtainedAt DateTime @default(now())
+
+  user  User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  card  Card @relation(fields: [cardId], references: [id])
+
+  @@index([userId])
+}
+
+enum Rarity {
+  COMUM
+  INCOMUM
+  RARO
+  EPICO
+  LENDARIO
+  MITICO
+  ANCESTRAL
+}
