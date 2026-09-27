@@ -20,6 +20,7 @@ import BattlePassModal from "./BattlePassModal";
 import TorreModal from "./TorreModal";
 import AchievementsModal from "./AchievementsModal";
 import DailyChallengesModal from "./DailyChallengesModal";
+import CodexModal from "./CodexModal";
 
 export type Profile = {
   id: number;
@@ -58,6 +59,7 @@ export default function GamePage() {
   const [showTorre, setShowTorre] = useState(false);
   const [showAchievements, setShowAchievements] = useState(false);
   const [showDailyChallenges, setShowDailyChallenges] = useState(false);
+  const [showCodex, setShowCodex] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated()) { router.replace("/login"); return; }
@@ -105,7 +107,7 @@ export default function GamePage() {
           {tab === "cartas"  && <CartasTab  key="cartas" />}
           {tab === "invocar" && <InvocarTab key="invocar" />}
           {tab === "guilda"  && <GuildaTab  key="guilda" />}
-          {tab === "perfil"  && <PerfilTab  key="perfil" profile={profile} onLogout={handleLogout} onAchievements={() => setShowAchievements(true)} />}
+          {tab === "perfil"  && <PerfilTab  key="perfil" profile={profile} onLogout={handleLogout} onAchievements={() => setShowAchievements(true)} onCodex={() => setShowCodex(true)} />}
         </AnimatePresence>
       </main>
 
@@ -118,6 +120,7 @@ export default function GamePage() {
         {showTorre && <TorreModal key="torre" onClose={() => setShowTorre(false)} />}
         {showAchievements && <AchievementsModal key="achievements" onClose={() => setShowAchievements(false)} />}
         {showDailyChallenges && <DailyChallengesModal key="daily" onClose={() => setShowDailyChallenges(false)} />}
+        {showCodex && <CodexModal key="codex" onClose={() => setShowCodex(false)} />}
       </AnimatePresence>
 
       {/* Bottom nav */}
