@@ -9,6 +9,14 @@ type CloudSaveEnvelope = {
   data: string; // JSON stringified SaveData
 };
 
+type CloudSaveDownload = {
+  schemaVersion: number;
+  revision: number;
+  checksum: string;
+  data: unknown;
+  serverOfflineMs: number;
+};
+
 type CloudSaveResponse = {
   success: boolean;
   revision: number;
@@ -18,21 +26,17 @@ let _revision = 0;
 let _syncTimer: ReturnType<typeof setTimeout> | null = null;
 let _uploading = false;
 
-// Carrega save da nuvem. Retorna true se encontrou um save existente.
-export async function loadCloudSave(): Promise<boolean> {
+// Carrega save da nuvem. Retorna serverOfflineMs se encontrou save, null caso contrário.
+export async function loadCloudSave(): Promise<number | null> {
   try {
-    const res = await api.get<CloudSaveEnvelope | null>("/player/save");
-    if (!res || res.data === "null" || !res.data) return false;
-
-    let cloudSave: unknown;
-    try { cloudSave = JSON.parse(res.data); } catch { return false; }
-    if (!cloudSave || typeof cloudSave !== "object") return false;
+    const res = await api.get<CloudSaveDownload | null>("/player/save");
+    if (!res || !res.data || typeof res.data !== "object") return null;
 
     _revision = res.revision ?? 0;
-    useGameStore.setState((s) => ({ ...s, save: cloudSave as typeof s.save, cloudSynced: true, lastSyncAt: new Date().toISOString() }));
-    return true;
+    useGameStore.setState((s) => ({ ...s, save: res.data as typeof s.save, cloudSynced: true, lastSyncAt: new Date().toISOString() }));
+    return res.serverOfflineMs ?? 0;
   } catch {
-    return false;
+    return null;
   }
 }
 

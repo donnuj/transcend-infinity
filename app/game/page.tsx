@@ -99,9 +99,10 @@ export default function GamePage() {
     api.get<Profile>("/player/profile").then((p) => setProfile(p)).catch(() => null);
     localStorage.removeItem("ti_game_save");
     useGameStore.getState().resetSave();
-    loadCloudSave().then((found) => {
-      if (!found) uploadCloudSave();
-      const reward = useGameStore.getState().collectOfflineRewards();
+    loadCloudSave().then((serverOfflineMs) => {
+      if (serverOfflineMs === null) { uploadCloudSave(); return; }
+      // Use server-provided elapsed time — not manipulable by the client
+      const reward = useGameStore.getState().collectOfflineRewards(serverOfflineMs);
       if (reward) { setOfflineReward(reward); uploadCloudSave(); }
     }).finally(() => setUser(u));
   }, [router]);

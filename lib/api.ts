@@ -11,21 +11,17 @@ async function refreshAccessToken(): Promise<string | null> {
 
   _refreshPromise = (async () => {
     try {
-      const refreshToken = localStorage.getItem("ti_refresh_token");
-      if (!refreshToken) return null;
-
       const res = await fetch(`${BASE_URL}/auth/refresh`, {
         method: "POST",
+        credentials: "include", // envia o cookie httpOnly de refresh
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ refreshToken }),
       });
 
       if (!res.ok) return null;
 
-      const data = await res.json();
-      localStorage.setItem("ti_token", data.accessToken);
-      if (data.refreshToken) localStorage.setItem("ti_refresh_token", data.refreshToken);
-      return data.accessToken as string;
+      const data = await res.json() as { accessToken?: string };
+      if (data.accessToken) localStorage.setItem("ti_token", data.accessToken);
+      return data.accessToken ?? null;
     } catch {
       return null;
     } finally {
@@ -41,6 +37,7 @@ async function request<T>(path: string, options: RequestOptions = {}, isRetry = 
 
   const res = await fetch(`${BASE_URL}${path}`, {
     ...options,
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -56,7 +53,6 @@ async function request<T>(path: string, options: RequestOptions = {}, isRetry = 
 
     // Refresh falhou: encerra sessão
     localStorage.removeItem("ti_token");
-    localStorage.removeItem("ti_refresh_token");
     localStorage.removeItem("ti_user");
     window.location.replace("/login");
     throw new Error("Sessão expirada");
@@ -64,7 +60,7 @@ async function request<T>(path: string, options: RequestOptions = {}, isRetry = 
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({ message: res.statusText }));
-    const error = new Error(err.message ?? "Erro desconhecido") as Error & { status: number };
+    const error = new Error((err as { message?: string }).message ?? "Erro desconhecido") as Error & { status: number };
     error.status = res.status;
     throw error;
   }

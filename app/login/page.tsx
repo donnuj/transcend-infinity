@@ -10,7 +10,6 @@ type Mode = "login" | "register";
 
 type AuthResponse = {
   accessToken: string;
-  refreshToken: string;
   profile: { id: number; username: string; email: string; level: number };
 };
 
@@ -52,7 +51,7 @@ export default function LoginPage() {
           ? { email, username, password }
           : { email, password };
         const res = await api.post<AuthResponse>(endpoint, body);
-        saveSession(res.accessToken, { ...res.profile, id: String(res.profile.id) }, res.refreshToken);
+        saveSession(res.accessToken, { ...res.profile, id: String(res.profile.id) });
         router.replace("/game");
       } catch (err) {
         const e = err as Error & { status?: number };

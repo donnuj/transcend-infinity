@@ -212,7 +212,7 @@ type GameStore = {
   getProfessionLevel: () => number;
 
   // Offline
-  collectOfflineRewards: () => { ouro: number; xp: number } | null;
+  collectOfflineRewards: (elapsedMs?: number) => { ouro: number; xp: number } | null;
   pingLastActive: () => void;
 
   // Bonus helpers (companion + forge + faction + housing)
@@ -860,17 +860,17 @@ export const useGameStore = create<GameStore>()(
 
       // ── Offline ──────────────────────────────────────────────────────────────
 
-      collectOfflineRewards() {
-        const lastActive = get().save.offline?.lastActiveAt;
-        if (!lastActive) {
-          get().pingLastActive();
-          return null;
+      collectOfflineRewards(elapsedMs?: number) {
+        // Use server-provided elapsed time if available; fall back to local lastActiveAt
+        let elapsed: number;
+        if (elapsedMs !== undefined) {
+          elapsed = elapsedMs;
+        } else {
+          const lastActive = get().save.offline?.lastActiveAt;
+          if (!lastActive) { get().pingLastActive(); return null; }
+          elapsed = Math.min(Date.now() - new Date(lastActive).getTime(), 8 * 3600 * 1000);
         }
-        const elapsed = Math.min(Date.now() - new Date(lastActive).getTime(), 8 * 3600 * 1000);
-        if (elapsed < 5 * 60 * 1000) {
-          get().pingLastActive();
-          return null;
-        }
+        if (elapsed < 5 * 60 * 1000) { get().pingLastActive(); return null; }
         const level = get().save.playerLevel.level;
         const hoursAway = elapsed / 3600000;
         const ouro = Math.floor((level * 12 + 20) * hoursAway);
