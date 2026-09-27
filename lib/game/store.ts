@@ -27,9 +27,13 @@ export function newSave(): SaveData {
     heroLevels: [],
     heroEquipment: [],
     heroRunes: [],
-    inventory: [],
-    equipmentInventory: [],
-    runeInventory: [],
+    inventory: [
+      { itemId: "pocao_cura_p",     qty: 5 },
+      { itemId: "cristal_evolucao", qty: 3 },
+      { itemId: "pedra_ascensao",   qty: 1 },
+    ],
+    equipmentInventory: ["espada_ferro","armadura_couro","anel_forca"],
+    runeInventory: ["runa_forca","runa_sorte"],
     dungeon: [],
     travel: { unlockedDestinationIds: ["reg_valdris"], hasHorse: false, hasShip: false },
     reputation: [],
@@ -98,6 +102,8 @@ type GameStore = {
   getHeroRunes: (heroId: string) => SaveData["heroRunes"][0];
   getFragmentos: (heroId: string) => number;
   addHeroXp: (heroId: string, xp: number) => void;
+  useXpItem: (heroId: string) => boolean;
+  ascendHero: (heroId: string) => boolean;
   rankUpHero: (heroId: string) => boolean;
   upgradeHeroStars: (heroId: string) => boolean;
   awakenHero: (heroId: string) => boolean;
@@ -258,6 +264,32 @@ export const useGameStore = create<GameStore>()(
             entry.level++;
           }
         });
+      },
+
+      useXpItem(heroId) {
+        const CRISTAL_XP = 500;
+        const qty = get().getItemQty("cristal_evolucao");
+        if (qty < 1) return false;
+        get().removeItem("cristal_evolucao", 1);
+        get().addHeroXp(heroId, CRISTAL_XP);
+        return true;
+      },
+
+      ascendHero(heroId) {
+        const TIER_MAX_LEVEL = [20, 30, 40, 50, 60, 70];
+        const pedras = get().getItemQty("pedra_ascensao");
+        if (pedras < 1) return false;
+        const lvl = get().getHeroLevel(heroId);
+        if (lvl.tier >= 5) return false;
+        const maxAtTier = TIER_MAX_LEVEL[lvl.tier];
+        if (lvl.level < maxAtTier) return false;
+        get().removeItem("pedra_ascensao", 1);
+        set((s) => {
+          let entry = s.save.heroLevels.find((h) => h.heroId === heroId);
+          if (!entry) { s.save.heroLevels.push({ heroId, level: 1, xp: 0, tier: 0, talentPath: -1 }); entry = s.save.heroLevels[s.save.heroLevels.length - 1]; }
+          entry.tier = (entry.tier + 1) as typeof entry.tier;
+        });
+        return true;
       },
 
       rankUpHero(heroId) {

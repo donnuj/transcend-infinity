@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useGameStore } from "@/lib/game/store";
 import { HERO_MAP } from "@/lib/game/data/heroes";
 import { SKILL_MAP } from "@/lib/game/data/skills";
+import { EQUIP_MAP } from "@/lib/game/data/items";
+import { RUNE_MAP } from "@/lib/game/data/items";
 import { deriveStats, getStatsAtLevel } from "@/lib/game/calc";
 import type { GachaRarity, HeroDef, SaveData } from "@/lib/game/types";
 
@@ -42,10 +44,10 @@ const FILTERS: FilterRarity[] = ["TODOS","Lendário","Épico","Raro","Incomum","
 type HeroEntry = { hero: HeroDef; copies: number };
 
 export default function CartasTab() {
-  const { save, getHeroProgression, getHeroLevel, getHeroSkills } = useGameStore();
+  const { save, getHeroProgression, getHeroLevel, getHeroSkills, getHeroEquipment, getHeroRunes } = useGameStore();
   const [filter, setFilter] = useState<FilterRarity>("TODOS");
   const [selected, setSelected] = useState<HeroDef | null>(null);
-  const [detailTab, setDetailTab] = useState<"stats"|"skills"|"prog">("stats");
+  const [detailTab, setDetailTab] = useState<"stats"|"skills"|"prog"|"equip">("stats");
 
   const collected = useMemo<HeroEntry[]>(() => {
     const counts = new Map<string, number>();
@@ -163,6 +165,10 @@ export default function CartasTab() {
             progression={getHeroProgression(selected.heroId)}
             levelData={getHeroLevel(selected.heroId)}
             skillData={getHeroSkills(selected.heroId)}
+            equipData={getHeroEquipment(selected.heroId)}
+            runeData={getHeroRunes(selected.heroId)}
+            equipInventory={save.equipmentInventory}
+            runeInventory={save.runeInventory}
             detailTab={detailTab}
             onTabChange={setDetailTab}
             onClose={() => setSelected(null)}
@@ -175,7 +181,7 @@ export default function CartasTab() {
 
 // ── Hero Detail Sheet ──────────────────────────────────────────────────────────
 
-type DetailTab = "stats" | "skills" | "prog";
+type DetailTab = "stats" | "skills" | "prog" | "equip";
 
 type DetailProps = {
   hero: HeroDef;
@@ -183,12 +189,16 @@ type DetailProps = {
   progression: SaveData["heroProgression"][0];
   levelData: SaveData["heroLevels"][0];
   skillData: SaveData["heroSkills"][0];
+  equipData: SaveData["heroEquipment"][0];
+  runeData: SaveData["heroRunes"][0];
+  equipInventory: string[];
+  runeInventory: string[];
   detailTab: DetailTab;
   onTabChange: (t: DetailTab) => void;
   onClose: () => void;
 };
 
-function HeroDetail({ hero, copies, progression, levelData, skillData, detailTab, onTabChange, onClose }: DetailProps) {
+function HeroDetail({ hero, copies, progression, levelData, skillData, equipData, runeData, equipInventory, runeInventory, detailTab, onTabChange, onClose }: DetailProps) {
   const s = RARITY_STYLE[hero.rarity];
   const rank = (["F","E","D","C","B","A","S","SS","SSS"] as const)[progression.rank] ?? "F";
   const stars = Math.max(1, Math.min(5, progression.stars)) as 1|2|3|4|5;
@@ -261,21 +271,21 @@ function HeroDetail({ hero, copies, progression, levelData, skillData, detailTab
         </div>
 
         {/* Tabs */}
-        <div className="mb-4 flex gap-1 rounded-xl bg-violet/5 p-1">
-          {(["stats","skills","prog"] as const).map((t) => (
+        <div className="mb-4 grid grid-cols-4 gap-1 rounded-xl bg-violet/5 p-1">
+          {(["stats","skills","prog","equip"] as const).map((t) => (
             <motion.button
               key={t}
               onClick={() => onTabChange(t)}
               whileTap={{ scale: 0.97 }}
               transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
-              className="flex-1 rounded-lg py-1.5 text-[8px] font-bold tracking-widest transition-colors duration-150"
+              className="rounded-lg py-1.5 text-[7.5px] font-bold tracking-wider transition-colors duration-150"
               style={{
                 background: detailTab === t ? s.glow : "transparent",
                 color:      detailTab === t ? s.color : "rgba(122,111,160,0.5)",
                 border:     detailTab === t ? `1px solid ${s.border}` : "1px solid transparent",
               }}
             >
-              {t === "stats" ? "ATRIBUTOS" : t === "skills" ? "HABILIDADES" : "PROGRESSÃO"}
+              {t === "stats" ? "ATRIBUTOS" : t === "skills" ? "SKILLS" : t === "prog" ? "PROGRESSO" : "EQUIP."}
             </motion.button>
           ))}
         </div>
@@ -369,8 +379,10 @@ function HeroDetail({ hero, copies, progression, levelData, skillData, detailTab
                   );
                 })}
               </motion.div>
+            ) : detailTab === "prog" ? (
+              <ProgressionTab hero={hero} progression={progression} levelData={levelData} s={s} />
             ) : (
-              <ProgressionTab hero={hero} progression={progression} s={s} />
+              <EquipTab hero={hero} equipData={equipData} runeData={runeData} equipInventory={equipInventory} runeInventory={runeInventory} s={s} />
             )}
           </AnimatePresence>
         </div>
@@ -397,13 +409,18 @@ const AWAKEN_FRAG_COST = [20,40,60,80,100];
 const AWAKEN_BONUS = ["–","Vel. Atq +5%","Crít +3%","HP +10%","Todos stats +5%","Forma Lendária"];
 const STAR_FRAG_COST = [5,10,15,20];
 
-function ProgressionTab({ hero, progression, s }: {
+function ProgressionTab({ hero, progression, levelData, s }: {
   hero: HeroDef;
   progression: SaveData["heroProgression"][0];
+  levelData: SaveData["heroLevels"][0];
   s: { color: string; glow: string; border: string };
 }) {
-  const { rankUpHero, upgradeHeroStars, awakenHero, getFragmentos } = useGameStore();
+  const { rankUpHero, upgradeHeroStars, awakenHero, getFragmentos, useXpItem, ascendHero, getItemQty } = useGameStore();
   const frags = getFragmentos(hero.heroId);
+  const xpItems = getItemQty("cristal_evolucao");
+  const pedras = getItemQty("pedra_ascensao");
+  const TIER_MAX_LEVEL = [20, 30, 40, 50, 60, 70];
+  const canAscend = levelData.tier < 5 && levelData.level >= TIER_MAX_LEVEL[levelData.tier] && pedras >= 1;
   const rank = progression.rank;
   const stars = progression.stars;
   const awaken = progression.awakenLevel;
@@ -422,6 +439,33 @@ function ProgressionTab({ hero, progression, s }: {
       transition={{ duration: 0.15, ease }}
       className="flex flex-col gap-3"
     >
+      {/* Level & Ascension */}
+      <ProgSection title="Nível" current={`Nv. ${levelData.level} (Tier ${levelData.tier})`} next={levelData.tier < 5 ? `Cap: ${TIER_MAX_LEVEL[levelData.tier]}` : "MAX"} s={s}>
+        <div className="mb-2">
+          <div className="mb-1 flex justify-between">
+            <span className="text-[8px] text-violet/40">XP</span>
+            <span className="text-[8px] text-violet/40">{levelData.xp} / {100 + levelData.level * 50}</span>
+          </div>
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-violet/10">
+            <div className="h-full rounded-full" style={{ width: `${Math.min(100, (levelData.xp / (100 + levelData.level * 50)) * 100)}%`, background: s.color }} />
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <UpgradeButton
+            label={`Usar Cristal de Evolução (${xpItems})`}
+            enabled={xpItems > 0}
+            color={s.color} glow={s.glow} border={s.border}
+            onPress={() => { useXpItem(hero.heroId); }}
+          />
+          <UpgradeButton
+            label={`Ascender (${pedras} pedra${pedras !== 1 ? "s" : ""})`}
+            enabled={canAscend}
+            color="rgb(255,200,50)" glow="rgba(255,200,50,0.1)" border="rgba(255,200,50,0.4)"
+            onPress={() => { ascendHero(hero.heroId); }}
+          />
+        </div>
+      </ProgSection>
+
       {/* Fragment count */}
       <div className="flex items-center justify-between rounded-xl border border-violet/10 px-4 py-3" style={{ background: "rgba(122,111,160,0.04)" }}>
         <span className="text-[10px] text-violet/60">Fragmentos de Memória</span>
@@ -499,6 +543,200 @@ function ProgressionTab({ hero, progression, s }: {
           />
         )}
       </ProgSection>
+    </motion.div>
+  );
+}
+
+// ── Equipment Tab ──────────────────────────────────────────────────────────────
+
+const EQUIP_SLOT_LABEL: Record<string, string> = {
+  weaponId: "Arma", armorId: "Armadura", accessoryId: "Acessório", reliquiaId: "Relíquia"
+};
+const EQUIP_SLOTS = ["weaponId","armorId","accessoryId","reliquiaId"] as const;
+const RUNE_SLOTS = ["slot0","slot1"] as const;
+
+function EquipTab({ hero, equipData, runeData, equipInventory, runeInventory, s }: {
+  hero: HeroDef;
+  equipData: SaveData["heroEquipment"][0];
+  runeData: SaveData["heroRunes"][0];
+  equipInventory: string[];
+  runeInventory: string[];
+  s: { color: string; glow: string; border: string };
+}) {
+  const { equipItem, equipRune } = useGameStore();
+  const [pickingSlot, setPickingSlot] = useState<string | null>(null);
+
+  const availableEquip = (slot: typeof EQUIP_SLOTS[number]) => {
+    const slotType = slot.replace("Id","") as "weapon"|"armor"|"accessory"|"reliquia";
+    return equipInventory.map((id) => EQUIP_MAP[id]).filter((e) => e && e.slot === slotType);
+  };
+  const availableRunes = () => runeInventory.map((id) => RUNE_MAP[id]).filter(Boolean);
+
+  const isRuneSlot = (s: string) => s === "slot0" || s === "slot1";
+
+  const handleEquip = (slot: string, id: string) => {
+    if (isRuneSlot(slot)) {
+      equipRune(hero.heroId, slot as "slot0"|"slot1", id);
+    } else {
+      equipItem(hero.heroId, slot as typeof EQUIP_SLOTS[number], id);
+    }
+    setPickingSlot(null);
+  };
+
+  return (
+    <motion.div
+      key="equip"
+      initial={{ opacity: 0, x: 8 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -8 }}
+      transition={{ duration: 0.15, ease }}
+      className="flex flex-col gap-2"
+    >
+      <p className="mb-1 text-[9px] font-bold tracking-widest text-violet/40">EQUIPAMENTOS</p>
+      {EQUIP_SLOTS.map((slot) => {
+        const currentId = (equipData as Record<string, string | undefined>)[slot];
+        const current = currentId ? EQUIP_MAP[currentId] : null;
+        const available = availableEquip(slot);
+        const isPicking = pickingSlot === slot;
+        return (
+          <div key={slot}>
+            <div
+              className="flex items-center gap-2 rounded-xl border px-3 py-2.5 transition-colors"
+              style={{
+                borderColor: current ? s.border : "rgba(122,111,160,0.1)",
+                background: current ? s.glow : "rgba(122,111,160,0.04)",
+              }}
+            >
+              <div className="min-w-0 flex-1">
+                <p className="text-[8px] text-violet/40">{EQUIP_SLOT_LABEL[slot]}</p>
+                {current ? (
+                  <p className="text-[10px] font-bold text-cream/80">{current.name}</p>
+                ) : (
+                  <p className="text-[10px] text-violet/30">— Vazio —</p>
+                )}
+                {current && (
+                  <p className="text-[8px] text-violet/50">
+                    {Object.entries(current.statBonus).map(([k,v]) => `+${v} ${k}`).join(" · ")}
+                  </p>
+                )}
+              </div>
+              {available.length > 0 && (
+                <motion.button
+                  onClick={() => setPickingSlot(isPicking ? null : slot)}
+                  whileTap={{ scale: 0.94 }}
+                  transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
+                  className="rounded-lg px-2 py-1.5 text-[8px] font-bold"
+                  style={{ color: s.color, border: `1px solid ${s.border}`, background: s.glow }}
+                >
+                  {isPicking ? "✕" : "Equipar"}
+                </motion.button>
+              )}
+            </div>
+            <AnimatePresence>
+              {isPicking && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
+                  className="overflow-hidden"
+                >
+                  <div className="mt-1 flex flex-col gap-1 pl-2">
+                    {available.map((eq) => eq && (
+                      <motion.button
+                        key={eq.equipId}
+                        onClick={() => handleEquip(slot, eq.equipId)}
+                        whileTap={{ scale: 0.97 }}
+                        transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
+                        className="flex items-center justify-between rounded-lg border border-violet/10 px-3 py-2 text-left"
+                        style={{ background: "rgba(122,111,160,0.06)" }}
+                      >
+                        <div>
+                          <p className="text-[9px] font-bold text-cream/80">{eq.name}</p>
+                          <p className="text-[8px] text-violet/40">
+                            {Object.entries(eq.statBonus).map(([k,v]) => `+${v} ${k}`).join(" · ")}
+                          </p>
+                        </div>
+                        <span className="text-[8px]" style={{ color: s.color }}>+</span>
+                      </motion.button>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        );
+      })}
+
+      <p className="mt-2 text-[9px] font-bold tracking-widest text-violet/40">RUNAS</p>
+      {RUNE_SLOTS.map((slot, i) => {
+        const currentId = (runeData as Record<string, string | undefined>)[slot];
+        const current = currentId ? RUNE_MAP[currentId] : null;
+        const available = availableRunes();
+        const isPicking = pickingSlot === slot;
+        return (
+          <div key={slot}>
+            <div
+              className="flex items-center gap-2 rounded-xl border px-3 py-2.5"
+              style={{
+                borderColor: current ? s.border : "rgba(122,111,160,0.1)",
+                background: current ? s.glow : "rgba(122,111,160,0.04)",
+              }}
+            >
+              <div className="min-w-0 flex-1">
+                <p className="text-[8px] text-violet/40">Runa {i + 1}</p>
+                {current ? (
+                  <p className="text-[10px] font-bold text-cream/80">{current.name}</p>
+                ) : (
+                  <p className="text-[10px] text-violet/30">— Vazio —</p>
+                )}
+                {current && <p className="text-[8px] text-violet/50">{current.description}</p>}
+              </div>
+              {available.length > 0 && (
+                <motion.button
+                  onClick={() => setPickingSlot(isPicking ? null : slot)}
+                  whileTap={{ scale: 0.94 }}
+                  transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
+                  className="rounded-lg px-2 py-1.5 text-[8px] font-bold"
+                  style={{ color: s.color, border: `1px solid ${s.border}`, background: s.glow }}
+                >
+                  {isPicking ? "✕" : "Equipar"}
+                </motion.button>
+              )}
+            </div>
+            <AnimatePresence>
+              {isPicking && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
+                  className="overflow-hidden"
+                >
+                  <div className="mt-1 flex flex-col gap-1 pl-2">
+                    {available.map((rune) => rune && (
+                      <motion.button
+                        key={rune.runeId}
+                        onClick={() => handleEquip(slot, rune.runeId)}
+                        whileTap={{ scale: 0.97 }}
+                        transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
+                        className="flex items-center justify-between rounded-lg border border-violet/10 px-3 py-2 text-left"
+                        style={{ background: "rgba(122,111,160,0.06)" }}
+                      >
+                        <div>
+                          <p className="text-[9px] font-bold text-cream/80">{rune.name}</p>
+                          <p className="text-[8px] text-violet/40">{rune.description}</p>
+                        </div>
+                        <span className="text-[8px]" style={{ color: s.color }}>+</span>
+                      </motion.button>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        );
+      })}
     </motion.div>
   );
 }
