@@ -31,6 +31,8 @@ import WorldMapModal from "./WorldMapModal";
 import NpcDialogueModal from "./NpcDialogueModal";
 import CaravanaModal from "./CaravanaModal";
 import SettingsModal from "./SettingsModal";
+import ProfessionModal from "./ProfessionModal";
+import ForgeModal from "./ForgeModal";
 
 export type Profile = {
   id: number;
@@ -80,6 +82,8 @@ export default function GamePage() {
   const [showNpcDialogue, setShowNpcDialogue] = useState(false);
   const [showCaravana, setShowCaravana] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showProfession, setShowProfession] = useState(false);
+  const [showForge, setShowForge] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated()) { router.replace("/login"); return; }
@@ -127,7 +131,7 @@ export default function GamePage() {
           {tab === "cartas"  && <CartasTab  key="cartas" />}
           {tab === "invocar" && <InvocarTab key="invocar" />}
           {tab === "guilda"  && <GuildaTab  key="guilda" onFortress={() => setShowFortress(true)} />}
-          {tab === "perfil"  && <PerfilTab  key="perfil" profile={profile} onLogout={handleLogout} onAchievements={() => setShowAchievements(true)} onCodex={() => setShowCodex(true)} onSeason={() => setShowSeason(true)} onHousing={() => setShowHousing(true)} onCompanions={() => setShowCompanions(true)} onAlchemy={() => setShowAlchemy(true)} onSettings={() => setShowSettings(true)} />}
+          {tab === "perfil"  && <PerfilTab  key="perfil" profile={profile} onLogout={handleLogout} onAchievements={() => setShowAchievements(true)} onCodex={() => setShowCodex(true)} onSeason={() => setShowSeason(true)} onHousing={() => setShowHousing(true)} onCompanions={() => setShowCompanions(true)} onAlchemy={() => setShowAlchemy(true)} onSettings={() => setShowSettings(true)} onProfession={() => setShowProfession(true)} onForge={() => setShowForge(true)} />}
         </AnimatePresence>
       </main>
 
@@ -151,6 +155,8 @@ export default function GamePage() {
         {showNpcDialogue && <NpcDialogueModal key="npcdialogue" onClose={() => setShowNpcDialogue(false)} />}
         {showCaravana && <CaravanaModal key="caravana" onClose={() => setShowCaravana(false)} />}
         {showSettings && <SettingsModal key="settings" onClose={() => setShowSettings(false)} />}
+        {showProfession && <ProfessionModal key="profession" onClose={() => setShowProfession(false)} />}
+        {showForge && <ForgeModal key="forge" onClose={() => setShowForge(false)} />}
       </AnimatePresence>
 
       {/* Bottom nav */}

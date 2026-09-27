@@ -74,6 +74,9 @@ export function newSave(): SaveData {
       buildings: [],
     },
     audio: { musicVolume: 0.7, sfxVolume: 1.0 },
+    forge: [],
+    professionTasks: { lastReset: "", completedToday: [] },
+    offline: { lastActiveAt: new Date().toISOString() },
   };
 }
 
@@ -158,6 +161,20 @@ type GameStore = {
   evolveCompanion: (id: string) => boolean;
   setActiveCompanion: (id: string) => void;
   getCompanion: (id: string) => SaveData["companions"][0] | undefined;
+
+  // Forge
+  getForgeLevel: (equipId: string) => number;
+  forgeEnhance: (equipId: string) => boolean;
+
+  // Profession
+  chooseProfession: (profId: string) => void;
+  addProfessionXp: (amount: number) => void;
+  completeProfessionTask: (taskId: string) => boolean;
+  getProfessionLevel: () => number;
+
+  // Offline
+  collectOfflineRewards: () => { ouro: number; xp: number } | null;
+  pingLastActive: () => void;
 
   // Reset (debug)
   resetSave: () => void;
@@ -628,6 +645,80 @@ export const useGameStore = create<GameStore>()(
 
       getCompanion(id) {
         return get().save.companions.find((c) => c.companionId === id);
+      },
+
+      // ── Forge ────────────────────────────────────────────────────────────────
+
+      getForgeLevel(equipId) {
+        return get().save.forge.find((f) => f.equipId === equipId)?.level ?? 0;
+      },
+
+      forgeEnhance(equipId) {
+        const FORGE_COSTS = [200, 400, 800, 1500, 2500, 4000, 6000, 9000, 13000, 18000];
+        const current = get().getForgeLevel(equipId);
+        if (current >= 10) return false;
+        const cost = FORGE_COSTS[current];
+        if (!get().spendCurrency("ouro", cost)) return false;
+        set((s) => {
+          const entry = s.save.forge.find((f) => f.equipId === equipId);
+          if (entry) entry.level++;
+          else s.save.forge.push({ equipId, level: 1 });
+        });
+        return true;
+      },
+
+      // ── Profession ───────────────────────────────────────────────────────────
+
+      getProfessionLevel() {
+        const xp = get().save.profession.xp;
+        return Math.floor(Math.sqrt(xp / 50)) + 1;
+      },
+
+      chooseProfession(profId) {
+        set((s) => { s.save.profession.chosenProfession = profId; });
+      },
+
+      addProfessionXp(amount) {
+        set((s) => { s.save.profession.xp += amount; });
+      },
+
+      completeProfessionTask(taskId) {
+        const today = new Date().toISOString().split("T")[0];
+        const tasks = get().save.professionTasks;
+        if (tasks.lastReset !== today) {
+          set((s) => { s.save.professionTasks = { lastReset: today, completedToday: [] }; });
+        }
+        if (get().save.professionTasks.completedToday.includes(taskId)) return false;
+        set((s) => { s.save.professionTasks.completedToday.push(taskId); });
+        get().addProfessionXp(80);
+        return true;
+      },
+
+      // ── Offline ──────────────────────────────────────────────────────────────
+
+      collectOfflineRewards() {
+        const lastActive = get().save.offline?.lastActiveAt;
+        if (!lastActive) {
+          get().pingLastActive();
+          return null;
+        }
+        const elapsed = Math.min(Date.now() - new Date(lastActive).getTime(), 8 * 3600 * 1000);
+        if (elapsed < 5 * 60 * 1000) {
+          get().pingLastActive();
+          return null;
+        }
+        const level = get().save.playerLevel.level;
+        const hoursAway = elapsed / 3600000;
+        const ouro = Math.floor((level * 12 + 20) * hoursAway);
+        const xp = Math.floor((level * 5 + 10) * hoursAway);
+        get().addCurrency("ouro", ouro);
+        get().addPlayerXp(xp);
+        get().pingLastActive();
+        return { ouro, xp };
+      },
+
+      pingLastActive() {
+        set((s) => { s.save.offline = { lastActiveAt: new Date().toISOString() }; });
       },
 
       // ── Reset ────────────────────────────────────────────────────────────────

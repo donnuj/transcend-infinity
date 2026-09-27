@@ -448,6 +448,20 @@ export type AudioSave = {
   sfxVolume: number;
 };
 
+export type ForgeEnhancement = {
+  equipId: string;
+  level: number; // 1–10
+};
+
+export type ProfessionTaskSave = {
+  lastReset: string;
+  completedToday: string[];
+};
+
+export type OfflineSave = {
+  lastActiveAt: string;
+}
+
 // ── Full Save ─────────────────────────────────────────────────────────────────
 
 export type SaveData = {
@@ -492,4 +506,7 @@ export type SaveData = {
   alchemy: AlchemySave;
   fortress: FortressSave;
   audio: AudioSave;
+  forge: ForgeEnhancement[];
+  professionTasks: ProfessionTaskSave;
+  offline: OfflineSave;
 };

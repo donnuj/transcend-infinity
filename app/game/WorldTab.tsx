@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGameStore } from "@/lib/game/store";
 import { scheduleSave } from "@/lib/game/save";
@@ -51,7 +52,14 @@ export default function WorldTab({
   onNpcDialogue: () => void;
   onCaravana: () => void;
 }) {
-  const { save, addCurrency, processLogin } = useGameStore();
+  const { save, addCurrency, processLogin, collectOfflineRewards } = useGameStore();
+  const [offlineReward, setOfflineReward] = useState<{ ouro: number; xp: number } | null>(null);
+
+  useEffect(() => {
+    const reward = collectOfflineRewards();
+    if (reward) { setOfflineReward(reward); scheduleSave(); }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const playerLevel = save.playerLevel;
   const loginBonus = save.loginBonus;
   const wallet = save.wallet;
@@ -132,6 +140,41 @@ export default function WorldTab({
           <span className="text-violet/50">Regiões: <span className="font-bold text-cream/70">{discoveredRegions}</span></span>
         </div>
       </div>
+
+      {/* Offline reward banner */}
+      <AnimatePresence>
+        {offlineReward && (
+          <motion.div
+            className="mb-5 rounded-xl border border-amber/25 px-5 py-4"
+            style={{ background: "linear-gradient(135deg, rgba(200,155,60,0.1) 0%, rgba(10,10,22,0.95) 80%)" }}
+            initial={{ opacity: 0, y: -8, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -8, scale: 0.97 }}
+            transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
+          >
+            <div className="mb-3 flex items-center gap-2">
+              <span className="text-[14px]">⏳</span>
+              <p className="text-[10px] font-bold tracking-[0.15em] text-amber-400">RENDA PASSIVA COLETADA</p>
+            </div>
+            <div className="flex gap-3">
+              <div className="flex items-center gap-1.5 rounded-lg border border-amber/20 px-3 py-2 text-[10px] font-bold text-amber-400">
+                <span>◆</span><span>+{offlineReward.ouro.toLocaleString("pt-BR")} ouro</span>
+              </div>
+              <div className="flex items-center gap-1.5 rounded-lg border border-violet/20 px-3 py-2 text-[10px] font-bold text-violet/70">
+                <span>⬡</span><span>+{offlineReward.xp} XP</span>
+              </div>
+            </div>
+            <motion.button
+              onClick={() => setOfflineReward(null)}
+              whileTap={{ scale: 0.94 }}
+              transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
+              className="mt-3 w-full rounded-lg border border-amber/20 py-2 text-[9px] font-bold tracking-widest text-amber-400/70"
+            >
+              ÓTIMO
+            </motion.button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Login Bonus */}
       <div className="mb-5 rounded-xl border border-violet/15 px-4 py-3.5" style={{ background: "rgba(122,111,160,0.05)" }}>
