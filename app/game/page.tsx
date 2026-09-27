@@ -21,6 +21,7 @@ import TorreModal from "./TorreModal";
 import AchievementsModal from "./AchievementsModal";
 import DailyChallengesModal from "./DailyChallengesModal";
 import CodexModal from "./CodexModal";
+import FortressModal from "./FortressModal";
 
 export type Profile = {
   id: number;
@@ -60,6 +61,7 @@ export default function GamePage() {
   const [showAchievements, setShowAchievements] = useState(false);
   const [showDailyChallenges, setShowDailyChallenges] = useState(false);
   const [showCodex, setShowCodex] = useState(false);
+  const [showFortress, setShowFortress] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated()) { router.replace("/login"); return; }
@@ -106,7 +108,7 @@ export default function GamePage() {
           {tab === "mundo"   && <WorldTab   key="mundo"   profile={profile} onInvocar={() => setTab("invocar")} onDungeon={() => setShowDungeon(true)} onArena={() => setShowArena(true)} onMercado={() => setShowMercado(true)} onBattlePass={() => setShowBattlePass(true)} onTorre={() => setShowTorre(true)} onDailyChallenges={() => setShowDailyChallenges(true)} />}
           {tab === "cartas"  && <CartasTab  key="cartas" />}
           {tab === "invocar" && <InvocarTab key="invocar" />}
-          {tab === "guilda"  && <GuildaTab  key="guilda" />}
+          {tab === "guilda"  && <GuildaTab  key="guilda" onFortress={() => setShowFortress(true)} />}
           {tab === "perfil"  && <PerfilTab  key="perfil" profile={profile} onLogout={handleLogout} onAchievements={() => setShowAchievements(true)} onCodex={() => setShowCodex(true)} />}
         </AnimatePresence>
       </main>
@@ -121,6 +123,7 @@ export default function GamePage() {
         {showAchievements && <AchievementsModal key="achievements" onClose={() => setShowAchievements(false)} />}
         {showDailyChallenges && <DailyChallengesModal key="daily" onClose={() => setShowDailyChallenges(false)} />}
         {showCodex && <CodexModal key="codex" onClose={() => setShowCodex(false)} />}
+        {showFortress && <FortressModal key="fortress" onClose={() => setShowFortress(false)} />}
       </AnimatePresence>
 
       {/* Bottom nav */}

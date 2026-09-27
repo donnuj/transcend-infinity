@@ -23,7 +23,7 @@ function getTierInfo(faction: typeof FACTIONS[0], points: number) {
   return { tier, nextTier, pct };
 }
 
-export default function GuildaTab() {
+export default function GuildaTab({ onFortress }: { onFortress: () => void }) {
   const [sub, setSub] = useState<SubTab>("faccoes");
   const { save, getReputation, addReputation } = useGameStore();
 
@@ -137,7 +137,7 @@ export default function GuildaTab() {
               exit={{ opacity: 0, x: -8 }}
               transition={{ duration: 0.15, ease }}
             >
-              <FortalezaSection fortress={save.fortress} />
+              <FortalezaSection fortress={save.fortress} onManage={onFortress} />
             </motion.div>
           )}
         </AnimatePresence>
@@ -195,9 +195,9 @@ function GuildStat({ label, value }: { label: string; value: string }) {
 
 type FortressSave = ReturnType<typeof useGameStore.getState>["save"]["fortress"];
 
-function FortalezaSection({ fortress }: { fortress: FortressSave }) {
+function FortalezaSection({ fortress, onManage }: { fortress: FortressSave; onManage: () => void }) {
   const RESOURCE_ICON: Record<string, string> = {
-    Food: "🌾", Wood: "🪵", Stone: "⛰", Herbs: "🌿", Morale: "⚜",
+    Food: "◆", Wood: "◈", Stone: "●", Herbs: "◉", Morale: "★",
   };
   return (
     <div className="flex flex-col gap-4">
@@ -207,7 +207,7 @@ function FortalezaSection({ fortress }: { fortress: FortressSave }) {
           {fortress.fortressName.toUpperCase()}
         </h3>
         <p className="text-[9px] text-violet/50">
-          População: {fortress.population} · Reputação: {fortress.reputation}
+          Pop.: {fortress.population} · Rep.: {fortress.reputation} · Construções: {fortress.buildings.length}
         </p>
       </div>
       <div className="rounded-xl border border-violet/12 px-4 py-4" style={{ background: "rgba(122,111,160,0.04)" }}>
@@ -224,18 +224,15 @@ function FortalezaSection({ fortress }: { fortress: FortressSave }) {
           ))}
         </div>
       </div>
-      {fortress.buildings.length === 0 ? (
-        <p className="text-center text-[10px] text-violet/30">Nenhuma construção ainda.</p>
-      ) : (
-        <div className="rounded-xl border border-violet/12 px-4 py-3">
-          {fortress.buildings.map((b, i) => (
-            <div key={i} className="flex justify-between py-2 border-b border-violet/8">
-              <span className="text-[10px] text-cream/70">{b.buildingId}</span>
-              <span className="text-[10px] text-violet/50">Nv.{b.level}</span>
-            </div>
-          ))}
-        </div>
-      )}
+      <motion.button
+        onClick={onManage}
+        whileTap={{ scale: 0.97 }}
+        transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
+        className="w-full rounded-xl border py-3.5 text-[11px] font-bold tracking-widest"
+        style={{ borderColor: "rgba(200,155,60,0.4)", background: "rgba(200,155,60,0.08)", color: "rgb(200,155,60)" }}
+      >
+        GERENCIAR FORTALEZA
+      </motion.button>
     </div>
   );
 }
