@@ -20,10 +20,11 @@ function HeroImg({ heroId }: { heroId: string }) {
     <img
       src={`/heroes/${heroId}.png`}
       alt=""
-      className="absolute inset-0 h-full w-full object-cover object-top"
+      className="absolute inset-0 h-full w-full object-cover"
       style={{
-        maskImage: "linear-gradient(to bottom, black 55%, transparent 100%)",
-        WebkitMaskImage: "linear-gradient(to bottom, black 55%, transparent 100%)",
+        objectPosition: "center 20%",
+        maskImage: "linear-gradient(to bottom, black 65%, transparent 100%)",
+        WebkitMaskImage: "linear-gradient(to bottom, black 65%, transparent 100%)",
       }}
       onError={() => setErr(true)}
     />

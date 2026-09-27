@@ -115,7 +115,12 @@ export default function GamePage() {
 
   return (
     <div className="bg-atmosphere flex h-full justify-center">
-    <div className="relative flex h-full w-full max-w-md flex-col">
+    <div
+      className="relative flex h-full w-full max-w-md flex-col"
+      style={{
+        boxShadow: "inset 1px 0 0 rgba(200,155,60,0.07), inset -1px 0 0 rgba(200,155,60,0.07), 0 0 80px rgba(200,155,60,0.04)",
+      }}
+    >
       {/* Top bar */}
       <header
         className="relative flex items-center justify-between px-4 py-3"
