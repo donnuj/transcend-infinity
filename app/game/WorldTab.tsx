@@ -34,6 +34,7 @@ export default function WorldTab({
   onTorre,
   onDailyChallenges,
   onBossHunt,
+  onWorldMap,
 }: {
   profile: Profile | null;
   onInvocar: () => void;
@@ -44,6 +45,7 @@ export default function WorldTab({
   onTorre: () => void;
   onDailyChallenges: () => void;
   onBossHunt: () => void;
+  onWorldMap: () => void;
 }) {
   const { save, addCurrency, processLogin } = useGameStore();
   const playerLevel = save.playerLevel;
@@ -221,6 +223,13 @@ export default function WorldTab({
           sub="Chefões semanais"
           accent="rgba(255,100,60,0.8)"
           onClick={onBossHunt}
+        />
+        <ActionCard
+          icon="◎"
+          title="Mapa"
+          sub={`${save.worldMap.discoveredRegions.length} regiões`}
+          accent="rgba(100,180,255,0.8)"
+          onClick={onWorldMap}
         />
       </div>
 
