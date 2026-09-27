@@ -13,6 +13,23 @@ import type { GachaRarity, HeroDef, SaveData } from "@/lib/game/types";
 
 const ease = [0.23, 1, 0.32, 1] as const;
 
+function HeroImg({ heroId }: { heroId: string }) {
+  const [err, setErr] = useState(false);
+  if (err) return null;
+  return (
+    <img
+      src={`/heroes/${heroId}.png`}
+      alt=""
+      className="absolute inset-0 h-full w-full object-cover object-top"
+      style={{
+        maskImage: "linear-gradient(to bottom, black 55%, transparent 100%)",
+        WebkitMaskImage: "linear-gradient(to bottom, black 55%, transparent 100%)",
+      }}
+      onError={() => setErr(true)}
+    />
+  );
+}
+
 const RARITY_STYLE: Record<GachaRarity, { color: string; glow: string; border: string }> = {
   Comum:    { color: "rgb(180,180,210)", glow: "rgba(180,180,210,0.08)", border: "rgba(180,180,210,0.2)"  },
   Incomum:  { color: "rgb(100,210,130)", glow: "rgba(100,210,130,0.08)", border: "rgba(100,210,130,0.25)" },
@@ -208,7 +225,7 @@ function ArtDecoHeroCard({ hero, copies, progression, index, onClick }: {
             background: `repeating-linear-gradient(${identity.patternAngle + 90}deg, ${identity.accentColor}06 0px, transparent 1px, transparent 14px)`,
           }}
         />
-        {/* Class icon — main portrait focal point */}
+        {/* Class icon — fallback when no portrait image */}
         <div className="absolute inset-0 flex items-center justify-center" style={{ paddingTop: "18%" }}>
           <i
             className={`ra ${classIcon}`}
@@ -219,6 +236,8 @@ function ArtDecoHeroCard({ hero, copies, progression, index, onClick }: {
             }}
           />
         </div>
+        {/* Portrait image — covers icon when loaded */}
+        <HeroImg heroId={hero.heroId} />
         {/* Fade to bottom */}
         <div
           className="absolute bottom-0 left-0 right-0 h-12"

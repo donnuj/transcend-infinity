@@ -114,7 +114,8 @@ export default function GamePage() {
   }
 
   return (
-    <div className="bg-atmosphere flex h-full flex-col">
+    <div className="bg-atmosphere flex h-full justify-center">
+    <div className="relative flex h-full w-full max-w-md flex-col">
       {/* Top bar */}
       <header
         className="relative flex items-center justify-between px-4 py-3"
@@ -246,6 +247,7 @@ export default function GamePage() {
           );
         })}
       </nav>
+    </div>
     </div>
   );
 }

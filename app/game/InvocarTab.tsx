@@ -460,7 +460,7 @@ function PullCard({ result, index, single }: { result: PullResult; index: number
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1], delay: index * 0.06 }}
     >
-      <span className={single ? "mb-3 text-4xl" : "mb-1 text-xl"}>{result.hero.portrait}</span>
+      <HeroPortrait heroId={result.hero.heroId} emoji={result.hero.portrait} single={single} />
       {single && (
         <p className="mb-1.5 px-2 text-center text-[13px] font-black tracking-wide" style={{ color: s.color, fontFamily: "var(--font-cinzel)" }}>
           {result.hero.name.split(",")[0]}
@@ -485,6 +485,24 @@ function PullCard({ result, index, single }: { result: PullResult; index: number
         </span>
       )}
     </motion.div>
+  );
+}
+
+function HeroPortrait({ heroId, emoji, single }: { heroId: string; emoji: string; single: boolean }) {
+  const [err, setErr] = useState(false);
+  if (err) return (
+    <span className={single ? "mb-3 text-4xl" : "mb-1 text-xl"}>{emoji}</span>
+  );
+  return (
+    <img
+      src={`/heroes/${heroId}.png`}
+      alt=""
+      width={single ? 88 : 44}
+      height={single ? 88 : 44}
+      className={single ? "mb-3 rounded-xl" : "mb-1 rounded-lg"}
+      style={{ objectFit: "cover", objectPosition: "top center" }}
+      onError={() => setErr(true)}
+    />
   );
 }
 
