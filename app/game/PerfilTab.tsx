@@ -20,6 +20,7 @@ export default function PerfilTab({
   onSettings,
   onProfession,
   onForge,
+  onWiki,
 }: {
   profile: Profile | null;
   onLogout: () => void;
@@ -32,6 +33,7 @@ export default function PerfilTab({
   onSettings: () => void;
   onProfession: () => void;
   onForge: () => void;
+  onWiki: () => void;
 }) {
   const { save } = useGameStore();
   const unlockedAchievements = save.achievements.unlockedIds.length;
@@ -303,6 +305,24 @@ export default function PerfilTab({
       >
         <span className="text-[12px] font-bold tracking-[0.15em] text-cream/70">CONFIGURAÇÕES</span>
         <span className="text-[10px] text-violet/40">Áudio & Sistema →</span>
+      </motion.button>
+
+      {/* Wiki / Guia */}
+      <motion.button
+        onClick={onWiki}
+        whileTap={{ scale: 0.97 }}
+        transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
+        className="mb-3 flex w-full items-center justify-between rounded-xl border px-4 py-3.5"
+        style={{
+          background: "linear-gradient(135deg, rgba(90,160,255,0.06) 0%, rgba(90,160,255,0.02) 100%)",
+          borderColor: "rgba(90,160,255,0.25)",
+        }}
+      >
+        <div className="flex flex-col items-start gap-0.5">
+          <span className="text-[12px] font-bold tracking-[0.15em]" style={{ color: "rgb(90,160,255)" }}>GUIA DO NOVATO</span>
+          <span className="text-[9px] text-violet/40">Sistemas, economia, rotas de evolução</span>
+        </div>
+        <span className="text-[10px]" style={{ color: "rgba(90,160,255,0.6)" }}>Ler →</span>
       </motion.button>
 
       {/* Logout */}
