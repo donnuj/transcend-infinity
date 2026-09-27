@@ -348,6 +348,25 @@ export type TowerSave = {
   weekStart: string;
 };
 
+export type DungeonDifficulty = "easy" | "normal" | "hard" | "epic" | "legendary";
+
+export type PendingTowerClimb = {
+  heroIds: string[];
+  fromFloor: number;
+  targetFloor: number;
+  startTime: string;
+  endTime: string;
+};
+
+export type PendingDungeonRun = {
+  runId: string;
+  dungeonId: string;
+  heroIds: string[];
+  difficulty: DungeonDifficulty;
+  startTime: string;
+  endTime: string;
+};
+
 export type ArenaSave = {
   rating: number;
   wins: number;
@@ -509,4 +528,6 @@ export type SaveData = {
   forge: ForgeEnhancement[];
   professionTasks: ProfessionTaskSave;
   offline: OfflineSave;
+  pendingTower: PendingTowerClimb | null;
+  pendingDungeons: PendingDungeonRun[];
 };

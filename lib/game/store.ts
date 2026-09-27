@@ -1,9 +1,10 @@
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import { persist, createJSONStorage } from "zustand/middleware";
-import type { SaveData } from "./types";
+import type { SaveData, DungeonDifficulty, PendingTowerClimb, PendingDungeonRun } from "./types";
 import { ACHIEVEMENTS } from "./data/achievements";
 import { DAILY_CHALLENGES } from "./data/challenges";
+import { maxFloorInBudget, calcTowerTimeSeconds, DUNGEON_DURATIONS } from "./data/towerData";
 
 // ── Estado inicial (novo jogador) ─────────────────────────────────────────────
 
@@ -85,6 +86,8 @@ export function newSave(): SaveData {
     forge: [],
     professionTasks: { lastReset: "", completedToday: [] },
     offline: { lastActiveAt: new Date().toISOString() },
+    pendingTower: null,
+    pendingDungeons: [],
   };
 }
 
@@ -150,6 +153,17 @@ type GameStore = {
 
   // Tower
   updateTower: (floor: number) => void;
+  dispatchTowerClimb: (heroIds: string[], targetFloor: number) => boolean;
+  resolveTowerClimb: () => PendingTowerClimb | null;
+  cancelTowerClimb: () => void;
+
+  // Dungeon dispatch
+  dispatchDungeonRun: (dungeonId: string, heroIds: string[], difficulty: DungeonDifficulty) => string | null;
+  resolveDungeonRun: (runId: string) => PendingDungeonRun | null;
+  cancelDungeonRun: (runId: string) => void;
+
+  // Busy heroes (dispatched to tower or dungeon)
+  getBusyHeroIds: () => string[];
 
   // Cloud sync
   setCloudSynced: (synced: boolean, at?: string) => void;
@@ -557,6 +571,92 @@ export const useGameStore = create<GameStore>()(
           if (floor > s.save.tower.bestFloor) s.save.tower.bestFloor = floor;
           if (floor > s.save.tower.weeklyBest) s.save.tower.weeklyBest = floor;
         });
+      },
+
+      dispatchTowerClimb(heroIds, targetFloor) {
+        const state = get();
+        if (state.save.pendingTower) return false;
+        const busy = state.getBusyHeroIds();
+        if (heroIds.some((id) => busy.includes(id))) return false;
+        const fromFloor = state.save.tower.bestFloor;
+        if (targetFloor <= fromFloor) return false;
+
+        const seconds = calcTowerTimeSeconds(fromFloor, targetFloor);
+        const now = new Date();
+        const endTime = new Date(now.getTime() + seconds * 1000);
+
+        set((s) => {
+          s.save.pendingTower = {
+            heroIds,
+            fromFloor,
+            targetFloor,
+            startTime: now.toISOString(),
+            endTime: endTime.toISOString(),
+          };
+        });
+        return true;
+      },
+
+      resolveTowerClimb() {
+        const pending = get().save.pendingTower;
+        if (!pending) return null;
+        if (new Date() < new Date(pending.endTime)) return null;
+        set((s) => {
+          const floor = s.save.pendingTower!.targetFloor;
+          if (floor > s.save.tower.bestFloor) s.save.tower.bestFloor = floor;
+          if (floor > s.save.tower.weeklyBest) s.save.tower.weeklyBest = floor;
+          s.save.pendingTower = null;
+        });
+        return pending;
+      },
+
+      cancelTowerClimb() {
+        set((s) => { s.save.pendingTower = null; });
+      },
+
+      dispatchDungeonRun(dungeonId, heroIds, difficulty) {
+        const state = get();
+        const busy = state.getBusyHeroIds();
+        if (heroIds.some((id) => busy.includes(id))) return null;
+        const seconds = DUNGEON_DURATIONS[difficulty];
+        const now = new Date();
+        const runId = `${dungeonId}_${now.getTime()}`;
+        const endTime = new Date(now.getTime() + seconds * 1000);
+        set((s) => {
+          s.save.pendingDungeons.push({
+            runId,
+            dungeonId,
+            heroIds,
+            difficulty,
+            startTime: now.toISOString(),
+            endTime: endTime.toISOString(),
+          });
+        });
+        return runId;
+      },
+
+      resolveDungeonRun(runId) {
+        const run = get().save.pendingDungeons.find((r) => r.runId === runId);
+        if (!run) return null;
+        if (new Date() < new Date(run.endTime)) return null;
+        set((s) => {
+          s.save.pendingDungeons = s.save.pendingDungeons.filter((r) => r.runId !== runId);
+        });
+        return run;
+      },
+
+      cancelDungeonRun(runId) {
+        set((s) => {
+          s.save.pendingDungeons = s.save.pendingDungeons.filter((r) => r.runId !== runId);
+        });
+      },
+
+      getBusyHeroIds() {
+        const { pendingTower, pendingDungeons } = get().save;
+        const ids: string[] = [];
+        if (pendingTower) ids.push(...pendingTower.heroIds);
+        for (const run of pendingDungeons) ids.push(...run.heroIds);
+        return ids;
       },
 
       // ── Cloud sync ───────────────────────────────────────────────────────────

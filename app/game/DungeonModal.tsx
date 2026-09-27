@@ -1,16 +1,13 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGameStore } from "@/lib/game/store";
 import { HERO_MAP } from "@/lib/game/data/heroes";
 import { DUNGEONS } from "@/lib/game/data/world";
 import { scheduleSave } from "@/lib/game/save";
-import {
-  buildHeroCombatant, buildEnemyWave, simulateBattle,
-  type CombatantSnapshot, type BattleResult,
-} from "@/lib/game/combat";
-import type { DungeonDef } from "@/lib/game/types";
+import { DUNGEON_DURATIONS, DUNGEON_REWARDS } from "@/lib/game/data/towerData";
+import type { DungeonDef, DungeonDifficulty, PendingDungeonRun } from "@/lib/game/types";
 
 const ease = [0.23, 1, 0.32, 1] as const;
 
@@ -19,65 +16,94 @@ const RANK_COLOR: Record<string, string> = {
   B: "rgb(90,150,255)", C: "rgb(100,210,130)", D: "rgb(180,180,210)", "": "rgba(122,111,160,0.4)"
 };
 
-type Screen = "list" | "team" | "battle" | "result";
+const DIFFICULTY_LABELS: Record<DungeonDifficulty, string> = {
+  easy: "Fácil", normal: "Normal", hard: "Difícil", epic: "Épico", legendary: "Lendário"
+};
+
+const DIFFICULTY_COLOR: Record<DungeonDifficulty, string> = {
+  easy: "rgb(100,210,130)", normal: "rgb(90,150,255)", hard: "rgb(200,155,60)",
+  epic: "rgb(170,130,255)", legendary: "rgb(255,140,60)"
+};
+
+function fmtDuration(seconds: number): string {
+  if (seconds < 60) return `${seconds}s`;
+  if (seconds < 3600) return `${Math.round(seconds / 60)}min`;
+  const h = Math.floor(seconds / 3600);
+  const m = Math.round((seconds % 3600) / 60);
+  return m > 0 ? `${h}h ${m}min` : `${h}h`;
+}
+
+function fmtCountdown(ms: number): string {
+  if (ms <= 0) return "Pronto!";
+  const s = Math.floor(ms / 1000);
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  if (h > 0) return `${h}h ${String(m).padStart(2, "0")}min`;
+  if (m > 0) return `${m}min ${String(sec).padStart(2, "0")}s`;
+  return `${sec}s`;
+}
+
+type Screen = "list" | "difficulty" | "team" | "result";
 
 export default function DungeonModal({ onClose }: { onClose: () => void }) {
   const [screen, setScreen] = useState<Screen>("list");
   const [dungeon, setDungeon] = useState<DungeonDef | null>(null);
+  const [difficulty, setDifficulty] = useState<DungeonDifficulty>("normal");
   const [team, setTeam] = useState<string[]>([]);
-  const [result, setResult] = useState<BattleResult | null>(null);
-  const [battleLog, setBattleLog] = useState<string[]>([]);
+  const [resolvedRun, setResolvedRun] = useState<PendingDungeonRun | null>(null);
+  const [now, setNow] = useState(() => Date.now());
+
+  const {
+    save,
+    dispatchDungeonRun,
+    resolveDungeonRun,
+    cancelDungeonRun,
+    getBusyHeroIds,
+    addCurrency,
+    updateDungeonProgress,
+    incrementDailyProgress,
+  } = useGameStore();
+
+  const busyIds = getBusyHeroIds();
+  const pendingDungeons = save.pendingDungeons;
+
+  useEffect(() => {
+    if (pendingDungeons.length === 0) return;
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [pendingDungeons.length]);
 
   function selectDungeon(d: DungeonDef) {
     setDungeon(d);
     setTeam([]);
-    setScreen("team");
+    setDifficulty("normal");
+    setScreen("difficulty");
   }
 
-  function startBattle() {
+  function handleDispatch() {
     if (!dungeon || team.length === 0) return;
-    const store = useGameStore.getState();
-    const heroes = team.map((heroId) => {
-      const hero = HERO_MAP[heroId];
-      if (!hero) return null;
-      const prog = store.getHeroProgression(heroId);
-      const lvl = store.getHeroLevel(heroId);
-      return buildHeroCombatant(hero, prog.rank, Math.max(1, Math.min(5, prog.stars)) as 1|2|3|4|5, lvl.level);
-    }).filter((h): h is CombatantSnapshot => h !== null);
-
-    const enemies = buildEnemyWave(dungeon, 1);
-    const r = simulateBattle(heroes, enemies);
-    setResult(r);
-
-    const log: string[] = [];
-    for (const ev of r.events.slice(0, 12)) {
-      const actor = heroes.find((h) => h.id === ev.actorId) ?? { name: "Inimigo", portrait: "👹" };
-      const target = enemies.find((e) => e.id === ev.targetId) ?? heroes.find((h) => h.id === ev.targetId) ?? { name: "?", portrait: "?" };
-      if (ev.type === "miss") {
-        log.push(`${actor.name} errou o ataque!`);
-      } else {
-        log.push(`${actor.name} causou ${ev.value.toLocaleString("pt-BR")} de dano${ev.isCrit ? " (CRÍTICO!)" : ""}${ev.killedTarget ? ` — ${target.name} derrotado!` : ""}`);
-      }
+    const runId = dispatchDungeonRun(dungeon.dungeonId, team, difficulty);
+    if (runId) {
+      setScreen("list");
+      scheduleSave();
     }
-    setBattleLog(log);
-    setScreen("battle");
-
-    setTimeout(() => {
-      applyRewards(r, dungeon);
-      setScreen("result");
-    }, 2500);
   }
 
-  function applyRewards(r: BattleResult, d: DungeonDef) {
-    const store = useGameStore.getState();
-    if (r.won) {
-      store.updateDungeonProgress(d.dungeonId, r.rank, r.ticksElapsed);
-      store.addCurrency("ouro", r.ouroReward);
-      store.addPlayerXp(r.xpReward);
-      for (const drop of r.itemDrops) store.addItem(drop.itemId, drop.qty);
-      store.incrementDailyProgress("dungeons_today");
-    }
+  function handleCollect(runId: string) {
+    const run = pendingDungeons.find((r) => r.runId === runId);
+    if (!run) return;
+    const resolved = resolveDungeonRun(runId);
+    if (!resolved) return;
+
+    const rewards = DUNGEON_REWARDS[resolved.difficulty];
+    addCurrency("ouro", rewards.gold);
+    addCurrency("cristaisAstra", rewards.crystals);
+    updateDungeonProgress(resolved.dungeonId, "A", DUNGEON_DURATIONS[resolved.difficulty]);
+    incrementDailyProgress("dungeons_today");
     scheduleSave();
+    setResolvedRun(resolved);
+    setScreen("result");
   }
 
   return (
@@ -93,7 +119,12 @@ export default function DungeonModal({ onClose }: { onClose: () => void }) {
       <div className="flex items-center justify-between border-b border-amber/12 px-4 py-3">
         <div className="flex items-center gap-3">
           <motion.button
-            onClick={screen === "list" ? onClose : () => setScreen(screen === "battle" ? "team" : screen === "team" ? "list" : "list")}
+            onClick={() => {
+              if (screen === "list") onClose();
+              else if (screen === "difficulty") setScreen("list");
+              else if (screen === "team") setScreen("difficulty");
+              else setScreen("list");
+            }}
             whileTap={{ scale: 0.94 }}
             transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
             className="text-[10px] font-bold tracking-widest text-violet/60"
@@ -102,19 +133,56 @@ export default function DungeonModal({ onClose }: { onClose: () => void }) {
           </motion.button>
           <span className="h-4 w-[1px] bg-violet/20" />
           <span className="text-[11px] font-bold tracking-widest text-cream/70">
-            {screen === "list" ? "MASMORRAS" : screen === "team" ? dungeon?.name.toUpperCase() : "BATALHA"}
+            {screen === "list" ? "MASMORRAS" : screen === "difficulty" ? dungeon?.name.toUpperCase() : screen === "team" ? "SELECIONAR TIME" : "MISSÃO CONCLUÍDA"}
           </span>
         </div>
       </div>
 
       <AnimatePresence mode="wait">
-        {screen === "list" && <DungeonList key="list" onSelect={selectDungeon} />}
-        {screen === "team" && dungeon && <TeamPicker key="team" dungeon={dungeon} team={team} onTeamChange={setTeam} onStart={startBattle} />}
-        {screen === "battle" && dungeon && team.length > 0 && (
-          <BattleScreen key="battle" dungeon={dungeon} team={team} log={battleLog} />
+        {screen === "list" && (
+          <DungeonList
+            key="list"
+            pendingDungeons={pendingDungeons}
+            now={now}
+            onSelect={selectDungeon}
+            onCollect={handleCollect}
+            onCancel={(runId) => { cancelDungeonRun(runId); scheduleSave(); }}
+          />
         )}
-        {screen === "result" && result && dungeon && (
-          <ResultScreen key="result" result={result} dungeon={dungeon} onClose={onClose} onRetry={() => { setResult(null); setScreen("team"); }} />
+
+        {screen === "difficulty" && dungeon && (
+          <DifficultyPicker
+            key="difficulty"
+            dungeon={dungeon}
+            selected={difficulty}
+            onSelect={setDifficulty}
+            onNext={() => setScreen("team")}
+          />
+        )}
+
+        {screen === "team" && dungeon && (
+          <TeamPicker
+            key="team"
+            dungeon={dungeon}
+            difficulty={difficulty}
+            team={team}
+            busyIds={busyIds}
+            onTeamChange={setTeam}
+            onDispatch={handleDispatch}
+          />
+        )}
+
+        {screen === "result" && resolvedRun && (
+          <ResultScreen
+            key="result"
+            run={resolvedRun}
+            dungeon={DUNGEONS.find((d) => d.dungeonId === resolvedRun.dungeonId)!}
+            onClose={onClose}
+            onRetry={() => {
+              const d = DUNGEONS.find((d) => d.dungeonId === resolvedRun.dungeonId);
+              if (d) { setDungeon(d); setTeam([]); setDifficulty("normal"); setScreen("difficulty"); }
+            }}
+          />
         )}
       </AnimatePresence>
     </motion.div>
@@ -123,7 +191,13 @@ export default function DungeonModal({ onClose }: { onClose: () => void }) {
 
 // ── Dungeon List ────────────────────────────────────────────────────────────────
 
-function DungeonList({ onSelect }: { onSelect: (d: DungeonDef) => void }) {
+function DungeonList({ pendingDungeons, now, onSelect, onCollect, onCancel }: {
+  pendingDungeons: PendingDungeonRun[];
+  now: number;
+  onSelect: (d: DungeonDef) => void;
+  onCollect: (runId: string) => void;
+  onCancel: (runId: string) => void;
+}) {
   const { save } = useGameStore();
   return (
     <motion.div
@@ -133,9 +207,73 @@ function DungeonList({ onSelect }: { onSelect: (d: DungeonDef) => void }) {
       exit={{ opacity: 0, x: 10 }}
       transition={{ duration: 0.18, ease }}
     >
-      <p className="mb-4 text-[9px] uppercase tracking-[0.25em] text-violet/40">
-        Escolha uma masmorra para entrar
-      </p>
+      {/* Active runs */}
+      {pendingDungeons.length > 0 && (
+        <div className="mb-4">
+          <p className="mb-2 text-[9px] uppercase tracking-[0.25em] text-violet/40">Missões Ativas</p>
+          <div className="flex flex-col gap-2">
+            {pendingDungeons.map((run) => {
+              const remaining = Math.max(0, new Date(run.endTime).getTime() - now);
+              const isReady = remaining === 0;
+              const d = DUNGEONS.find((d) => d.dungeonId === run.dungeonId);
+              const diffColor = DIFFICULTY_COLOR[run.difficulty];
+              return (
+                <div
+                  key={run.runId}
+                  className="rounded-xl border px-3 py-3"
+                  style={{
+                    borderColor: isReady ? "rgba(100,220,140,0.4)" : `${diffColor}30`,
+                    background: isReady ? "rgba(100,220,140,0.06)" : `${diffColor}08`,
+                  }}
+                >
+                  <div className="mb-2 flex items-start justify-between">
+                    <div>
+                      <p className="text-[10px] font-bold text-cream/80">{d?.name ?? run.dungeonId}</p>
+                      <p className="text-[8px]" style={{ color: diffColor }}>{DIFFICULTY_LABELS[run.difficulty]}</p>
+                    </div>
+                    {!isReady && (
+                      <p className="text-[15px] font-black text-amber-400" style={{ fontFamily: "var(--font-cinzel)" }}>
+                        {fmtCountdown(remaining)}
+                      </p>
+                    )}
+                  </div>
+                  {/* Progress bar */}
+                  <div className="mb-2 h-1 w-full overflow-hidden rounded-full bg-void/80">
+                    <motion.div
+                      className="h-full rounded-full"
+                      style={{ background: isReady ? "rgb(100,220,140)" : diffColor }}
+                      animate={{ width: `${Math.min(1, 1 - remaining / (new Date(run.endTime).getTime() - new Date(run.startTime).getTime())) * 100}%` }}
+                      transition={{ duration: 0.5 }}
+                    />
+                  </div>
+                  {isReady ? (
+                    <motion.button
+                      onClick={() => onCollect(run.runId)}
+                      whileTap={{ scale: 0.97 }}
+                      transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
+                      className="w-full rounded-lg border py-2 text-[10px] font-bold tracking-widest"
+                      style={{ borderColor: "rgba(100,220,140,0.4)", background: "rgba(100,220,140,0.1)", color: "rgb(100,220,140)" }}
+                    >
+                      RECOLHER
+                    </motion.button>
+                  ) : (
+                    <motion.button
+                      onClick={() => onCancel(run.runId)}
+                      whileTap={{ scale: 0.97 }}
+                      transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
+                      className="w-full rounded-lg border border-red-500/20 py-1.5 text-[9px] font-bold tracking-wider text-red-400/50"
+                    >
+                      Cancelar
+                    </motion.button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <p className="mb-4 text-[9px] uppercase tracking-[0.25em] text-violet/40">Masmorras</p>
       <div className="flex flex-col gap-3">
         {DUNGEONS.map((d, i) => {
           const prog = save.dungeon.find((dp) => dp.dungeonId === d.dungeonId);
@@ -164,9 +302,9 @@ function DungeonList({ onSelect }: { onSelect: (d: DungeonDef) => void }) {
                 {d.description && <p className="mt-1 text-[9px] text-violet/40 line-clamp-1">{d.description}</p>}
               </div>
               <div className="flex flex-col items-end gap-1">
-                {!!prog?.bestRank ? (
-                  <span className="text-[13px] font-black" style={{ color: RANK_COLOR[prog.bestRank] ?? "rgba(122,111,160,0.4)" }}>
-                    {prog.bestRank}
+                {cleared ? (
+                  <span className="text-[13px] font-black" style={{ color: RANK_COLOR[prog!.bestRank] ?? "rgba(122,111,160,0.4)" }}>
+                    {prog!.bestRank}
                   </span>
                 ) : (
                   <span className="text-[9px] text-violet/30">Novo</span>
@@ -181,16 +319,94 @@ function DungeonList({ onSelect }: { onSelect: (d: DungeonDef) => void }) {
   );
 }
 
+// ── Difficulty Picker ───────────────────────────────────────────────────────────
+
+function DifficultyPicker({ dungeon, selected, onSelect, onNext }: {
+  dungeon: DungeonDef;
+  selected: DungeonDifficulty;
+  onSelect: (d: DungeonDifficulty) => void;
+  onNext: () => void;
+}) {
+  const difficulties: DungeonDifficulty[] = ["easy", "normal", "hard", "epic", "legendary"];
+  return (
+    <motion.div
+      className="flex flex-1 flex-col overflow-hidden"
+      initial={{ opacity: 0, x: 10 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -10 }}
+      transition={{ duration: 0.18, ease }}
+    >
+      <div className="flex-1 overflow-y-auto px-4 pt-4">
+        <p className="mb-1 text-[9px] uppercase tracking-[0.2em] text-violet/40">Dificuldade</p>
+        <p className="mb-4 text-[9px] text-violet/40">{dungeon.description}</p>
+        <div className="flex flex-col gap-2">
+          {difficulties.map((diff) => {
+            const rewards = DUNGEON_REWARDS[diff];
+            const secs = DUNGEON_DURATIONS[diff];
+            const color = DIFFICULTY_COLOR[diff];
+            const sel = selected === diff;
+            return (
+              <motion.button
+                key={diff}
+                onClick={() => onSelect(diff)}
+                whileTap={{ scale: 0.98 }}
+                transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
+                className="flex items-center justify-between rounded-xl border px-4 py-3 text-left"
+                style={{
+                  borderColor: sel ? `${color}60` : "rgba(122,111,160,0.15)",
+                  background: sel ? `${color}12` : "rgba(122,111,160,0.04)",
+                }}
+              >
+                <div>
+                  <p className="text-[11px] font-bold" style={{ color: sel ? color : "rgba(232,217,160,0.7)" }}>
+                    {DIFFICULTY_LABELS[diff]}
+                  </p>
+                  <p className="text-[8px] text-violet/40">
+                    {rewards.xp.toLocaleString("pt-BR")} XP · {rewards.gold.toLocaleString("pt-BR")} ouro · {rewards.crystals} cristais
+                  </p>
+                  <p className="text-[8px]" style={{ color: `${color}80` }}>
+                    {Math.round(rewards.itemChance * 100)}% chance de item {rewards.itemRarity}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-[13px] font-bold" style={{ color: sel ? color : "rgba(122,111,160,0.6)" }}>
+                    {fmtDuration(secs)}
+                  </p>
+                  <p className="text-[8px] text-violet/40">duração</p>
+                </div>
+              </motion.button>
+            );
+          })}
+        </div>
+      </div>
+      <div className="border-t border-violet/10 px-4 py-3">
+        <motion.button
+          onClick={onNext}
+          whileTap={{ scale: 0.97 }}
+          transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
+          className="w-full rounded-xl border py-3.5 text-[11px] font-bold tracking-widest"
+          style={{ borderColor: `${DIFFICULTY_COLOR[selected]}40`, background: `${DIFFICULTY_COLOR[selected]}10`, color: DIFFICULTY_COLOR[selected] }}
+        >
+          SELECIONAR TIME
+        </motion.button>
+      </div>
+    </motion.div>
+  );
+}
+
 // ── Team Picker ─────────────────────────────────────────────────────────────────
 
-function TeamPicker({ dungeon, team, onTeamChange, onStart }: {
+function TeamPicker({ dungeon, difficulty, team, busyIds, onTeamChange, onDispatch }: {
   dungeon: DungeonDef;
+  difficulty: DungeonDifficulty;
   team: string[];
+  busyIds: string[];
   onTeamChange: (t: string[]) => void;
-  onStart: () => void;
+  onDispatch: () => void;
 }) {
   const { save } = useGameStore();
   const MAX_TEAM = 3;
+  const diffColor = DIFFICULTY_COLOR[difficulty];
 
   const heroes = useMemo(() => {
     const ids = new Set(save.collectedHeroIds.map((k) => k.split("|")[1]));
@@ -198,6 +414,7 @@ function TeamPicker({ dungeon, team, onTeamChange, onStart }: {
   }, [save.collectedHeroIds]);
 
   function toggle(heroId: string) {
+    if (busyIds.includes(heroId)) return;
     if (team.includes(heroId)) {
       onTeamChange(team.filter((id) => id !== heroId));
     } else if (team.length < MAX_TEAM) {
@@ -214,10 +431,14 @@ function TeamPicker({ dungeon, team, onTeamChange, onStart }: {
       transition={{ duration: 0.18, ease }}
     >
       <div className="px-4 pt-4">
-        <p className="mb-1 text-[9px] uppercase tracking-[0.2em] text-violet/40">
-          Selecione até {MAX_TEAM} heróis ({team.length}/{MAX_TEAM})
-        </p>
-        {/* Team slots */}
+        <div className="mb-3 flex items-center justify-between">
+          <p className="text-[9px] uppercase tracking-[0.2em] text-violet/40">
+            Time ({team.length}/{MAX_TEAM})
+          </p>
+          <span className="text-[9px] font-bold" style={{ color: diffColor }}>
+            {DIFFICULTY_LABELS[difficulty]} · {fmtDuration(DUNGEON_DURATIONS[difficulty])}
+          </span>
+        </div>
         <div className="mb-3 flex gap-2">
           {Array.from({ length: MAX_TEAM }).map((_, i) => {
             const heroId = team[i];
@@ -227,8 +448,8 @@ function TeamPicker({ dungeon, team, onTeamChange, onStart }: {
                 key={i}
                 className="flex h-12 w-12 items-center justify-center rounded-xl border text-xl"
                 style={{
-                  borderColor: hero ? "rgba(200,155,60,0.4)" : "rgba(122,111,160,0.15)",
-                  background: hero ? "rgba(200,155,60,0.08)" : "rgba(122,111,160,0.04)",
+                  borderColor: hero ? `${diffColor}60` : "rgba(122,111,160,0.15)",
+                  background: hero ? `${diffColor}10` : "rgba(122,111,160,0.04)",
                 }}
               >
                 {hero ? hero.portrait : <span className="text-[10px] text-violet/20">+</span>}
@@ -249,21 +470,24 @@ function TeamPicker({ dungeon, team, onTeamChange, onStart }: {
             {heroes.map((hero) => {
               if (!hero) return null;
               const selected = team.includes(hero.heroId);
+              const busy = busyIds.includes(hero.heroId);
               return (
                 <motion.button
                   key={hero.heroId}
                   onClick={() => toggle(hero.heroId)}
-                  whileTap={{ scale: 0.94 }}
+                  whileTap={!busy ? { scale: 0.94 } : undefined}
                   transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
                   className="flex flex-col items-center rounded-xl border pb-2 pt-3"
                   style={{
-                    borderColor: selected ? "rgba(200,155,60,0.5)" : "rgba(122,111,160,0.15)",
-                    background: selected ? "rgba(200,155,60,0.1)" : "rgba(122,111,160,0.04)",
+                    borderColor: selected ? `${diffColor}60` : busy ? "rgba(255,80,80,0.15)" : "rgba(122,111,160,0.15)",
+                    background: selected ? `${diffColor}12` : busy ? "rgba(255,80,80,0.04)" : "rgba(122,111,160,0.04)",
+                    opacity: busy ? 0.45 : 1,
                   }}
                 >
                   <span className="mb-1 text-2xl">{hero.portrait}</span>
                   <p className="text-[8px] font-bold text-cream/70">{hero.name.split(",")[0]}</p>
-                  {selected && <span className="mt-0.5 text-[7px] text-amber-400">✓ Selecionado</span>}
+                  {busy && <p className="text-[7px] text-red-400/70">ocupado</p>}
+                  {selected && !busy && <p className="text-[7px]" style={{ color: diffColor }}>✓</p>}
                 </motion.button>
               );
             })}
@@ -273,64 +497,18 @@ function TeamPicker({ dungeon, team, onTeamChange, onStart }: {
 
       <div className="border-t border-violet/10 px-4 py-3">
         <motion.button
-          onClick={team.length > 0 ? onStart : undefined}
+          onClick={team.length > 0 ? onDispatch : undefined}
           whileTap={team.length > 0 ? { scale: 0.97 } : undefined}
           transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
-          className="w-full rounded-xl border py-3.5 text-[11px] font-bold tracking-widest transition-all duration-150"
+          className="w-full rounded-xl border py-3.5 text-[11px] font-bold tracking-widest"
           style={{
-            borderColor: team.length > 0 ? "rgba(200,155,60,0.4)" : "rgba(122,111,160,0.1)",
-            background: team.length > 0 ? "rgba(200,155,60,0.1)" : "transparent",
-            color: team.length > 0 ? "rgb(200,155,60)" : "rgba(122,111,160,0.3)",
-            cursor: team.length > 0 ? "pointer" : "default",
+            borderColor: team.length > 0 ? `${diffColor}40` : "rgba(122,111,160,0.1)",
+            background: team.length > 0 ? `${diffColor}10` : "transparent",
+            color: team.length > 0 ? diffColor : "rgba(122,111,160,0.3)",
           }}
         >
-          {team.length > 0 ? "ENTRAR NA MASMORRA" : "SELECIONE HERÓIS"}
+          {team.length > 0 ? "DESPACHAR MISSÃO" : "SELECIONE HERÓIS"}
         </motion.button>
-      </div>
-    </motion.div>
-  );
-}
-
-// ── Battle Screen ──────────────────────────────────────────────────────────────
-
-function BattleScreen({ dungeon, team, log }: { dungeon: DungeonDef; team: string[]; log: string[] }) {
-  const store = useGameStore.getState();
-  return (
-    <motion.div
-      className="flex flex-1 flex-col items-center justify-center gap-4 px-4"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.2 }}
-    >
-      <div className="flex gap-3">
-        {team.map((heroId) => {
-          const hero = HERO_MAP[heroId];
-          return hero ? (
-            <motion.div
-              key={heroId}
-              className="flex h-14 w-14 items-center justify-center rounded-xl border border-amber/30 text-2xl"
-              style={{ background: "rgba(200,155,60,0.08)" }}
-              animate={{ y: [0, -4, 0] }}
-              transition={{ duration: 0.6, repeat: Infinity, delay: team.indexOf(heroId) * 0.2 }}
-            >
-              {hero.portrait}
-            </motion.div>
-          ) : null;
-        })}
-      </div>
-      <div className="flex gap-2 text-2xl">
-        {["⚔", "⚡", "⚔"].map((s, i) => (
-          <motion.span key={i} animate={{ scale: [1, 1.3, 1], opacity: [0.4, 1, 0.4] }} transition={{ duration: 0.5, delay: i * 0.15, repeat: Infinity }}>
-            {s}
-          </motion.span>
-        ))}
-      </div>
-      <p className="text-[11px] font-bold text-cream/60">Batalha em andamento...</p>
-      <div className="w-full rounded-xl border border-violet/10 px-4 py-3" style={{ background: "rgba(122,111,160,0.04)" }}>
-        {log.slice(-4).map((line, i) => (
-          <p key={i} className="text-[9px] text-violet/50 leading-relaxed">{line}</p>
-        ))}
       </div>
     </motion.div>
   );
@@ -338,12 +516,16 @@ function BattleScreen({ dungeon, team, log }: { dungeon: DungeonDef; team: strin
 
 // ── Result Screen ──────────────────────────────────────────────────────────────
 
-function ResultScreen({ result, dungeon, onClose, onRetry }: {
-  result: BattleResult;
+function ResultScreen({ run, dungeon, onClose, onRetry }: {
+  run: PendingDungeonRun;
   dungeon: DungeonDef;
   onClose: () => void;
   onRetry: () => void;
 }) {
+  const rewards = DUNGEON_REWARDS[run.difficulty];
+  const diffColor = DIFFICULTY_COLOR[run.difficulty];
+  const gotItem = Math.random() < rewards.itemChance;
+
   return (
     <motion.div
       className="flex flex-1 flex-col items-center justify-center gap-5 px-6"
@@ -358,42 +540,30 @@ function ResultScreen({ result, dungeon, onClose, onRetry }: {
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
       >
-        {result.won ? "🏆" : "💀"}
+        🏆
       </motion.div>
 
       <div className="text-center">
         <p className="mb-1 text-2xl font-black tracking-[0.2em] text-cream" style={{ fontFamily: "var(--font-cinzel)" }}>
-          {result.won ? "VITÓRIA" : "DERROTA"}
+          VITÓRIA
         </p>
-        <p className="text-[11px] text-violet/50">{dungeon.name}</p>
+        <p className="text-[11px]" style={{ color: diffColor }}>{dungeon.name} — {DIFFICULTY_LABELS[run.difficulty]}</p>
       </div>
 
-      {result.won && result.rank && (
-        <div
-          className="flex h-16 w-16 items-center justify-center rounded-xl border text-3xl font-black"
-          style={{ borderColor: RANK_COLOR[result.rank], color: RANK_COLOR[result.rank], background: `${RANK_COLOR[result.rank]}15` }}
-        >
-          {result.rank}
-        </div>
-      )}
-
-      <div className="w-full rounded-xl border border-violet/12 px-5 py-4" style={{ background: "rgba(122,111,160,0.04)" }}>
+      <div
+        className="w-full rounded-xl border px-4 py-4"
+        style={{ borderColor: `${diffColor}30`, background: `${diffColor}06` }}
+      >
         <p className="mb-3 text-[9px] uppercase tracking-[0.2em] text-violet/40">Recompensas</p>
-        <div className="flex justify-around">
-          <div className="flex flex-col items-center">
-            <span className="text-xl font-black text-amber-400">{result.ouroReward}</span>
-            <span className="text-[8px] text-violet/40">Ouro</span>
-          </div>
-          <div className="flex flex-col items-center">
-            <span className="text-xl font-black text-cream/70">{result.xpReward}</span>
-            <span className="text-[8px] text-violet/40">XP</span>
-          </div>
-          {result.itemDrops.map((drop) => (
-            <div key={drop.itemId} className="flex flex-col items-center">
-              <span className="text-xl font-black text-blue-400">×{drop.qty}</span>
-              <span className="text-[8px] text-violet/40">Item</span>
-            </div>
-          ))}
+        <div className="flex flex-col gap-1.5">
+          <RewardRow label="Ouro" value={`+${rewards.gold.toLocaleString("pt-BR")}`} color="rgb(200,155,60)" />
+          <RewardRow label="Cristais Astra" value={`+${rewards.crystals}`} color="rgb(170,130,255)" />
+          <RewardRow label="XP" value={`+${rewards.xp.toLocaleString("pt-BR")}`} color="rgb(100,220,140)" />
+          <RewardRow
+            label="Item"
+            value={gotItem ? `${rewards.itemRarity}` : "Nenhum"}
+            color={gotItem ? "rgb(232,217,160)" : "rgba(122,111,160,0.4)"}
+          />
         </div>
       </div>
 
@@ -410,11 +580,21 @@ function ResultScreen({ result, dungeon, onClose, onRetry }: {
           onClick={onClose}
           whileTap={{ scale: 0.97 }}
           transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
-          className="flex-1 rounded-xl border border-amber/30 bg-amber/10 py-3.5 text-[11px] font-bold tracking-wider text-amber-400"
+          className="flex-1 rounded-xl border py-3.5 text-[11px] font-bold tracking-wider"
+          style={{ borderColor: `${diffColor}40`, background: `${diffColor}10`, color: diffColor }}
         >
           SAIR
         </motion.button>
       </div>
     </motion.div>
+  );
+}
+
+function RewardRow({ label, value, color }: { label: string; value: string; color: string }) {
+  return (
+    <div className="flex items-center justify-between">
+      <span className="text-[10px] text-violet/50">{label}</span>
+      <span className="text-[10px] font-bold" style={{ color }}>{value}</span>
+    </div>
   );
 }
