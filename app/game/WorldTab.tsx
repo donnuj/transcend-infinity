@@ -245,7 +245,7 @@ export default function WorldTab({
         </AnimatePresence>
 
         {/* ── Login Bonus ───────────────────────────────────────────────── */}
-        <motion.div
+        {canClaimLogin && <motion.div
           className="mb-4"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -261,22 +261,18 @@ export default function WorldTab({
               <p className="text-[9px] font-black uppercase tracking-[0.2em] text-violet/45">
                 Login Diário · Dia {loginBonus.dayInCycle}
               </p>
-              {canClaimLogin ? (
-                <motion.button
-                  onClick={claimLoginBonus}
-                  whileTap={{ scale: 0.92 }}
-                  transition={spring}
-                  className="rounded-lg px-3 py-1.5 text-[9px] font-black tracking-wider text-void"
-                  style={{
-                    background: "linear-gradient(135deg, rgb(200,155,60) 0%, rgb(175,128,35) 100%)",
-                    boxShadow: "0 2px 10px rgba(200,155,60,0.3)",
-                  }}
-                >
-                  {currentReward.icon} RESGATAR
-                </motion.button>
-              ) : (
-                <span className="text-[9px] text-violet/30">Resgatado ✓</span>
-              )}
+              <motion.button
+                onClick={claimLoginBonus}
+                whileTap={{ scale: 0.92 }}
+                transition={spring}
+                className="rounded-lg px-3 py-1.5 text-[9px] font-black tracking-wider text-void"
+                style={{
+                  background: "linear-gradient(135deg, rgb(200,155,60) 0%, rgb(175,128,35) 100%)",
+                  boxShadow: "0 2px 10px rgba(200,155,60,0.3)",
+                }}
+              >
+                {currentReward.icon} RESGATAR
+              </motion.button>
             </div>
             <div className="flex gap-1.5">
               {LOGIN_REWARDS.map((r, i) => {
@@ -305,7 +301,7 @@ export default function WorldTab({
               })}
             </div>
           </div>
-        </motion.div>
+        </motion.div>}
 
         {/* ── Section: Batalha ─────────────────────────────────────────── */}
         <SectionLabel Icon={Sword} label="Batalha" />
