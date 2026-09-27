@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import { persist, createJSONStorage } from "zustand/middleware";
 import type { SaveData } from "./types";
+import { ACHIEVEMENTS } from "./data/achievements";
 
 // ── Estado inicial (novo jogador) ─────────────────────────────────────────────
 
@@ -140,6 +141,9 @@ type GameStore = {
 
   // Cloud sync
   setCloudSynced: (synced: boolean, at?: string) => void;
+
+  // Achievements
+  checkAchievements: () => string[];
 
   // Reset (debug)
   resetSave: () => void;
@@ -511,6 +515,24 @@ export const useGameStore = create<GameStore>()(
           s.cloudSynced = synced;
           if (at) s.lastSyncAt = at;
         });
+      },
+
+      // ── Achievements ─────────────────────────────────────────────────────────
+
+      checkAchievements() {
+        const save = get().save;
+        const newUnlocks: string[] = [];
+        for (const ach of ACHIEVEMENTS) {
+          if (!save.achievements.unlockedIds.includes(ach.id) && ach.check(save)) {
+            newUnlocks.push(ach.id);
+          }
+        }
+        if (newUnlocks.length > 0) {
+          set((s) => {
+            s.save.achievements.unlockedIds.push(...newUnlocks);
+          });
+        }
+        return newUnlocks;
       },
 
       // ── Reset ────────────────────────────────────────────────────────────────

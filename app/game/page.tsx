@@ -18,6 +18,7 @@ import ArenaModal from "./ArenaModal";
 import MercadoModal from "./MercadoModal";
 import BattlePassModal from "./BattlePassModal";
 import TorreModal from "./TorreModal";
+import AchievementsModal from "./AchievementsModal";
 
 export type Profile = {
   id: number;
@@ -54,6 +55,7 @@ export default function GamePage() {
   const [showMercado, setShowMercado] = useState(false);
   const [showBattlePass, setShowBattlePass] = useState(false);
   const [showTorre, setShowTorre] = useState(false);
+  const [showAchievements, setShowAchievements] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated()) { router.replace("/login"); return; }
@@ -101,7 +103,7 @@ export default function GamePage() {
           {tab === "cartas"  && <CartasTab  key="cartas" />}
           {tab === "invocar" && <InvocarTab key="invocar" />}
           {tab === "guilda"  && <GuildaTab  key="guilda" />}
-          {tab === "perfil"  && <PerfilTab  key="perfil" profile={profile} onLogout={handleLogout} />}
+          {tab === "perfil"  && <PerfilTab  key="perfil" profile={profile} onLogout={handleLogout} onAchievements={() => setShowAchievements(true)} />}
         </AnimatePresence>
       </main>
 
@@ -112,6 +114,7 @@ export default function GamePage() {
         {showMercado && <MercadoModal key="mercado" onClose={() => setShowMercado(false)} />}
         {showBattlePass && <BattlePassModal key="battlepass" onClose={() => setShowBattlePass(false)} />}
         {showTorre && <TorreModal key="torre" onClose={() => setShowTorre(false)} />}
+        {showAchievements && <AchievementsModal key="achievements" onClose={() => setShowAchievements(false)} />}
       </AnimatePresence>
 
       {/* Bottom nav */}
