@@ -159,8 +159,9 @@ export default function LoginPage() {
             type="password"
             value={password}
             onChange={setPassword}
-            placeholder="••••••••"
+            placeholder={mode === "register" ? "Mínimo 12 caracteres" : "••••••••"}
             autoComplete={mode === "login" ? "current-password" : "new-password"}
+            hint={mode === "register" ? "Mínimo 12 caracteres, inclua letras e números" : undefined}
           />
 
           {/* Feedback */}
@@ -226,6 +227,7 @@ function Field({
   onChange,
   placeholder,
   autoComplete,
+  hint,
 }: {
   label: string;
   type: string;
@@ -233,6 +235,7 @@ function Field({
   onChange: (v: string) => void;
   placeholder: string;
   autoComplete?: string;
+  hint?: string;
 }) {
   return (
     <div className="mt-4 flex flex-col gap-1.5">
@@ -246,9 +249,13 @@ function Field({
         placeholder={placeholder}
         autoComplete={autoComplete}
         required
+        minLength={type === "password" && hint ? 12 : undefined}
         className="h-12 rounded border border-violet/30 bg-void px-3.5 text-[14px] text-cream placeholder:text-cream/25 transition-colors duration-200 focus:border-amber/70 focus:bg-void/100"
         style={{ transitionTimingFunction: "cubic-bezier(0.23,1,0.32,1)" }}
       />
+      {hint && (
+        <p className="text-[10px] text-violet/45">{hint}</p>
+      )}
     </div>
   );
 }

@@ -92,9 +92,12 @@ export default function GamePage() {
 
   useEffect(() => {
     if (!isAuthenticated()) { router.replace("/login"); return; }
-    setUser(getUser());
+    const u = getUser();
     api.get<Profile>("/player/profile").then((p) => setProfile(p)).catch(() => null);
-    loadCloudSave();
+    // Limpa save local para evitar que novo usuário herde dados de sessão anterior
+    localStorage.removeItem("ti_game_save");
+    useGameStore.getState().resetSave();
+    loadCloudSave().finally(() => setUser(u));
   }, [router]);
 
   function handleLogout() {
