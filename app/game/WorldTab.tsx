@@ -28,10 +28,12 @@ export default function WorldTab({
   profile,
   onInvocar,
   onDungeon,
+  onArena,
 }: {
   profile: Profile | null;
   onInvocar: () => void;
   onDungeon: () => void;
+  onArena: () => void;
 }) {
   const { save, addCurrency, processLogin } = useGameStore();
   const playerLevel = save.playerLevel;
@@ -171,11 +173,11 @@ export default function WorldTab({
           onClick={onDungeon}
         />
         <ActionCard
-          icon="◈"
-          title="Torre Infinita"
-          sub={`Melhor: Andar ${save.tower.bestFloor}`}
-          accent="rgba(180,110,255,0.7)"
-          disabled
+          icon="⚔"
+          title="Arena"
+          sub={`Rating: ${save.arena.rating}`}
+          accent="rgba(100,160,255,0.7)"
+          onClick={onArena}
         />
         <ActionCard
           icon="◆"
