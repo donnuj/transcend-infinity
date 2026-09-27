@@ -234,13 +234,13 @@ export default function GamePage() {
                 <Icon
                   weight={active ? "fill" : "light"}
                   size={20}
-                  color={active ? color : "rgba(122,111,160,0.38)"}
+                  color={active ? color : "rgba(180,170,210,0.65)"}
                 />
               </motion.div>
               <span
                 className="relative z-10 text-[7.5px] font-bold tracking-[0.14em]"
                 style={{
-                  color: active ? color : "rgba(122,111,160,0.35)",
+                  color: active ? color : "rgba(180,170,210,0.55)",
                   transition: "color 220ms cubic-bezier(0.23,1,0.32,1)",
                 }}
               >
