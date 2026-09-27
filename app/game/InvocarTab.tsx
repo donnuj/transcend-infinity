@@ -2,83 +2,131 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useGameStore } from "@/lib/game/store";
+import { scheduleSave } from "@/lib/game/save";
+import { BANNERS, BANNER_MAP } from "@/lib/game/data/banners";
+import { HERO_MAP } from "@/lib/game/data/heroes";
+import type { BannerDef, GachaRarity, HeroDef } from "@/lib/game/types";
 
 const ease = [0.23, 1, 0.32, 1] as const;
 
-type Rarity = "NORMAL" | "RARO" | "ÉPICO" | "LENDÁRIO";
-
-type Card = { name: string; rarity: Rarity; element: string };
-
-const RARITY_STYLE: Record<Rarity, { color: string; glow: string; border: string; label: string }> = {
-  NORMAL:   { color: "rgb(180,180,210)",  glow: "rgba(180,180,210,0.15)", border: "rgba(180,180,210,0.25)", label: "Normal"   },
-  RARO:     { color: "rgb(90,150,255)",   glow: "rgba(90,150,255,0.2)",   border: "rgba(90,150,255,0.4)",   label: "Raro"     },
-  ÉPICO:    { color: "rgb(180,110,255)",  glow: "rgba(180,110,255,0.25)", border: "rgba(180,110,255,0.45)", label: "Épico"    },
-  LENDÁRIO: { color: "rgb(200,155,60)",   glow: "rgba(200,155,60,0.35)",  border: "rgba(200,155,60,0.6)",   label: "Lendário" },
+const RARITY_STYLE: Record<GachaRarity, { color: string; glow: string; border: string; label: string }> = {
+  Comum:    { color: "rgb(180,180,210)",  glow: "rgba(180,180,210,0.12)", border: "rgba(180,180,210,0.25)", label: "Comum"    },
+  Incomum:  { color: "rgb(100,210,130)",  glow: "rgba(100,210,130,0.12)", border: "rgba(100,210,130,0.3)",  label: "Incomum"  },
+  Raro:     { color: "rgb(90,150,255)",   glow: "rgba(90,150,255,0.18)",  border: "rgba(90,150,255,0.4)",   label: "Raro"     },
+  Épico:    { color: "rgb(180,110,255)",  glow: "rgba(180,110,255,0.2)",  border: "rgba(180,110,255,0.45)", label: "Épico"    },
+  Lendário: { color: "rgb(200,155,60)",   glow: "rgba(200,155,60,0.3)",   border: "rgba(200,155,60,0.6)",   label: "Lendário" },
+  Mítico:   { color: "rgb(255,80,80)",    glow: "rgba(255,80,80,0.25)",   border: "rgba(255,80,80,0.55)",   label: "Mítico"   },
+  Divino:   { color: "rgb(255,255,200)",  glow: "rgba(255,255,200,0.35)", border: "rgba(255,255,200,0.7)",  label: "Divino"   },
 };
 
-const ELEMENT_ICON: Record<string, string> = {
-  Fogo: "🔥", Água: "💧", Terra: "⛰", Ar: "🌀", Luz: "✦", Sombra: "◈", Arcano: "◉",
+type PullResult = {
+  hero: HeroDef;
+  rarity: GachaRarity;
+  isNew: boolean;
+  wasPity: boolean;
+  fragmentsAwarded: number;
 };
 
-const POOL: Card[] = [
-  { name: "Arqueiro Celestial",    rarity: "LENDÁRIO", element: "Luz"    },
-  { name: "Dragão Eterno",         rarity: "LENDÁRIO", element: "Fogo"   },
-  { name: "Serafim Carmesim",      rarity: "LENDÁRIO", element: "Luz"    },
-  { name: "Druida das Trevas",     rarity: "ÉPICO",    element: "Sombra" },
-  { name: "Cavaleiro de Gelo",     rarity: "ÉPICO",    element: "Água"   },
-  { name: "Titã Arcano",           rarity: "ÉPICO",    element: "Arcano" },
-  { name: "Valquíria Dourada",     rarity: "ÉPICO",    element: "Luz"    },
-  { name: "Golem de Obsidiana",    rarity: "RARO",     element: "Terra"  },
-  { name: "Maga Lunar",            rarity: "RARO",     element: "Arcano" },
-  { name: "Fênix Renascida",       rarity: "RARO",     element: "Fogo"   },
-  { name: "Espírito do Vento",     rarity: "RARO",     element: "Ar"     },
-  { name: "Sereia das Profundezas",rarity: "RARO",     element: "Água"   },
-  { name: "Necromante",            rarity: "RARO",     element: "Sombra" },
-  { name: "Goblin Feroz",          rarity: "NORMAL",   element: "Terra"  },
-  { name: "Soldado de Fogo",       rarity: "NORMAL",   element: "Fogo"   },
-  { name: "Elfa Sombria",          rarity: "NORMAL",   element: "Sombra" },
-  { name: "Lobo Ártico",           rarity: "NORMAL",   element: "Ar"     },
-  { name: "Sereia Canção",         rarity: "NORMAL",   element: "Água"   },
-  { name: "Golem de Pedra",        rarity: "NORMAL",   element: "Terra"  },
-  { name: "Arqueiro das Sombras",  rarity: "NORMAL",   element: "Sombra" },
-  { name: "Fada da Floresta",      rarity: "NORMAL",   element: "Ar"     },
-  { name: "Guardião da Luz",       rarity: "NORMAL",   element: "Luz"    },
-];
+// ── Gacha engine pura ─────────────────────────────────────────────────────────
 
-function pullOne(): Card {
-  const r = Math.random() * 100;
-  const rarity: Rarity = r < 3 ? "LENDÁRIO" : r < 15 ? "ÉPICO" : r < 40 ? "RARO" : "NORMAL";
-  const pool = POOL.filter((c) => c.rarity === rarity);
-  return pool[Math.floor(Math.random() * pool.length)];
+function rollBanner(banner: BannerDef, pityCount: number): { heroId: string; rarity: GachaRarity; wasPity: boolean } {
+  const forcedPity = pityCount >= banner.pityThreshold;
+
+  // Soft pity: multiplicador crescente a partir de softPityStart
+  const softMult = pityCount >= banner.softPityStart
+    ? 1 + (pityCount - banner.softPityStart) * 0.05
+    : 1;
+
+  if (forcedPity) {
+    const legendPool = banner.pool.filter(
+      (e) => e.rarity === "Lendário" || e.rarity === "Mítico" || e.rarity === "Divino"
+    );
+    if (legendPool.length) {
+      const picked = legendPool[Math.floor(Math.random() * legendPool.length)];
+      return { heroId: picked.heroId, rarity: picked.rarity, wasPity: true };
+    }
+  }
+
+  let totalWeight = 0;
+  for (const e of banner.pool) {
+    const isLegend = e.rarity === "Lendário" || e.rarity === "Mítico" || e.rarity === "Divino";
+    totalWeight += isLegend ? e.weight * softMult : e.weight;
+  }
+
+  let roll = Math.random() * totalWeight;
+  for (const e of banner.pool) {
+    const isLegend = e.rarity === "Lendário" || e.rarity === "Mítico" || e.rarity === "Divino";
+    const w = isLegend ? e.weight * softMult : e.weight;
+    roll -= w;
+    if (roll <= 0) return { heroId: e.heroId, rarity: e.rarity, wasPity: false };
+  }
+  const last = banner.pool[banner.pool.length - 1];
+  return { heroId: last.heroId, rarity: last.rarity, wasPity: false };
 }
 
-const COST_1 = 10;
-const COST_10 = 90;
+const RANK_ORDER: GachaRarity[] = ["Comum", "Incomum", "Raro", "Épico", "Lendário", "Mítico", "Divino"];
 
-export default function InvocarTab({
-  gems,
-  onGemsChange,
-}: {
-  gems: number;
-  onGemsChange: (v: number) => void;
-}) {
-  const [results, setResults] = useState<Card[] | null>(null);
+// ── Componente principal ──────────────────────────────────────────────────────
+
+export default function InvocarTab() {
+  const store = useGameStore();
+  const [activeBannerId, setActiveBannerId] = useState(BANNERS[0].bannerId);
+  const [results, setResults] = useState<PullResult[] | null>(null);
   const [pulling, setPulling] = useState(false);
 
-  function doPull(count: 1 | 10) {
-    const cost = count === 1 ? COST_1 : COST_10;
-    if (gems < cost) return;
+  const wallet = store.save.wallet;
+  const selos = wallet.selosDeInvocacao + wallet.selosLivres;
+  const invocador = store.save.invocador;
+  const banner = BANNER_MAP[activeBannerId];
+  const pity = store.getPity(activeBannerId);
+
+  function executePull(count: 1 | 10) {
+    if (selos < count) return;
     setPulling(true);
+
     setTimeout(() => {
-      setResults(Array.from({ length: count }, pullOne));
-      onGemsChange(gems - cost);
+      const pullResults: PullResult[] = [];
+      let currentPity = pity;
+
+      for (let i = 0; i < count; i++) {
+        const { heroId, rarity, wasPity } = rollBanner(banner, currentPity);
+        const hero = HERO_MAP[heroId];
+        if (!hero) continue;
+
+        const isLegend = rarity === "Lendário" || rarity === "Mítico" || rarity === "Divino";
+        const isNew = !store.hasHero(activeBannerId, heroId);
+
+        // Atualizar pity
+        if (isLegend) currentPity = 0;
+        else currentPity++;
+
+        // Fragmentos em duplicatas
+        const fragments = isNew ? 0 : 1;
+
+        pullResults.push({ hero, rarity, isNew, wasPity, fragmentsAwarded: fragments });
+
+        // Atualizar store
+        store.addCollectedHero(activeBannerId, heroId);
+        if (!isNew) store.addFragmento(heroId, 1);
+        store.registerPull();
+
+        // Gastar selo (Livres primeiro)
+        if (wallet.selosLivres > 0) store.spendCurrency("selosLivres", 1);
+        else store.spendCurrency("selosDeInvocacao", 1);
+      }
+
+      store.setPity(activeBannerId, currentPity);
+      scheduleSave();
+
+      setResults(pullResults);
       setPulling(false);
-    }, 350);
+    }, 400);
   }
 
   return (
     <motion.div
-      className="flex h-full flex-col overflow-y-auto"
+      className="flex h-full flex-col"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
@@ -88,15 +136,21 @@ export default function InvocarTab({
         {results ? (
           <ResultScreen
             key="result"
-            cards={results}
+            results={results}
             onClose={() => setResults(null)}
           />
         ) : (
           <BannerScreen
             key="banner"
-            gems={gems}
+            banner={banner}
+            selos={selos}
+            pity={pity}
+            invocador={invocador}
             pulling={pulling}
-            onPull={doPull}
+            banners={BANNERS}
+            activeBannerId={activeBannerId}
+            onSelectBanner={setActiveBannerId}
+            onPull={executePull}
           />
         )}
       </AnimatePresence>
@@ -104,132 +158,145 @@ export default function InvocarTab({
   );
 }
 
+// ── Banner screen ─────────────────────────────────────────────────────────────
+
 function BannerScreen({
-  gems,
-  pulling,
-  onPull,
+  banner, selos, pity, invocador, pulling, banners, activeBannerId, onSelectBanner, onPull,
 }: {
-  gems: number;
+  banner: BannerDef;
+  selos: number;
+  pity: number;
+  invocador: { level: number; totalPulls: number };
   pulling: boolean;
+  banners: BannerDef[];
+  activeBannerId: string;
+  onSelectBanner: (id: string) => void;
   onPull: (n: 1 | 10) => void;
 }) {
+  // Calcular taxas por raridade a partir do pool
+  const rates = calcRates(banner.pool);
+
   return (
     <motion.div
       key="banner"
-      className="flex flex-col px-4 pb-6 pt-5"
+      className="flex flex-col overflow-y-auto px-4 pb-6 pt-4"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.18, ease }}
+      transition={{ duration: 0.18 }}
     >
-      {/* Banner art */}
-      <div
-        className="relative mb-4 overflow-hidden rounded-2xl border border-amber/25"
-        style={{
-          height: 200,
-          background:
-            "linear-gradient(160deg, rgba(40,25,5,0.95) 0%, rgba(10,10,22,1) 55%, rgba(30,10,50,0.95) 100%)",
-          boxShadow: "0 0 60px rgba(200,155,60,0.08) inset, 0 0 0 1px rgba(200,155,60,0.06)",
-        }}
-      >
-        {/* Ambient glow */}
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(ellipse 70% 60% at 50% 30%, rgba(200,155,60,0.12) 0%, transparent 70%)",
-          }}
-        />
-        {/* Rarity stars */}
-        <div className="absolute top-4 right-4 flex gap-1">
-          {[...Array(5)].map((_, i) => (
-            <span key={i} className="text-[10px]" style={{ color: "rgba(200,155,60,0.6)" }}>
-              ✦
-            </span>
-          ))}
-        </div>
-        {/* Content */}
-        <div className="absolute bottom-0 left-0 right-0 p-5">
-          <p className="mb-0.5 text-[9px] font-bold tracking-[0.3em] text-amber/60 uppercase">
-            Banner Atual
-          </p>
-          <h3
-            className="text-lg font-black tracking-[0.12em] text-cream"
+      {/* Banner selector */}
+      <div className="mb-3 flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+        {banners.map((b) => (
+          <motion.button
+            key={b.bannerId}
+            onClick={() => onSelectBanner(b.bannerId)}
+            whileTap={{ scale: 0.95 }}
+            transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
+            className="flex-shrink-0 rounded-lg border px-3 py-1.5 text-[9px] font-bold tracking-wider"
             style={{
-              fontFamily: "var(--font-cinzel)",
-              textShadow: "0 0 20px rgba(200,155,60,0.6)",
+              borderColor: b.bannerId === activeBannerId ? "rgba(200,155,60,0.6)" : "rgba(122,111,160,0.2)",
+              color: b.bannerId === activeBannerId ? "rgb(200,155,60)" : "rgba(122,111,160,0.5)",
+              background: b.bannerId === activeBannerId ? "rgba(200,155,60,0.08)" : "transparent",
             }}
           >
-            ASCENSÃO CELESTIAL
+            {b.isLimited && "⚡ "}{b.name.toUpperCase()}
+          </motion.button>
+        ))}
+      </div>
+
+      {/* Banner art */}
+      <div
+        className="relative mb-4 overflow-hidden rounded-2xl border border-amber/20"
+        style={{
+          height: 180,
+          background: "linear-gradient(160deg, rgba(40,25,5,0.95) 0%, rgba(10,10,22,1) 55%, rgba(30,10,50,0.95) 100%)",
+          boxShadow: "0 0 60px rgba(200,155,60,0.07) inset",
+        }}
+      >
+        <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse 70% 60% at 50% 30%, rgba(200,155,60,0.1) 0%, transparent 70%)" }} />
+        {banner.isLimited && (
+          <div className="absolute right-3 top-3 rounded-full border border-amber/40 px-2 py-0.5 text-[8px] font-bold text-amber/80 bg-amber/10">
+            LIMITADO
+          </div>
+        )}
+        <div className="absolute bottom-0 left-0 right-0 px-5 pb-4">
+          <p className="mb-0.5 text-[9px] font-bold tracking-[0.3em] text-amber/50 uppercase">Banner</p>
+          <h3 className="text-lg font-black tracking-[0.1em] text-cream" style={{ fontFamily: "var(--font-cinzel)", textShadow: "0 0 20px rgba(200,155,60,0.5)" }}>
+            {banner.name.toUpperCase()}
           </h3>
-          <p className="text-[11px] text-violet/60">Taxa de Lendário: 3%</p>
+          <p className="text-[10px] text-violet/50 mt-0.5">{banner.lore}</p>
         </div>
       </div>
 
-      {/* Rates */}
-      <div className="mb-5 flex gap-2">
-        {(["LENDÁRIO", "ÉPICO", "RARO", "NORMAL"] as Rarity[]).map((r) => {
-          const s = RARITY_STYLE[r];
-          const rate = r === "LENDÁRIO" ? "3%" : r === "ÉPICO" ? "12%" : r === "RARO" ? "25%" : "60%";
-          return (
-            <div
-              key={r}
-              className="flex flex-1 flex-col items-center rounded-lg border py-2"
-              style={{ borderColor: s.border, backgroundColor: s.glow }}
-            >
-              <span className="text-[10px] font-bold" style={{ color: s.color }}>
-                {rate}
-              </span>
-              <span className="text-[8px] tracking-wide" style={{ color: s.color, opacity: 0.7 }}>
-                {s.label}
-              </span>
-            </div>
-          );
-        })}
+      {/* Taxas */}
+      <div className="mb-4 flex gap-1.5 flex-wrap">
+        {(Object.entries(rates) as [GachaRarity, number][])
+          .filter(([, v]) => v > 0)
+          .sort((a, b) => RANK_ORDER.indexOf(b[0]) - RANK_ORDER.indexOf(a[0]))
+          .map(([rarity, rate]) => {
+            const s = RARITY_STYLE[rarity];
+            return (
+              <div key={rarity} className="flex items-center gap-1 rounded-lg border px-2 py-1.5" style={{ borderColor: s.border, background: s.glow }}>
+                <span className="text-[10px] font-black" style={{ color: s.color }}>{rate.toFixed(1)}%</span>
+                <span className="text-[8px] font-bold" style={{ color: s.color, opacity: 0.7 }}>{s.label}</span>
+              </div>
+            );
+          })}
+      </div>
+
+      {/* Pity tracker */}
+      <div className="mb-4 rounded-xl border border-violet/12 px-4 py-3" style={{ background: "rgba(122,111,160,0.04)" }}>
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-[9px] font-bold tracking-wider text-violet/50">PITY</span>
+          <span className="text-[10px] font-bold text-cream/60">{pity} / {banner.pityThreshold}</span>
+        </div>
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-violet/12">
+          <motion.div
+            className="h-full rounded-full"
+            style={{
+              width: `${(pity / banner.pityThreshold) * 100}%`,
+              background: pity >= banner.softPityStart ? "rgb(200,155,60)" : "rgb(122,111,160)",
+              boxShadow: pity >= banner.softPityStart ? "0 0 8px rgba(200,155,60,0.5)" : "none",
+            }}
+            transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+          />
+        </div>
+        {pity >= banner.softPityStart && (
+          <p className="mt-1 text-[8px] text-amber/60 font-bold">✦ Soft pity ativo — chance aumentada!</p>
+        )}
+      </div>
+
+      {/* Invocador */}
+      <div className="mb-4 flex items-center justify-between rounded-xl border border-violet/12 px-4 py-2.5" style={{ background: "rgba(122,111,160,0.04)" }}>
+        <div>
+          <p className="text-[8px] font-bold tracking-[0.2em] text-violet/40 uppercase">Invocador Nível</p>
+          <p className="text-[16px] font-black text-cream">{invocador.level}</p>
+        </div>
+        <div className="text-right">
+          <p className="text-[8px] font-bold tracking-[0.2em] text-violet/40 uppercase">Total Invocações</p>
+          <p className="text-[16px] font-black text-cream">{invocador.totalPulls.toLocaleString("pt-BR")}</p>
+        </div>
       </div>
 
       {/* Pull buttons */}
       <div className="flex flex-col gap-3">
-        <PullButton
-          label="Invocar ×1"
-          cost={COST_1}
-          gems={gems}
-          loading={pulling}
-          onClick={() => onPull(1)}
-        />
-        <PullButton
-          label="Invocar ×10"
-          cost={COST_10}
-          gems={gems}
-          loading={pulling}
-          onClick={() => onPull(10)}
-          highlight
-        />
+        <PullBtn label="Invocar ×1"  cost={1}  selos={selos} loading={pulling} onClick={() => onPull(1)} />
+        <PullBtn label="Invocar ×10" cost={10} selos={selos} loading={pulling} onClick={() => onPull(10)} highlight />
       </div>
 
-      <p className="mt-4 text-center text-[10px] text-violet/35">
-        Você tem {gems} ✦ Gemas
+      <p className="mt-3 text-center text-[10px] text-violet/35">
+        Selos disponíveis: {selos} &nbsp;·&nbsp; 1 Selo = 1 Invocação
       </p>
     </motion.div>
   );
 }
 
-function PullButton({
-  label,
-  cost,
-  gems,
-  loading,
-  onClick,
-  highlight,
-}: {
-  label: string;
-  cost: number;
-  gems: number;
-  loading: boolean;
-  onClick: () => void;
-  highlight?: boolean;
+function PullBtn({ label, cost, selos, loading, onClick, highlight }: {
+  label: string; cost: number; selos: number; loading: boolean;
+  onClick: () => void; highlight?: boolean;
 }) {
-  const canAfford = gems >= cost;
+  const canAfford = selos >= cost;
   return (
     <motion.button
       onClick={canAfford && !loading ? onClick : undefined}
@@ -238,70 +305,77 @@ function PullButton({
       disabled={!canAfford || loading}
       className="flex items-center justify-between rounded-xl border px-5 py-3.5"
       style={{
-        borderColor: highlight
-          ? canAfford ? "rgba(200,155,60,0.6)" : "rgba(200,155,60,0.2)"
-          : canAfford ? "rgba(122,111,160,0.35)" : "rgba(122,111,160,0.15)",
-        background: highlight
-          ? canAfford ? "rgba(200,155,60,0.12)" : "rgba(200,155,60,0.04)"
-          : "rgba(122,111,160,0.06)",
-        opacity: canAfford ? 1 : 0.5,
+        borderColor: highlight ? (canAfford ? "rgba(200,155,60,0.6)" : "rgba(200,155,60,0.15)") : (canAfford ? "rgba(122,111,160,0.3)" : "rgba(122,111,160,0.12)"),
+        background: highlight ? (canAfford ? "rgba(200,155,60,0.1)" : "rgba(200,155,60,0.03)") : "rgba(122,111,160,0.05)",
+        opacity: canAfford ? 1 : 0.45,
         cursor: canAfford && !loading ? "pointer" : "default",
       }}
     >
-      <span
-        className="text-[13px] font-bold tracking-wider"
-        style={{ color: highlight ? "rgb(232,217,160)" : "rgba(122,111,160,0.8)" }}
-      >
+      <span className="text-[13px] font-bold tracking-wider" style={{ color: highlight ? "rgb(232,217,160)" : "rgba(122,111,160,0.8)" }}>
         {label}
       </span>
-      <span
-        className="flex items-center gap-1 text-[12px] font-bold"
-        style={{ color: highlight ? "rgb(200,155,60)" : "rgba(122,111,160,0.7)" }}
-      >
+      <div className="flex items-center gap-1.5">
         {loading ? (
-          <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-amber/30 border-t-amber" />
+          <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-amber/30 border-t-amber inline-block" />
         ) : (
-          <>✦ {cost}</>
+          <span className="text-[12px] font-bold" style={{ color: highlight ? "rgb(200,155,60)" : "rgba(122,111,160,0.7)" }}>
+            {cost} Selo{cost > 1 ? "s" : ""}
+          </span>
         )}
-      </span>
+      </div>
     </motion.button>
   );
 }
 
-function ResultScreen({ cards, onClose }: { cards: Card[]; onClose: () => void }) {
-  const best = cards.reduce((a, b) => {
-    const order: Rarity[] = ["NORMAL", "RARO", "ÉPICO", "LENDÁRIO"];
-    return order.indexOf(b.rarity) > order.indexOf(a.rarity) ? b : a;
-  });
+// ── Result screen ──────────────────────────────────────────────────────────────
+
+function ResultScreen({ results, onClose }: { results: PullResult[]; onClose: () => void }) {
+  const best = results.reduce((a, b) =>
+    RANK_ORDER.indexOf(b.rarity) > RANK_ORDER.indexOf(a.rarity) ? b : a
+  );
   const bestStyle = RARITY_STYLE[best.rarity];
+  const single = results.length === 1;
 
   return (
     <motion.div
       key="result"
-      className="flex flex-col items-center px-4 pb-6 pt-5"
+      className="flex flex-col items-center overflow-y-auto px-4 pb-6 pt-5"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.2, ease }}
+      transition={{ duration: 0.2 }}
     >
-      <p
-        className="mb-5 text-[10px] font-bold tracking-[0.3em] uppercase"
-        style={{ color: bestStyle.color }}
-      >
-        {cards.length === 1 ? "Invocação" : `${cards.length}× Invocações`}
+      <p className="mb-4 text-[10px] font-bold tracking-[0.3em] uppercase" style={{ color: bestStyle.color }}>
+        {single ? "Invocação" : `${results.length}× Invocações`}
       </p>
 
-      <div className={`mb-6 w-full ${cards.length === 1 ? "flex justify-center" : "grid grid-cols-5 gap-2"}`}>
-        {cards.map((card, i) => (
-          <PulledCardTile key={i} card={card} index={i} single={cards.length === 1} />
+      {/* Cards */}
+      <div className={`mb-5 w-full ${single ? "flex justify-center" : "grid grid-cols-5 gap-2"}`}>
+        {results.map((r, i) => (
+          <PullCard key={i} result={r} index={i} single={single} />
         ))}
       </div>
+
+      {/* Summary para multi-pull */}
+      {!single && (
+        <div className="mb-5 flex w-full flex-wrap justify-center gap-2">
+          {countByRarity(results).map(({ rarity, count }) => {
+            const s = RARITY_STYLE[rarity];
+            return (
+              <div key={rarity} className="flex items-center gap-1.5 rounded-lg border px-3 py-1.5" style={{ borderColor: s.border, background: s.glow }}>
+                <span className="text-[11px] font-black" style={{ color: s.color }}>×{count}</span>
+                <span className="text-[9px] font-bold" style={{ color: s.color, opacity: 0.8 }}>{s.label}</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       <motion.button
         onClick={onClose}
         whileTap={{ scale: 0.97 }}
         transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
-        className="w-full max-w-xs rounded-xl border border-amber/30 py-3.5 text-[12px] font-bold tracking-[0.2em] text-cream/80 transition-colors duration-150 hover:border-amber/60 hover:bg-amber/8"
+        className="w-full max-w-xs rounded-xl border border-amber/30 py-3.5 text-[12px] font-bold tracking-[0.2em] text-cream/75 transition-colors duration-150 hover:border-amber/60 hover:bg-amber/8"
       >
         CONTINUAR
       </motion.button>
@@ -309,41 +383,64 @@ function ResultScreen({ cards, onClose }: { cards: Card[]; onClose: () => void }
   );
 }
 
-function PulledCardTile({ card, index, single }: { card: Card; index: number; single: boolean }) {
-  const s = RARITY_STYLE[card.rarity];
+function PullCard({ result, index, single }: { result: PullResult; index: number; single: boolean }) {
+  const s = RARITY_STYLE[result.rarity];
   return (
     <motion.div
-      className="flex flex-col items-center overflow-hidden rounded-xl border"
+      className={`flex flex-col items-center overflow-hidden rounded-xl border ${single ? "w-44" : ""}`}
       style={{
         borderColor: s.border,
-        boxShadow: `0 0 16px ${s.glow}`,
-        background: `linear-gradient(160deg, ${s.glow} 0%, rgba(10,10,22,0.95) 100%)`,
-        ...(single ? { width: 160, paddingTop: 24, paddingBottom: 20 } : { paddingTop: 10, paddingBottom: 8 }),
+        background: `linear-gradient(160deg, ${s.glow} 0%, rgba(10,10,22,0.96) 100%)`,
+        boxShadow: `0 0 20px ${s.glow}`,
+        padding: single ? "24px 16px 20px" : "10px 8px 8px",
       }}
-      initial={{ opacity: 0, scale: 0.82 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1], delay: index * 0.07 }}
+      initial={{ opacity: 0, scale: 0.8, y: 10 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1], delay: index * 0.06 }}
     >
-      <span className={single ? "mb-3 text-4xl" : "mb-1 text-xl"}>
-        {ELEMENT_ICON[card.element] ?? "◈"}
-      </span>
+      <span className={single ? "mb-3 text-4xl" : "mb-1 text-xl"}>{result.hero.portrait}</span>
       {single && (
-        <p
-          className="mb-1 text-[14px] font-black tracking-wide text-center px-3"
-          style={{ color: s.color, fontFamily: "var(--font-cinzel)" }}
-        >
-          {card.name}
+        <p className="mb-1.5 px-2 text-center text-[13px] font-black tracking-wide" style={{ color: s.color, fontFamily: "var(--font-cinzel)" }}>
+          {result.hero.name.split(",")[0]}
         </p>
       )}
-      <span
-        className={`font-bold tracking-wider ${single ? "text-[11px]" : "text-[8px]"}`}
-        style={{ color: s.color }}
-      >
-        {s.label.toUpperCase()}
+      <span className={`font-bold tracking-wider ${single ? "text-[10px]" : "text-[7px]"}`} style={{ color: s.color }}>
+        {result.wasPity ? "★ PITY — " : ""}{s.label.toUpperCase()}
       </span>
       {!single && (
-        <p className="mt-0.5 text-center text-[7px] text-cream/50 px-1 leading-tight">{card.name}</p>
+        <p className="mt-0.5 px-1 text-center text-[7px] leading-tight text-cream/45">
+          {result.hero.name.split(",")[0]}
+        </p>
+      )}
+      {result.fragmentsAwarded > 0 && (
+        <span className={`mt-1 rounded-full border border-violet/20 px-1.5 font-bold text-violet/60 ${single ? "text-[9px]" : "text-[6px]"}`}>
+          +{result.fragmentsAwarded} fragmento
+        </span>
+      )}
+      {result.isNew && (
+        <span className={`mt-0.5 font-bold text-green-400/70 ${single ? "text-[9px]" : "text-[6px]"}`}>
+          NOVO
+        </span>
       )}
     </motion.div>
   );
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function calcRates(pool: BannerDef["pool"]): Partial<Record<GachaRarity, number>> {
+  const totalWeight = pool.reduce((s, e) => s + e.weight, 0);
+  const rates: Partial<Record<GachaRarity, number>> = {};
+  for (const e of pool) {
+    rates[e.rarity] = (rates[e.rarity] ?? 0) + (e.weight / totalWeight) * 100;
+  }
+  return rates;
+}
+
+function countByRarity(results: PullResult[]): { rarity: GachaRarity; count: number }[] {
+  const map: Partial<Record<GachaRarity, number>> = {};
+  for (const r of results) map[r.rarity] = (map[r.rarity] ?? 0) + 1;
+  return (Object.entries(map) as [GachaRarity, number][])
+    .sort((a, b) => RANK_ORDER.indexOf(b[0]) - RANK_ORDER.indexOf(a[0]))
+    .map(([rarity, count]) => ({ rarity, count }));
 }

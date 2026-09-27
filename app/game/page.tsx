@@ -88,7 +88,7 @@ export default function GamePage() {
         <AnimatePresence mode="wait">
           {tab === "mundo"   && <WorldTab   key="mundo"   profile={profile} onInvocar={() => setTab("invocar")} />}
           {tab === "cartas"  && <CartasTab  key="cartas" />}
-          {tab === "invocar" && <InvocarTab key="invocar" gems={gems} onGemsChange={setGems} />}
+          {tab === "invocar" && <InvocarTab key="invocar" />}
           {tab === "guilda"  && <GuildaTab  key="guilda" />}
           {tab === "perfil"  && <PerfilTab  key="perfil" profile={profile} onLogout={handleLogout} />}
         </AnimatePresence>
