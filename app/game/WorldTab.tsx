@@ -29,11 +29,13 @@ export default function WorldTab({
   onInvocar,
   onDungeon,
   onArena,
+  onMercado,
 }: {
   profile: Profile | null;
   onInvocar: () => void;
   onDungeon: () => void;
   onArena: () => void;
+  onMercado: () => void;
 }) {
   const { save, addCurrency, processLogin } = useGameStore();
   const playerLevel = save.playerLevel;
@@ -184,7 +186,7 @@ export default function WorldTab({
           title="Mercado"
           sub={`${wallet.ouro.toLocaleString("pt-BR")} ouro`}
           accent="rgba(255,140,80,0.7)"
-          disabled
+          onClick={onMercado}
         />
       </div>
 

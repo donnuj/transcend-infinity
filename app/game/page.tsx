@@ -15,6 +15,7 @@ import GuildaTab from "./GuildaTab";
 import PerfilTab from "./PerfilTab";
 import DungeonModal from "./DungeonModal";
 import ArenaModal from "./ArenaModal";
+import MercadoModal from "./MercadoModal";
 
 export type Profile = {
   id: number;
@@ -48,6 +49,7 @@ export default function GamePage() {
   const [tab, setTab] = useState<Tab>("mundo");
   const [showDungeon, setShowDungeon] = useState(false);
   const [showArena, setShowArena] = useState(false);
+  const [showMercado, setShowMercado] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated()) { router.replace("/login"); return; }
@@ -91,7 +93,7 @@ export default function GamePage() {
       {/* Content */}
       <main className="relative flex-1 overflow-hidden">
         <AnimatePresence mode="wait">
-          {tab === "mundo"   && <WorldTab   key="mundo"   profile={profile} onInvocar={() => setTab("invocar")} onDungeon={() => setShowDungeon(true)} onArena={() => setShowArena(true)} />}
+          {tab === "mundo"   && <WorldTab   key="mundo"   profile={profile} onInvocar={() => setTab("invocar")} onDungeon={() => setShowDungeon(true)} onArena={() => setShowArena(true)} onMercado={() => setShowMercado(true)} />}
           {tab === "cartas"  && <CartasTab  key="cartas" />}
           {tab === "invocar" && <InvocarTab key="invocar" />}
           {tab === "guilda"  && <GuildaTab  key="guilda" />}
@@ -103,6 +105,7 @@ export default function GamePage() {
       <AnimatePresence>
         {showDungeon && <DungeonModal key="dungeon" onClose={() => setShowDungeon(false)} />}
         {showArena && <ArenaModal key="arena" onClose={() => setShowArena(false)} />}
+        {showMercado && <MercadoModal key="mercado" onClose={() => setShowMercado(false)} />}
       </AnimatePresence>
 
       {/* Bottom nav */}
