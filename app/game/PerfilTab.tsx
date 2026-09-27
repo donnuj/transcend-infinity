@@ -1,11 +1,12 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useGameStore } from "@/lib/game/store";
+import { ITEM_MAP, EQUIP_MAP, RUNE_MAP } from "@/lib/game/data/items";
+import { useSave } from "@/lib/game/save";
 import type { Profile } from "./page";
 
 const ease = [0.23, 1, 0.32, 1] as const;
-
-const EXP_PER_LEVEL = 500;
 
 export default function PerfilTab({
   profile,
@@ -14,13 +15,16 @@ export default function PerfilTab({
   profile: Profile | null;
   onLogout: () => void;
 }) {
-  const level = profile?.level ?? 1;
-  const exp = profile?.experience ?? 0;
-  const expPct = Math.min((exp / EXP_PER_LEVEL) * 100, 100);
+  const { save } = useGameStore();
+  const { cloudSynced, lastSyncAt, save: manualSave } = useSave();
+  const wallet = save.wallet;
+  const playerLevel = save.playerLevel;
+  const invocador = save.invocador;
   const initial = (profile?.characterName ?? profile?.username ?? "?")[0].toUpperCase();
   const joined = profile?.registeredAt
     ? new Date(profile.registeredAt).toLocaleDateString("pt-BR", { month: "long", year: "numeric" })
     : null;
+  const xpPct = Math.min(100, (playerLevel.xp / (200 * playerLevel.level)) * 100);
 
   return (
     <motion.div
@@ -31,7 +35,7 @@ export default function PerfilTab({
       transition={{ duration: 0.2, ease }}
     >
       {/* Avatar */}
-      <div className="mb-6 flex flex-col items-center">
+      <div className="mb-5 flex flex-col items-center">
         <div
           className="mb-3 flex h-20 w-20 items-center justify-center rounded-full border-2 border-amber/40 text-3xl font-black text-cream"
           style={{
@@ -44,58 +48,129 @@ export default function PerfilTab({
         </div>
         <h2
           className="text-xl font-black tracking-[0.15em] text-cream"
-          style={{
-            fontFamily: "var(--font-cinzel)",
-            textShadow: "0 0 20px rgba(200,155,60,0.3)",
-          }}
+          style={{ fontFamily: "var(--font-cinzel)", textShadow: "0 0 20px rgba(200,155,60,0.3)" }}
         >
           {(profile?.characterName ?? "Invocador").toUpperCase()}
         </h2>
         {joined && (
-          <p className="mt-1 text-[10px] tracking-wider text-violet/45">
-            Membro desde {joined}
-          </p>
+          <p className="mt-1 text-[10px] tracking-wider text-violet/45">Membro desde {joined}</p>
         )}
+        <div className="mt-1.5 flex items-center gap-1.5">
+          <div className="h-1.5 w-1.5 rounded-full" style={{ background: cloudSynced ? "rgb(100,220,140)" : "rgb(255,100,100)" }} />
+          <span className="text-[9px] text-violet/40">
+            {cloudSynced
+              ? `Sync ${lastSyncAt ? new Date(lastSyncAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) : "ok"}`
+              : "Não sincronizado"}
+          </span>
+          <motion.button
+            onClick={() => manualSave()}
+            whileTap={{ scale: 0.94 }}
+            transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
+            className="rounded px-1.5 py-0.5 text-[8px] text-violet/40 border border-violet/15"
+          >
+            Salvar
+          </motion.button>
+        </div>
       </div>
 
-      {/* Level card */}
-      <div
-        className="mb-4 rounded-xl border border-amber/18 px-5 py-4"
-        style={{ background: "rgba(200,155,60,0.05)" }}
-      >
+      {/* Player level */}
+      <div className="mb-4 rounded-xl border border-amber/18 px-5 py-4" style={{ background: "rgba(200,155,60,0.05)" }}>
         <div className="mb-2 flex items-center justify-between">
-          <span className="text-[11px] font-bold tracking-wider text-cream/70">
-            NÍVEL {level}
-          </span>
-          <span className="text-[10px] text-violet/50">
-            {exp} / {EXP_PER_LEVEL} EXP
-          </span>
+          <span className="text-[11px] font-bold tracking-wider text-cream/70">NÍVEL {playerLevel.level}</span>
+          <span className="text-[10px] text-violet/50">{playerLevel.xp} / {200 * playerLevel.level} EXP</span>
         </div>
         <div className="h-2 w-full overflow-hidden rounded-full bg-violet/12">
           <motion.div
             className="h-full rounded-full bg-amber"
             initial={{ width: 0 }}
-            animate={{ width: `${expPct}%` }}
+            animate={{ width: `${xpPct}%` }}
             transition={{ duration: 0.7, ease, delay: 0.15 }}
             style={{ boxShadow: "0 0 8px rgba(200,155,60,0.5)" }}
           />
         </div>
       </div>
 
-      {/* Resources */}
-      <div className="mb-4 grid grid-cols-2 gap-3">
-        <ResourceCard icon="◆" label="Ouro" value={profile?.gold ?? 0} color="rgb(200,155,60)" />
-        <ResourceCard icon="✦" label="Gemas" value={profile?.premiumCurrency ?? 0} color="rgb(170,130,255)" />
+      {/* Wallet */}
+      <div className="mb-4 grid grid-cols-2 gap-2">
+        <CurrencyCard icon="◆" label="Ouro" value={wallet.ouro} color="rgb(200,155,60)" />
+        <CurrencyCard icon="✦" label="Cristais Astra" value={wallet.cristaisAstra} color="rgb(170,130,255)" />
+        <CurrencyCard icon="✦" label="Selos de Invocação" value={wallet.selosDeInvocacao} color="rgb(90,150,255)" />
+        <CurrencyCard icon="★" label="Selos Livres" value={wallet.selosLivres} color="rgb(100,220,140)" />
       </div>
 
-      {/* Account info */}
-      <div
-        className="mb-6 rounded-xl border border-violet/12 px-4 py-4"
-        style={{ background: "rgba(122,111,160,0.04)" }}
-      >
-        <p className="mb-3 text-[9px] font-bold tracking-[0.2em] text-violet/40 uppercase">
-          Conta
-        </p>
+      {/* Invocador stats */}
+      <div className="mb-4 rounded-xl border border-violet/12 px-4 py-3" style={{ background: "rgba(122,111,160,0.04)" }}>
+        <p className="mb-2.5 text-[9px] font-bold uppercase tracking-[0.2em] text-violet/40">Invocador</p>
+        <div className="grid grid-cols-2 gap-x-4">
+          <InfoRow label="Nível" value={String(invocador.level)} />
+          <InfoRow label="Total Invocações" value={String(invocador.totalPulls)} />
+          <InfoRow label="Heróis Coletados" value={String(new Set(save.collectedHeroIds.map((k) => k.split("|")[1])).size)} last />
+          <InfoRow label="Login Streak" value={`${wallet.loginStreak} dias`} last />
+        </div>
+      </div>
+
+      {/* Inventory */}
+      {save.inventory.length > 0 && (
+        <div className="mb-4 rounded-xl border border-violet/12 px-4 py-3" style={{ background: "rgba(122,111,160,0.04)" }}>
+          <p className="mb-2.5 text-[9px] font-bold uppercase tracking-[0.2em] text-violet/40">Inventário</p>
+          <div className="flex flex-col gap-0.5">
+            {save.inventory.map((item) => {
+              const def = ITEM_MAP[item.itemId];
+              if (!def) return null;
+              return (
+                <div key={item.itemId} className="flex items-center justify-between py-1.5" style={{ borderBottom: "1px solid rgba(122,111,160,0.08)" }}>
+                  <span className="text-[10px] text-cream/70">{def.name}</span>
+                  <span className="text-[10px] font-bold text-violet/60">×{item.qty}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Equipment inventory */}
+      {save.equipmentInventory.length > 0 && (
+        <div className="mb-4 rounded-xl border border-violet/12 px-4 py-3" style={{ background: "rgba(122,111,160,0.04)" }}>
+          <p className="mb-2.5 text-[9px] font-bold uppercase tracking-[0.2em] text-violet/40">Equipamentos ({save.equipmentInventory.length})</p>
+          <div className="flex flex-wrap gap-1.5">
+            {Array.from(new Set(save.equipmentInventory)).map((id) => {
+              const eq = EQUIP_MAP[id];
+              if (!eq) return null;
+              const count = save.equipmentInventory.filter((e) => e === id).length;
+              return (
+                <div key={id} className="rounded-lg border border-violet/10 px-2 py-1" style={{ background: "rgba(122,111,160,0.06)" }}>
+                  <span className="text-[9px] text-cream/70">{eq.name}</span>
+                  {count > 1 && <span className="ml-1 text-[8px] text-violet/40">×{count}</span>}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Rune inventory */}
+      {save.runeInventory.length > 0 && (
+        <div className="mb-5 rounded-xl border border-violet/12 px-4 py-3" style={{ background: "rgba(122,111,160,0.04)" }}>
+          <p className="mb-2.5 text-[9px] font-bold uppercase tracking-[0.2em] text-violet/40">Runas ({save.runeInventory.length})</p>
+          <div className="flex flex-wrap gap-1.5">
+            {Array.from(new Set(save.runeInventory)).map((id) => {
+              const rune = RUNE_MAP[id];
+              if (!rune) return null;
+              const count = save.runeInventory.filter((r) => r === id).length;
+              return (
+                <div key={id} className="rounded-lg border border-violet/10 px-2 py-1" style={{ background: "rgba(122,111,160,0.06)" }}>
+                  <span className="text-[9px] text-cream/70">{rune.name}</span>
+                  {count > 1 && <span className="ml-1 text-[8px] text-violet/40">×{count}</span>}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Account */}
+      <div className="mb-5 rounded-xl border border-violet/12 px-4 py-4" style={{ background: "rgba(122,111,160,0.04)" }}>
+        <p className="mb-3 text-[9px] font-bold uppercase tracking-[0.2em] text-violet/40">Conta</p>
         <InfoRow label="Usuário" value={profile?.username ?? "—"} />
         <InfoRow label="E-mail" value={profile?.email ?? "—"} />
         <InfoRow label="ID" value={profile ? `#${profile.id}` : "—"} last />
@@ -114,17 +189,12 @@ export default function PerfilTab({
   );
 }
 
-function ResourceCard({ icon, label, value, color }: { icon: string; label: string; value: number; color: string }) {
+function CurrencyCard({ icon, label, value, color }: { icon: string; label: string; value: number; color: string }) {
   return (
-    <div
-      className="flex flex-col items-center rounded-xl border py-4"
-      style={{ borderColor: `${color}28`, background: `${color}08` }}
-    >
-      <span className="mb-1 text-xl" style={{ color }}>{icon}</span>
-      <span className="text-lg font-black text-cream">{value.toLocaleString("pt-BR")}</span>
-      <span className="text-[9px] font-bold tracking-wider" style={{ color, opacity: 0.6 }}>
-        {label.toUpperCase()}
-      </span>
+    <div className="flex flex-col items-center rounded-xl border py-3" style={{ borderColor: `${color}28`, background: `${color}08` }}>
+      <span className="mb-0.5 text-lg" style={{ color }}>{icon}</span>
+      <span className="text-base font-black text-cream">{value.toLocaleString("pt-BR")}</span>
+      <span className="text-[8px] font-bold uppercase tracking-wider" style={{ color, opacity: 0.6 }}>{label}</span>
     </div>
   );
 }
