@@ -17,18 +17,19 @@ type CloudSaveResponse = {
 let _revision = 0;
 let _syncTimer: ReturnType<typeof setTimeout> | null = null;
 
-// Carrega save da nuvem. Se não existir, mantém o save local (novo jogo).
-export async function loadCloudSave(): Promise<void> {
+// Carrega save da nuvem. Retorna true se encontrou um save existente.
+export async function loadCloudSave(): Promise<boolean> {
   try {
     const res = await api.get<CloudSaveEnvelope | null>("/player/save");
-    if (!res || res.data === "null" || !res.data) return;
+    if (!res || res.data === "null" || !res.data) return false;
 
     const cloudSave = JSON.parse(res.data);
     _revision = res.revision ?? 0;
 
     useGameStore.setState((s) => ({ ...s, save: cloudSave, cloudSynced: true, lastSyncAt: new Date().toISOString() }));
+    return true;
   } catch {
-    // Falha silenciosa: joga com save local
+    return false;
   }
 }
 

@@ -34,7 +34,15 @@ export function newSave(): SaveData {
       { itemId: "cristal_evolucao", qty: 3 },
       { itemId: "pedra_ascensao",   qty: 1 },
     ],
-    equipmentInventory: ["espada_ferro","armadura_couro","anel_forca"],
+    equipmentInventory: [
+      "espada_ferro","espada_ferro","espada_ferro","espada_ferro",
+      "arco_caçador","arco_caçador","arco_caçador",
+      "cajado_iniciante","cajado_iniciante","cajado_iniciante",
+      "armadura_couro","armadura_couro","armadura_couro","armadura_couro","armadura_couro",
+      "armadura_couro","armadura_couro","armadura_couro","armadura_couro","armadura_couro",
+      "anel_forca","anel_forca","anel_forca","anel_forca","anel_forca",
+      "anel_forca","anel_forca","anel_forca","anel_forca","anel_forca",
+    ],
     runeInventory: ["runa_forca","runa_sorte"],
     dungeon: [],
     travel: { unlockedDestinationIds: ["reg_valdris"], hasHorse: false, hasShip: false },
@@ -400,22 +408,34 @@ export const useGameStore = create<GameStore>()(
 
       equipItem(heroId, slot, equipId) {
         set((s) => {
+          const idx = s.save.equipmentInventory.indexOf(equipId);
+          if (idx === -1) return;
+          s.save.equipmentInventory.splice(idx, 1);
+
           let entry = s.save.heroEquipment.find((h) => h.heroId === heroId);
           if (!entry) {
             s.save.heroEquipment.push({ heroId });
             entry = s.save.heroEquipment[s.save.heroEquipment.length - 1];
           }
+          const prev = (entry as Record<string, string | undefined>)[slot];
+          if (prev) s.save.equipmentInventory.push(prev);
           (entry as Record<string, string>)[slot] = equipId;
         });
       },
 
       equipRune(heroId, slot, runeId) {
         set((s) => {
+          const idx = s.save.runeInventory.indexOf(runeId);
+          if (idx === -1) return;
+          s.save.runeInventory.splice(idx, 1);
+
           let entry = s.save.heroRunes.find((h) => h.heroId === heroId);
           if (!entry) {
             s.save.heroRunes.push({ heroId });
             entry = s.save.heroRunes[s.save.heroRunes.length - 1];
           }
+          const prev = (entry as Record<string, string | undefined>)[slot];
+          if (prev) s.save.runeInventory.push(prev);
           (entry as Record<string, string>)[slot] = runeId;
         });
       },

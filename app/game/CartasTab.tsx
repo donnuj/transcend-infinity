@@ -3,6 +3,7 @@
 import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGameStore } from "@/lib/game/store";
+import { scheduleSave } from "@/lib/game/save";
 import { HERO_MAP } from "@/lib/game/data/heroes";
 import { SKILL_MAP } from "@/lib/game/data/skills";
 import { EQUIP_MAP } from "@/lib/game/data/items";
@@ -746,6 +747,7 @@ function EquipTab({ hero, equipData, runeData, equipInventory, runeInventory, s 
       equipItem(hero.heroId, slot as typeof EQUIP_SLOTS[number], id);
     }
     setPickingSlot(null);
+    scheduleSave();
   };
 
   return (

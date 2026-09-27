@@ -8,7 +8,7 @@ import { api } from "@/lib/api";
 import { getUser, isAuthenticated, clearSession } from "@/lib/auth";
 import type { StoredUser } from "@/lib/auth";
 import { useGameStore } from "@/lib/game/store";
-import { loadCloudSave } from "@/lib/game/save";
+import { loadCloudSave, uploadCloudSave } from "@/lib/game/save";
 import WorldTab from "./WorldTab";
 import CartasTab from "./CartasTab";
 import InvocarTab from "./InvocarTab";
@@ -97,7 +97,9 @@ export default function GamePage() {
     // Limpa save local para evitar que novo usuário herde dados de sessão anterior
     localStorage.removeItem("ti_game_save");
     useGameStore.getState().resetSave();
-    loadCloudSave().finally(() => setUser(u));
+    loadCloudSave().then((found) => {
+      if (!found) uploadCloudSave();
+    }).finally(() => setUser(u));
   }, [router]);
 
   // Keep-alive: mantém o backend no Render acordado enquanto o jogador está na sessão
