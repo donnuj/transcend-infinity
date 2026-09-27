@@ -188,29 +188,14 @@ input:-webkit-autofill {
     rgb(6,7,15);
 }
 
-/* desktop: colunas laterais com estrelas para enquadrar o jogo */
+/* desktop: gradientes laterais mais intensos para enquadrar o jogo */
 @media (min-width: 448px) {
-  .bg-atmosphere::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    background-image:
-      radial-gradient(circle, rgba(232,217,160,0.25) 1px, transparent 1px),
-      radial-gradient(circle, rgba(200,155,60,0.15) 1px, transparent 1px);
-    background-size: 60px 60px, 97px 97px;
-    background-position: 0 0, 30px 30px;
-    mask-image: linear-gradient(to right,
-      rgba(0,0,0,0.6) 0%,
-      transparent calc(50% - 224px),
-      transparent calc(50% + 224px),
-      rgba(0,0,0,0.6) 100%
-    );
-    -webkit-mask-image: linear-gradient(to right,
-      rgba(0,0,0,0.6) 0%,
-      transparent calc(50% - 224px),
-      transparent calc(50% + 224px),
-      rgba(0,0,0,0.6) 100%
-    );
+  .bg-atmosphere {
+    background:
+      radial-gradient(ellipse at 18% 35%, rgba(90,50,180,0.28) 0%, transparent 48%),
+      radial-gradient(ellipse at 82% 65%, rgba(160,100,20,0.22) 0%, transparent 48%),
+      radial-gradient(ellipse at 50% 0%,  rgba(120,60,200,0.18) 0%, transparent 42%),
+      radial-gradient(ellipse at 50% 100%,rgba(60,30,110,0.15)  0%, transparent 50%),
+      rgb(6,7,15);
   }
 }

@@ -118,7 +118,8 @@ export default function GamePage() {
     <div
       className="relative flex h-full w-full max-w-md flex-col"
       style={{
-        boxShadow: "inset 1px 0 0 rgba(200,155,60,0.07), inset -1px 0 0 rgba(200,155,60,0.07), 0 0 80px rgba(200,155,60,0.04)",
+        boxShadow: "inset 1px 0 0 rgba(200,155,60,0.18), inset -1px 0 0 rgba(200,155,60,0.18), 0 0 120px rgba(200,155,60,0.12)",
+        background: "linear-gradient(180deg, rgba(10,8,20,0.6) 0%, transparent 120px)",
       }}
     >
       {/* Top bar */}
