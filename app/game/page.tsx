@@ -30,6 +30,7 @@ import AlchemyModal from "./AlchemyModal";
 import WorldMapModal from "./WorldMapModal";
 import NpcDialogueModal from "./NpcDialogueModal";
 import CaravanaModal from "./CaravanaModal";
+import SettingsModal from "./SettingsModal";
 
 export type Profile = {
   id: number;
@@ -78,6 +79,7 @@ export default function GamePage() {
   const [showWorldMap, setShowWorldMap] = useState(false);
   const [showNpcDialogue, setShowNpcDialogue] = useState(false);
   const [showCaravana, setShowCaravana] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated()) { router.replace("/login"); return; }
@@ -125,7 +127,7 @@ export default function GamePage() {
           {tab === "cartas"  && <CartasTab  key="cartas" />}
           {tab === "invocar" && <InvocarTab key="invocar" />}
           {tab === "guilda"  && <GuildaTab  key="guilda" onFortress={() => setShowFortress(true)} />}
-          {tab === "perfil"  && <PerfilTab  key="perfil" profile={profile} onLogout={handleLogout} onAchievements={() => setShowAchievements(true)} onCodex={() => setShowCodex(true)} onSeason={() => setShowSeason(true)} onHousing={() => setShowHousing(true)} onCompanions={() => setShowCompanions(true)} onAlchemy={() => setShowAlchemy(true)} />}
+          {tab === "perfil"  && <PerfilTab  key="perfil" profile={profile} onLogout={handleLogout} onAchievements={() => setShowAchievements(true)} onCodex={() => setShowCodex(true)} onSeason={() => setShowSeason(true)} onHousing={() => setShowHousing(true)} onCompanions={() => setShowCompanions(true)} onAlchemy={() => setShowAlchemy(true)} onSettings={() => setShowSettings(true)} />}
         </AnimatePresence>
       </main>
 
@@ -148,6 +150,7 @@ export default function GamePage() {
         {showWorldMap && <WorldMapModal key="worldmap" onClose={() => setShowWorldMap(false)} />}
         {showNpcDialogue && <NpcDialogueModal key="npcdialogue" onClose={() => setShowNpcDialogue(false)} />}
         {showCaravana && <CaravanaModal key="caravana" onClose={() => setShowCaravana(false)} />}
+        {showSettings && <SettingsModal key="settings" onClose={() => setShowSettings(false)} />}
       </AnimatePresence>
 
       {/* Bottom nav */}

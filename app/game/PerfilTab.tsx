@@ -17,6 +17,7 @@ export default function PerfilTab({
   onHousing,
   onCompanions,
   onAlchemy,
+  onSettings,
 }: {
   profile: Profile | null;
   onLogout: () => void;
@@ -26,6 +27,7 @@ export default function PerfilTab({
   onHousing: () => void;
   onCompanions: () => void;
   onAlchemy: () => void;
+  onSettings: () => void;
 }) {
   const { save } = useGameStore();
   const unlockedAchievements = save.achievements.unlockedIds.length;
@@ -259,6 +261,18 @@ export default function PerfilTab({
       >
         <span className="text-[12px] font-bold tracking-[0.15em] text-cream/70">CONQUISTAS</span>
         <span className="text-[10px] font-bold text-amber-400">{unlockedAchievements} / 23</span>
+      </motion.button>
+
+      {/* Settings button */}
+      <motion.button
+        onClick={onSettings}
+        whileTap={{ scale: 0.97 }}
+        transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
+        className="mb-3 flex w-full items-center justify-between rounded-xl border border-violet/15 px-4 py-3.5"
+        style={{ background: "rgba(122,111,160,0.04)" }}
+      >
+        <span className="text-[12px] font-bold tracking-[0.15em] text-cream/70">CONFIGURAÇÕES</span>
+        <span className="text-[10px] text-violet/40">Áudio & Sistema →</span>
       </motion.button>
 
       {/* Logout */}
