@@ -27,9 +27,11 @@ const DAILY_MISSIONS = [
 export default function WorldTab({
   profile,
   onInvocar,
+  onDungeon,
 }: {
   profile: Profile | null;
   onInvocar: () => void;
+  onDungeon: () => void;
 }) {
   const { save, addCurrency, processLogin } = useGameStore();
   const playerLevel = save.playerLevel;
@@ -166,7 +168,7 @@ export default function WorldTab({
           title="Masmorra"
           sub={`${clearedDungeons}/${totalDungeons} completadas`}
           accent="rgba(100,160,255,0.7)"
-          disabled
+          onClick={onDungeon}
         />
         <ActionCard
           icon="◈"

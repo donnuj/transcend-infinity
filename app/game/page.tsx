@@ -6,11 +6,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { api } from "@/lib/api";
 import { getUser, isAuthenticated, clearSession } from "@/lib/auth";
 import type { StoredUser } from "@/lib/auth";
+import { useGameStore } from "@/lib/game/store";
+import { loadCloudSave } from "@/lib/game/save";
 import WorldTab from "./WorldTab";
 import CartasTab from "./CartasTab";
 import InvocarTab from "./InvocarTab";
 import GuildaTab from "./GuildaTab";
 import PerfilTab from "./PerfilTab";
+import DungeonModal from "./DungeonModal";
 
 export type Profile = {
   id: number;
@@ -38,17 +41,17 @@ const ease = [0.23, 1, 0.32, 1] as const;
 
 export default function GamePage() {
   const router = useRouter();
+  const wallet = useGameStore((s) => s.save.wallet);
   const [user, setUser] = useState<StoredUser | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [gems, setGems] = useState(0);
   const [tab, setTab] = useState<Tab>("mundo");
+  const [showDungeon, setShowDungeon] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated()) { router.replace("/login"); return; }
     setUser(getUser());
-    api.get<Profile>("/player/profile")
-      .then((p) => { setProfile(p); setGems(p.premiumCurrency); })
-      .catch(() => null);
+    api.get<Profile>("/player/profile").then((p) => setProfile(p)).catch(() => null);
+    loadCloudSave();
   }, [router]);
 
   function handleLogout() {
@@ -78,21 +81,26 @@ export default function GamePage() {
           {(profile?.characterName ?? user.username).toUpperCase()}
         </span>
         <div className="flex items-center gap-2">
-          <Chip icon="✦" value={gems} color="rgb(170,130,255)" />
-          <Chip icon="◆" value={profile?.gold ?? 0} color="rgb(200,155,60)" />
+          <Chip icon="✦" value={wallet.cristaisAstra} color="rgb(170,130,255)" />
+          <Chip icon="◆" value={wallet.ouro} color="rgb(200,155,60)" />
         </div>
       </header>
 
       {/* Content */}
       <main className="relative flex-1 overflow-hidden">
         <AnimatePresence mode="wait">
-          {tab === "mundo"   && <WorldTab   key="mundo"   profile={profile} onInvocar={() => setTab("invocar")} />}
+          {tab === "mundo"   && <WorldTab   key="mundo"   profile={profile} onInvocar={() => setTab("invocar")} onDungeon={() => setShowDungeon(true)} />}
           {tab === "cartas"  && <CartasTab  key="cartas" />}
           {tab === "invocar" && <InvocarTab key="invocar" />}
           {tab === "guilda"  && <GuildaTab  key="guilda" />}
           {tab === "perfil"  && <PerfilTab  key="perfil" profile={profile} onLogout={handleLogout} />}
         </AnimatePresence>
       </main>
+
+      {/* Dungeon overlay */}
+      <AnimatePresence>
+        {showDungeon && <DungeonModal key="dungeon" onClose={() => setShowDungeon(false)} />}
+      </AnimatePresence>
 
       {/* Bottom nav */}
       <nav
