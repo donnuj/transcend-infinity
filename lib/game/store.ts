@@ -152,6 +152,13 @@ type GameStore = {
   // Achievements
   checkAchievements: () => string[];
 
+  // Companions
+  collectCompanion: (id: string) => void;
+  addCompanionBond: (id: string, amount: number) => void;
+  evolveCompanion: (id: string) => boolean;
+  setActiveCompanion: (id: string) => void;
+  getCompanion: (id: string) => SaveData["companions"][0] | undefined;
+
   // Reset (debug)
   resetSave: () => void;
 };
@@ -584,6 +591,43 @@ export const useGameStore = create<GameStore>()(
           });
         }
         return newUnlocks;
+      },
+
+      // ── Companions ───────────────────────────────────────────────────────────
+
+      collectCompanion(id) {
+        set((s) => {
+          if (!s.save.companions.find((c) => c.companionId === id))
+            s.save.companions.push({ companionId: id, bond: 0, form: 0, isActive: false });
+        });
+      },
+
+      addCompanionBond(id, amount) {
+        set((s) => {
+          const c = s.save.companions.find((c) => c.companionId === id);
+          if (c) c.bond = Math.min(100, c.bond + amount);
+        });
+      },
+
+      evolveCompanion(id) {
+        const c = get().save.companions.find((c) => c.companionId === id);
+        if (!c) return false;
+        set((s) => {
+          const entry = s.save.companions.find((c) => c.companionId === id);
+          if (entry) entry.form += 1;
+        });
+        return true;
+      },
+
+      setActiveCompanion(id) {
+        set((s) => {
+          s.save.activeCompanionId = id;
+          for (const c of s.save.companions) c.isActive = c.companionId === id;
+        });
+      },
+
+      getCompanion(id) {
+        return get().save.companions.find((c) => c.companionId === id);
       },
 
       // ── Reset ────────────────────────────────────────────────────────────────

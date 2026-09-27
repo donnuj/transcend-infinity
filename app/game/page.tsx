@@ -25,6 +25,7 @@ import FortressModal from "./FortressModal";
 import BossHuntModal from "./BossHuntModal";
 import SeasonModal from "./SeasonModal";
 import HousingModal from "./HousingModal";
+import CompanionsModal from "./CompanionsModal";
 
 export type Profile = {
   id: number;
@@ -68,6 +69,7 @@ export default function GamePage() {
   const [showBossHunt, setShowBossHunt] = useState(false);
   const [showSeason, setShowSeason] = useState(false);
   const [showHousing, setShowHousing] = useState(false);
+  const [showCompanions, setShowCompanions] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated()) { router.replace("/login"); return; }
@@ -115,7 +117,7 @@ export default function GamePage() {
           {tab === "cartas"  && <CartasTab  key="cartas" />}
           {tab === "invocar" && <InvocarTab key="invocar" />}
           {tab === "guilda"  && <GuildaTab  key="guilda" onFortress={() => setShowFortress(true)} />}
-          {tab === "perfil"  && <PerfilTab  key="perfil" profile={profile} onLogout={handleLogout} onAchievements={() => setShowAchievements(true)} onCodex={() => setShowCodex(true)} onSeason={() => setShowSeason(true)} onHousing={() => setShowHousing(true)} />}
+          {tab === "perfil"  && <PerfilTab  key="perfil" profile={profile} onLogout={handleLogout} onAchievements={() => setShowAchievements(true)} onCodex={() => setShowCodex(true)} onSeason={() => setShowSeason(true)} onHousing={() => setShowHousing(true)} onCompanions={() => setShowCompanions(true)} />}
         </AnimatePresence>
       </main>
 
@@ -133,6 +135,7 @@ export default function GamePage() {
         {showBossHunt && <BossHuntModal key="bosshunt" onClose={() => setShowBossHunt(false)} />}
         {showSeason && <SeasonModal key="season" onClose={() => setShowSeason(false)} />}
         {showHousing && <HousingModal key="housing" onClose={() => setShowHousing(false)} />}
+        {showCompanions && <CompanionsModal key="companions" onClose={() => setShowCompanions(false)} />}
       </AnimatePresence>
 
       {/* Bottom nav */}
