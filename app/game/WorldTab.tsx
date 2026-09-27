@@ -94,7 +94,7 @@ export default function WorldTab({
     >
       {/* ── Hero Banner ──────────────────────────────────────────────────── */}
       <div
-        className="relative overflow-hidden px-4 md:px-8 pb-5 pt-5"
+        className="relative overflow-hidden pb-5 pt-5"
         style={{
           background: "linear-gradient(180deg, rgba(90,50,160,0.12) 0%, rgba(6,7,15,0) 100%)",
         }}
@@ -108,7 +108,7 @@ export default function WorldTab({
           style={{ background: "radial-gradient(circle, rgba(120,80,200,0.08) 0%, transparent 70%)" }}
         />
 
-        <div className="relative mx-auto flex max-w-5xl items-start gap-4">
+        <div className="relative mx-auto flex max-w-5xl items-start gap-4 px-4 md:px-8">
           {/* Avatar — outer shell + inner core */}
           <div className="relative shrink-0">
             <div
