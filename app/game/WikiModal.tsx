@@ -73,7 +73,7 @@ export default function WikiModal({ onClose }: { onClose: () => void }) {
               >
                 GUIA DO NOVATO
               </h2>
-              <p className="text-[8px] text-violet/45 tracking-[0.15em]">TRANSCEND INFINITY</p>
+              <p className="text-[8px] text-violet/70 tracking-[0.15em]">TRANSCEND INFINITY</p>
             </div>
           </div>
           <motion.button
@@ -101,11 +101,11 @@ export default function WikiModal({ onClose }: { onClose: () => void }) {
                 style={{
                   background: active ? "rgba(200,155,60,0.12)" : "transparent",
                   border: `1px solid ${active ? "rgba(200,155,60,0.35)" : "rgba(122,111,160,0.16)"}`,
-                  color: active ? "rgb(200,155,60)" : "rgba(122,111,160,0.5)",
+                  color: active ? "rgb(200,155,60)" : "rgba(180,170,210,0.75)",
                   transition: "all 180ms ease",
                 }}
               >
-                <Icon weight="light" size={11} color={active ? "rgb(200,155,60)" : "rgba(122,111,160,0.5)"} />
+                <Icon weight="light" size={11} color={active ? "rgb(200,155,60)" : "rgba(180,170,210,0.75)"} />
                 <span className="text-[9px] font-bold tracking-[0.1em]">{label.toUpperCase()}</span>
               </motion.button>
             );
@@ -296,7 +296,7 @@ function SectionHerois() {
           >
             <span className="text-[10px] font-black w-20 flex-shrink-0" style={{ color: r.color }}>{r.rarity}</span>
             <span className="text-[9px] text-amber" style={{ color: "rgb(250,190,50)" }}>{"★".repeat(r.stars)}</span>
-            <span className="text-[8px] text-violet/45 ml-auto text-right">{r.comment}</span>
+            <span className="text-[8px] text-violet/70 ml-auto text-right">{r.comment}</span>
           </div>
         ))}
       </div>
@@ -354,7 +354,7 @@ function SectionHerois() {
       />
 
       <WikiH2>Skills dos Heróis</WikiH2>
-      <p className="text-[10px] leading-relaxed text-violet/55">
+      <p className="text-[10px] leading-relaxed text-violet/82">
         Cada herói tem 4 skills: Básica (CD 0), Ativa 1 (CD 3–5), Ativa 2 (CD 4–5) e Última (CD 8–9). Upgrade de skill custa <span style={{ color: "rgb(200,155,60)" }}>100 × nível atual</span> em ouro (máximo nível 5 = 400 ouro por upgrade).
       </p>
       <InfoBox type="tip">
@@ -393,7 +393,7 @@ function SectionBatalha() {
       </InfoBox>
 
       <WikiH2>Arena PvP</WikiH2>
-      <p className="text-[10px] leading-relaxed text-violet/55">
+      <p className="text-[10px] leading-relaxed text-violet/82">
         Vitória: <span style={{ color: "rgb(100,220,140)" }}>+200 ouro + 15–30 rating</span>. Derrota: <span style={{ color: "rgb(255,100,80)" }}>+50 ouro – 5–20 rating</span>. Rating inicial: 1000 (Bronze). Vença 3x por dia para o desafio <b>Campeão</b> (+1 Selo).
       </p>
       <WikiTable
@@ -410,7 +410,7 @@ function SectionBatalha() {
       />
 
       <WikiH2>Torre Infinita</WikiH2>
-      <p className="text-[10px] leading-relaxed text-violet/55">
+      <p className="text-[10px] leading-relaxed text-violet/82">
         Sobe andares até perder. Inimigos escalam com o andar. Recompensas crescem com cada andar. Reset semanal no ranking.
       </p>
       <WikiTable
@@ -427,7 +427,7 @@ function SectionBatalha() {
       </InfoBox>
 
       <WikiH2>Boss Hunt (Semanal)</WikiH2>
-      <p className="text-[10px] leading-relaxed text-violet/55">
+      <p className="text-[10px] leading-relaxed text-violet/82">
         3 bosses por semana com limite de tentativas. Reset toda segunda-feira. Recompensas por boss: 2.000–5.000 ouro + 150–350 Cristais + 1–3 Selos.
       </p>
       <InfoBox type="warn">
@@ -542,13 +542,13 @@ function SectionDiario() {
               <p className="text-[11px] font-bold text-cream/88">{item.label}</p>
               <p className="text-[9px] mt-0.5" style={{ color: `${item.color}90` }}>{item.reward}</p>
             </div>
-            <span className="text-[8px] text-violet/35 flex-shrink-0">{item.time}</span>
+            <span className="text-[8px] text-violet/62 flex-shrink-0">{item.time}</span>
           </div>
         ))}
       </div>
 
       <WikiH2>Renda Offline</WikiH2>
-      <p className="text-[10px] leading-relaxed text-violet/55">
+      <p className="text-[10px] leading-relaxed text-violet/82">
         O jogo calcula ouro e XP enquanto você está offline. Fórmula: <span style={{ color: "rgb(200,155,60)" }}>(nível × 12 + 20) × horas</span> em ouro. Máximo de <b>8 horas</b> por sessão. Abra o jogo diariamente para não perder a renda acumulada.
       </p>
 
@@ -562,7 +562,7 @@ function SectionDiario() {
         ].map((g, i) => (
           <div key={i} className="flex items-start gap-2">
             <CheckCircle weight="light" size={14} color="rgba(100,210,130,0.7)" className="flex-shrink-0 mt-0.5" />
-            <span className="text-[10px] text-violet/60">{g}</span>
+            <span className="text-[10px] text-violet/85">{g}</span>
           </div>
         ))}
       </div>
@@ -578,7 +578,7 @@ function SectionAvancado() {
       <WikiHeader icon={Lightning} title="Sistemas Avançados" subtitle="Forja, Fortaleza, Gacha e mais" />
 
       <WikiH2>Sistema Gacha — Pity</WikiH2>
-      <p className="text-[10px] leading-relaxed text-violet/55">
+      <p className="text-[10px] leading-relaxed text-violet/82">
         O jogo tem um sistema de <b>pity</b>: a partir do pull 75 a chance de Lendário aumenta. No pull <span style={{ color: "rgb(200,155,60)" }}>90</span> é garantido um herói Lendário/Mítico/Divino. O contador reseta ao obter qualquer herói dessa raridade.
       </p>
       <WikiTable
@@ -605,25 +605,25 @@ function SectionAvancado() {
           ["+10", "18.000 ouro", "TODOS +10%"],
         ]}
       />
-      <p className="text-[9px] text-violet/45">Custo total para +10: 55.400 ouro. Forje apenas o equipamento do herói principal.</p>
+      <p className="text-[9px] text-violet/70">Custo total para +10: 55.400 ouro. Forje apenas o equipamento do herói principal.</p>
 
       <WikiH2>Battle Pass Gratuito</WikiH2>
-      <p className="text-[10px] leading-relaxed text-violet/55">
+      <p className="text-[10px] leading-relaxed text-violet/82">
         40 níveis, 1.000 XP por nível. O track gratuito dá <b>2.700 ouro + 900 Cristais + 6 Selos + 3 Selos Livres</b> no total. Priorize chegar ao nível 20 (1 Selo Livre) e nível 40 (2 Selos Livres).
       </p>
 
       <WikiH2>Fortaleza</WikiH2>
-      <p className="text-[10px] leading-relaxed text-violet/55">
+      <p className="text-[10px] leading-relaxed text-violet/82">
         Sistema de construção com 7 tipos de estruturas. A Fazenda e Serraria geram recursos passivos por hora. A Caserna melhora heróis. Comece construindo a <b>Caserna</b> (bônus de herói) e a <b>Fazenda</b> (comida passiva) primeiro.
       </p>
 
       <WikiH2>Facções</WikiH2>
-      <p className="text-[10px] leading-relaxed text-violet/55">
+      <p className="text-[10px] leading-relaxed text-violet/82">
         4 facções com bônus progressivos. <span style={{ color: "rgb(200,155,60)" }}>Ordem dos Arcontes</span> (✦) é a mais valiosa no longo prazo: desbloqueio de regiões e banner celestial. Para iniciantes, foque em <span style={{ color: "rgb(90,150,255)" }}>Ordem Imperial</span> (desconto no mercado).
       </p>
 
       <WikiH2>Companheiros</WikiH2>
-      <p className="text-[10px] leading-relaxed text-violet/55">
+      <p className="text-[10px] leading-relaxed text-violet/82">
         5 companheiros com bônus passivos. <span style={{ color: "rgb(200,155,60)" }}>Stella ⭐</span> (Lendário) dá +35% drops de Cristais no nível máximo. <span style={{ color: "rgb(200,155,60)" }}>Ash 🦅</span> (Épico) dá +35% ouro em combate. Ambos são excelentes para progressão.
       </p>
 
@@ -656,7 +656,7 @@ function WikiHeader({ icon: Icon, title, subtitle }: { icon: PhosphorIcon; title
         >
           {title.toUpperCase()}
         </h3>
-        <p className="text-[9px] text-violet/45 mt-0.5">{subtitle}</p>
+        <p className="text-[9px] text-violet/70 mt-0.5">{subtitle}</p>
       </div>
     </div>
   );
@@ -665,7 +665,7 @@ function WikiHeader({ icon: Icon, title, subtitle }: { icon: PhosphorIcon; title
 function WikiH2({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex items-center gap-2 pt-1">
-      <span className="text-[8.5px] font-black uppercase tracking-[0.2em] text-violet/40">{children}</span>
+      <span className="text-[8.5px] font-black uppercase tracking-[0.2em] text-violet/68">{children}</span>
       <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg, rgba(122,111,160,0.15) 0%, transparent)" }} />
     </div>
   );
@@ -684,7 +684,7 @@ function InfoBox({ type, children }: { type: InfoType; children: React.ReactNode
       style={{ background: styles.bg, border: `1px solid ${styles.border}` }}
     >
       <styles.Icon weight="light" size={14} color={styles.color} className="flex-shrink-0 mt-0.5" />
-      <p className="text-[10px] leading-relaxed" style={{ color: "rgba(232,217,160,0.75)" }}>{children}</p>
+      <p className="text-[10px] leading-relaxed" style={{ color: "rgba(232,217,160,0.92)" }}>{children}</p>
     </div>
   );
 }
@@ -702,7 +702,7 @@ function StepList({ steps }: { steps: { n: string; title: string; desc: string; 
           </div>
           <div className="flex-1">
             <p className="text-[11px] font-bold text-cream/88">{s.title}</p>
-            <p className="mt-0.5 text-[9px] leading-relaxed text-violet/50">{s.desc}</p>
+            <p className="mt-0.5 text-[9px] leading-relaxed text-violet/75">{s.desc}</p>
           </div>
         </div>
       ))}
@@ -716,7 +716,7 @@ function GoalList({ goals }: { goals: string[] }) {
       {goals.map((g, i) => (
         <div key={i} className="flex items-start gap-2">
           <ArrowRight weight="light" size={12} color="rgb(200,155,60)" className="flex-shrink-0 mt-0.5" />
-          <span className="text-[10px] text-violet/60">{g}</span>
+          <span className="text-[10px] text-violet/85">{g}</span>
         </div>
       ))}
     </div>
@@ -732,7 +732,7 @@ function WikiTable({ headers, rows }: { headers: string[]; rows: string[][] }) {
       >
         {headers.map((h) => (
           <div key={h} className="px-3 py-2" style={{ background: "rgba(122,111,160,0.08)" }}>
-            <span className="text-[8px] font-black uppercase tracking-[0.15em] text-violet/50">{h}</span>
+            <span className="text-[8px] font-black uppercase tracking-[0.15em] text-violet/75">{h}</span>
           </div>
         ))}
         {rows.map((row, i) =>
@@ -745,7 +745,7 @@ function WikiTable({ headers, rows }: { headers: string[]; rows: string[][] }) {
                 borderTop: "1px solid rgba(122,111,160,0.07)",
               }}
             >
-              <span className="text-[9px]" style={{ color: j === 0 ? "rgba(232,217,160,0.75)" : "rgba(200,155,60,0.85)" }}>{cell}</span>
+              <span className="text-[9px]" style={{ color: j === 0 ? "rgba(232,217,160,0.92)" : "rgba(200,155,60,0.85)" }}>{cell}</span>
             </div>
           ))
         )}
@@ -774,12 +774,12 @@ function CurrencyCard({ symbol, name, color, desc, sources, priority }: {
           {priority.toUpperCase()}
         </span>
       </div>
-      <p className="mb-2 text-[9px] leading-relaxed text-violet/55">{desc}</p>
+      <p className="mb-2 text-[9px] leading-relaxed text-violet/82">{desc}</p>
       <div className="flex flex-col gap-1">
         {sources.map((s, i) => (
           <div key={i} className="flex items-center gap-1.5">
             <div className="h-1 w-1 rounded-full flex-shrink-0" style={{ background: color, opacity: 0.6 }} />
-            <span className="text-[8.5px] text-violet/45">{s}</span>
+            <span className="text-[8.5px] text-violet/70">{s}</span>
           </div>
         ))}
       </div>
@@ -815,8 +815,8 @@ function ProfCard({ icon, name, color, bonus, playstyle, milestone10, forWho, re
         )}
       </div>
       <p className="text-[9px] font-bold mb-1" style={{ color: `${color}cc` }}>{bonus}</p>
-      <p className="text-[8.5px] leading-relaxed text-violet/50 mb-1">{playstyle}</p>
-      <p className="text-[8px] text-violet/35">Nível 10: {milestone10}</p>
+      <p className="text-[8.5px] leading-relaxed text-violet/75 mb-1">{playstyle}</p>
+      <p className="text-[8px] text-violet/62">Nível 10: {milestone10}</p>
       <p className="mt-1.5 text-[8px] font-bold" style={{ color: `${color}90` }}>→ {forWho}</p>
     </div>
   );
