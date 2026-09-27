@@ -206,7 +206,7 @@ async function main() {
     }
 
     // pausa para não sobrecarregar o serviço gratuito
-    await new Promise((r) => setTimeout(r, 1500));
+    await new Promise((r) => setTimeout(r, 4000));
   }
 
   console.log(`\nConcluído: ${done} gerados, ${skipped} pulados, ${errors} erros.`);
