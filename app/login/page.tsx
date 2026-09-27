@@ -55,7 +55,13 @@ export default function LoginPage() {
         saveSession(res.accessToken, { ...res.profile, id: String(res.profile.id) }, res.refreshToken);
         router.replace("/game");
       } catch (err) {
-        setFeedback({ msg: (err as Error).message, ok: false });
+        const e = err as Error & { status?: number };
+        if (mode === "register" && e.status === 409) {
+          setMode("login");
+          setFeedback({ msg: "Este e-mail já tem conta. Entre com sua senha.", ok: false });
+        } else {
+          setFeedback({ msg: e.message, ok: false });
+        }
       }
     });
   }

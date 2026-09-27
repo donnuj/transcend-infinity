@@ -64,7 +64,9 @@ async function request<T>(path: string, options: RequestOptions = {}, isRetry = 
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({ message: res.statusText }));
-    throw new Error(err.message ?? "Erro desconhecido");
+    const error = new Error(err.message ?? "Erro desconhecido") as Error & { status: number };
+    error.status = res.status;
+    throw error;
   }
 
   return res.json() as Promise<T>;
