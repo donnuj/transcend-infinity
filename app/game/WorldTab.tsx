@@ -33,6 +33,7 @@ export default function WorldTab({
   onBattlePass,
   onTorre,
   onDailyChallenges,
+  onBossHunt,
 }: {
   profile: Profile | null;
   onInvocar: () => void;
@@ -42,6 +43,7 @@ export default function WorldTab({
   onBattlePass: () => void;
   onTorre: () => void;
   onDailyChallenges: () => void;
+  onBossHunt: () => void;
 }) {
   const { save, addCurrency, processLogin } = useGameStore();
   const playerLevel = save.playerLevel;
@@ -212,6 +214,13 @@ export default function WorldTab({
           sub={`Melhor: ${save.tower.bestFloor}F`}
           accent="rgba(170,130,255,0.8)"
           onClick={onTorre}
+        />
+        <ActionCard
+          icon="☠"
+          title="Boss Hunt"
+          sub="Chefões semanais"
+          accent="rgba(255,100,60,0.8)"
+          onClick={onBossHunt}
         />
       </div>
 

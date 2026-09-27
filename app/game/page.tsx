@@ -22,6 +22,7 @@ import AchievementsModal from "./AchievementsModal";
 import DailyChallengesModal from "./DailyChallengesModal";
 import CodexModal from "./CodexModal";
 import FortressModal from "./FortressModal";
+import BossHuntModal from "./BossHuntModal";
 
 export type Profile = {
   id: number;
@@ -62,6 +63,7 @@ export default function GamePage() {
   const [showDailyChallenges, setShowDailyChallenges] = useState(false);
   const [showCodex, setShowCodex] = useState(false);
   const [showFortress, setShowFortress] = useState(false);
+  const [showBossHunt, setShowBossHunt] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated()) { router.replace("/login"); return; }
@@ -105,7 +107,7 @@ export default function GamePage() {
       {/* Content */}
       <main className="relative flex-1 overflow-hidden">
         <AnimatePresence mode="wait">
-          {tab === "mundo"   && <WorldTab   key="mundo"   profile={profile} onInvocar={() => setTab("invocar")} onDungeon={() => setShowDungeon(true)} onArena={() => setShowArena(true)} onMercado={() => setShowMercado(true)} onBattlePass={() => setShowBattlePass(true)} onTorre={() => setShowTorre(true)} onDailyChallenges={() => setShowDailyChallenges(true)} />}
+          {tab === "mundo"   && <WorldTab   key="mundo"   profile={profile} onInvocar={() => setTab("invocar")} onDungeon={() => setShowDungeon(true)} onArena={() => setShowArena(true)} onMercado={() => setShowMercado(true)} onBattlePass={() => setShowBattlePass(true)} onTorre={() => setShowTorre(true)} onDailyChallenges={() => setShowDailyChallenges(true)} onBossHunt={() => setShowBossHunt(true)} />}
           {tab === "cartas"  && <CartasTab  key="cartas" />}
           {tab === "invocar" && <InvocarTab key="invocar" />}
           {tab === "guilda"  && <GuildaTab  key="guilda" onFortress={() => setShowFortress(true)} />}
@@ -124,6 +126,7 @@ export default function GamePage() {
         {showDailyChallenges && <DailyChallengesModal key="daily" onClose={() => setShowDailyChallenges(false)} />}
         {showCodex && <CodexModal key="codex" onClose={() => setShowCodex(false)} />}
         {showFortress && <FortressModal key="fortress" onClose={() => setShowFortress(false)} />}
+        {showBossHunt && <BossHuntModal key="bosshunt" onClose={() => setShowBossHunt(false)} />}
       </AnimatePresence>
 
       {/* Bottom nav */}
