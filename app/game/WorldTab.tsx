@@ -30,12 +30,14 @@ export default function WorldTab({
   onDungeon,
   onArena,
   onMercado,
+  onBattlePass,
 }: {
   profile: Profile | null;
   onInvocar: () => void;
   onDungeon: () => void;
   onArena: () => void;
   onMercado: () => void;
+  onBattlePass: () => void;
 }) {
   const { save, addCurrency, processLogin } = useGameStore();
   const playerLevel = save.playerLevel;
@@ -187,6 +189,13 @@ export default function WorldTab({
           sub={`${wallet.ouro.toLocaleString("pt-BR")} ouro`}
           accent="rgba(255,140,80,0.7)"
           onClick={onMercado}
+        />
+        <ActionCard
+          icon="★"
+          title="Battle Pass"
+          sub={`Nível ${save.battlePass.level} / 40`}
+          accent="rgba(200,155,60,0.8)"
+          onClick={onBattlePass}
         />
       </div>
 
