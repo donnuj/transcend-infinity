@@ -1,48 +1,74 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useGameStore } from "@/lib/game/store";
+import { HERO_MAP } from "@/lib/game/data/heroes";
+import { SKILL_MAP } from "@/lib/game/data/skills";
+import { deriveStats, getStatsAtLevel } from "@/lib/game/calc";
+import type { GachaRarity, HeroDef, SaveData } from "@/lib/game/types";
 
 const ease = [0.23, 1, 0.32, 1] as const;
 
-type Rarity = "NORMAL" | "RARO" | "ÉPICO" | "LENDÁRIO";
+const RARITY_STYLE: Record<GachaRarity, { color: string; glow: string; border: string }> = {
+  Comum:    { color: "rgb(180,180,210)", glow: "rgba(180,180,210,0.08)", border: "rgba(180,180,210,0.2)"  },
+  Incomum:  { color: "rgb(100,210,130)", glow: "rgba(100,210,130,0.08)", border: "rgba(100,210,130,0.25)" },
+  Raro:     { color: "rgb(90,150,255)",  glow: "rgba(90,150,255,0.1)",   border: "rgba(90,150,255,0.3)"   },
+  Épico:    { color: "rgb(180,110,255)", glow: "rgba(180,110,255,0.12)", border: "rgba(180,110,255,0.35)" },
+  Lendário: { color: "rgb(200,155,60)",  glow: "rgba(200,155,60,0.12)",  border: "rgba(200,155,60,0.45)"  },
+  Mítico:   { color: "rgb(255,80,80)",   glow: "rgba(255,80,80,0.12)",   border: "rgba(255,80,80,0.5)"    },
+  Divino:   { color: "rgb(255,255,200)", glow: "rgba(255,255,200,0.15)", border: "rgba(255,255,200,0.6)"  },
+};
 
-const RARITY_STYLE: Record<Rarity, { color: string; glow: string; border: string }> = {
-  NORMAL:   { color: "rgb(180,180,210)",  glow: "rgba(180,180,210,0.08)", border: "rgba(180,180,210,0.2)"  },
-  RARO:     { color: "rgb(90,150,255)",   glow: "rgba(90,150,255,0.1)",   border: "rgba(90,150,255,0.3)"   },
-  ÉPICO:    { color: "rgb(180,110,255)",  glow: "rgba(180,110,255,0.12)", border: "rgba(180,110,255,0.35)" },
-  LENDÁRIO: { color: "rgb(200,155,60)",   glow: "rgba(200,155,60,0.12)",  border: "rgba(200,155,60,0.45)"  },
+const ELEMENT_LABEL: Record<string, string> = {
+  None: "—", Fire: "Fogo", Wind: "Vento", Earth: "Terra",
+  Water: "Água", Lightning: "Raio", Light: "Luz", Dark: "Sombra",
 };
 
 const ELEMENT_ICON: Record<string, string> = {
-  Fogo: "🔥", Água: "💧", Terra: "⛰", Ar: "🌀", Luz: "✦", Sombra: "◈", Arcano: "◉",
+  None: "◈", Fire: "🔥", Wind: "🌀", Earth: "⛰",
+  Water: "💧", Lightning: "⚡", Light: "✦", Dark: "◈",
 };
 
-type Card = { id: number; name: string; rarity: Rarity; element: string; atk: number; count: number };
+const ROLE_COLOR: Record<string, string> = {
+  DPS: "rgb(255,100,100)", Tank: "rgb(100,170,255)", Healer: "rgb(100,220,140)",
+  Support: "rgb(200,155,60)", Utility: "rgb(170,130,255)",
+};
 
-const MY_CARDS: Card[] = [
-  { id: 1,  name: "Arqueiro Celestial",    rarity: "LENDÁRIO", element: "Luz",    atk: 2400, count: 1 },
-  { id: 2,  name: "Druida das Trevas",     rarity: "ÉPICO",    element: "Sombra", atk: 1800, count: 2 },
-  { id: 3,  name: "Cavaleiro de Gelo",     rarity: "ÉPICO",    element: "Água",   atk: 1600, count: 1 },
-  { id: 4,  name: "Golem de Obsidiana",    rarity: "RARO",     element: "Terra",  atk: 1400, count: 3 },
-  { id: 5,  name: "Maga Lunar",            rarity: "RARO",     element: "Arcano", atk: 1350, count: 2 },
-  { id: 6,  name: "Fênix Renascida",       rarity: "RARO",     element: "Fogo",   atk: 1300, count: 1 },
-  { id: 7,  name: "Espírito do Vento",     rarity: "RARO",     element: "Ar",     atk: 1250, count: 2 },
-  { id: 8,  name: "Goblin Feroz",          rarity: "NORMAL",   element: "Terra",  atk: 800,  count: 5 },
-  { id: 9,  name: "Sereia Canção",         rarity: "NORMAL",   element: "Água",   atk: 750,  count: 4 },
-  { id: 10, name: "Soldado de Fogo",       rarity: "NORMAL",   element: "Fogo",   atk: 720,  count: 6 },
-  { id: 11, name: "Elfa Sombria",          rarity: "NORMAL",   element: "Sombra", atk: 700,  count: 3 },
-  { id: 12, name: "Lobo Ártico",           rarity: "NORMAL",   element: "Ar",     atk: 680,  count: 4 },
-];
+const RANK_ORDER: GachaRarity[] = ["Divino","Mítico","Lendário","Épico","Raro","Incomum","Comum"];
+type FilterRarity = "TODOS" | GachaRarity;
+const FILTERS: FilterRarity[] = ["TODOS","Lendário","Épico","Raro","Incomum","Comum"];
 
-type Filter = "TODOS" | Rarity;
-const FILTERS: Filter[] = ["TODOS", "LENDÁRIO", "ÉPICO", "RARO", "NORMAL"];
+type HeroEntry = { hero: HeroDef; copies: number };
 
 export default function CartasTab() {
-  const [filter, setFilter] = useState<Filter>("TODOS");
-  const [selected, setSelected] = useState<Card | null>(null);
+  const { save, getHeroProgression, getHeroLevel, getHeroSkills } = useGameStore();
+  const [filter, setFilter] = useState<FilterRarity>("TODOS");
+  const [selected, setSelected] = useState<HeroDef | null>(null);
+  const [detailTab, setDetailTab] = useState<"stats"|"skills">("stats");
 
-  const visible = filter === "TODOS" ? MY_CARDS : MY_CARDS.filter((c) => c.rarity === filter);
+  const collected = useMemo<HeroEntry[]>(() => {
+    const counts = new Map<string, number>();
+    for (const key of save.collectedHeroIds) {
+      const heroId = key.split("|")[1];
+      counts.set(heroId, (counts.get(heroId) ?? 0) + 1);
+    }
+    const entries: HeroEntry[] = [];
+    for (const [heroId, copies] of counts) {
+      const hero = HERO_MAP[heroId];
+      if (hero) entries.push({ hero, copies });
+    }
+    entries.sort((a, b) => {
+      const ra = RANK_ORDER.indexOf(a.hero.rarity);
+      const rb = RANK_ORDER.indexOf(b.hero.rarity);
+      return ra - rb || a.hero.name.localeCompare(b.hero.name);
+    });
+    return entries;
+  }, [save.collectedHeroIds]);
+
+  const visible = filter === "TODOS"
+    ? collected
+    : collected.filter((e) => e.hero.rarity === filter);
 
   return (
     <motion.div
@@ -56,7 +82,7 @@ export default function CartasTab() {
       <div className="flex gap-2 overflow-x-auto px-4 pb-3 pt-4 scrollbar-none">
         {FILTERS.map((f) => {
           const active = filter === f;
-          const s = f !== "TODOS" ? RARITY_STYLE[f] : null;
+          const s = f !== "TODOS" ? RARITY_STYLE[f as GachaRarity] : null;
           return (
             <motion.button
               key={f}
@@ -65,15 +91,9 @@ export default function CartasTab() {
               transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
               className="flex-shrink-0 rounded-full border px-3 py-1.5 text-[9px] font-bold tracking-[0.15em] transition-colors duration-150"
               style={{
-                borderColor: active
-                  ? s ? s.border : "rgba(200,155,60,0.5)"
-                  : "rgba(122,111,160,0.2)",
-                color: active
-                  ? s ? s.color : "rgb(200,155,60)"
-                  : "rgba(122,111,160,0.5)",
-                background: active
-                  ? s ? s.glow : "rgba(200,155,60,0.08)"
-                  : "transparent",
+                borderColor: active ? (s ? s.border : "rgba(200,155,60,0.5)") : "rgba(122,111,160,0.2)",
+                color:       active ? (s ? s.color  : "rgb(200,155,60)")      : "rgba(122,111,160,0.5)",
+                background:  active ? (s ? s.glow   : "rgba(200,155,60,0.08)") : "transparent",
               }}
             >
               {f}
@@ -84,119 +104,292 @@ export default function CartasTab() {
 
       {/* Count */}
       <p className="px-4 pb-2 text-[9px] text-violet/40">
-        {visible.length} carta{visible.length !== 1 ? "s" : ""}
+        {visible.length} herói{visible.length !== 1 ? "s" : ""} coletado{visible.length !== 1 ? "s" : ""}
       </p>
 
       {/* Grid */}
       <div className="flex-1 overflow-y-auto px-4 pb-4">
-        <div className="grid grid-cols-3 gap-2.5">
-          {visible.map((card, i) => {
-            const s = RARITY_STYLE[card.rarity];
-            return (
-              <motion.button
-                key={card.id}
-                onClick={() => setSelected(card)}
-                whileTap={{ scale: 0.94 }}
-                className="flex flex-col items-center overflow-hidden rounded-xl border pb-2.5 pt-3 text-center"
-                style={{
-                  borderColor: s.border,
-                  background: `linear-gradient(160deg, ${s.glow} 0%, rgba(10,10,22,0.95) 100%)`,
-                  boxShadow: `0 0 12px ${s.glow}`,
-                }}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1], delay: i * 0.03 }}
-              >
-                <span className="mb-1.5 text-2xl">{ELEMENT_ICON[card.element] ?? "◈"}</span>
-                <p className="px-1.5 text-[9px] font-bold leading-tight text-cream/75">
-                  {card.name}
-                </p>
-                <span className="mt-1 text-[8px] font-bold" style={{ color: s.color }}>
-                  {card.rarity === "LENDÁRIO" ? "★ LENDÁRIO" : card.rarity}
-                </span>
-                {card.count > 1 && (
-                  <span className="mt-0.5 text-[8px] text-violet/40">×{card.count}</span>
-                )}
-              </motion.button>
-            );
-          })}
-        </div>
+        {visible.length === 0 ? (
+          <EmptyState filter={filter} />
+        ) : (
+          <div className="grid grid-cols-3 gap-2.5">
+            {visible.map(({ hero, copies }, i) => {
+              const s = RARITY_STYLE[hero.rarity];
+              const prog = getHeroProgression(hero.heroId);
+              return (
+                <motion.button
+                  key={hero.heroId}
+                  onClick={() => { setSelected(hero); setDetailTab("stats"); }}
+                  whileTap={{ scale: 0.94 }}
+                  className="flex flex-col items-center overflow-hidden rounded-xl border pb-2.5 pt-3 text-center"
+                  style={{
+                    borderColor: s.border,
+                    background: `linear-gradient(160deg, ${s.glow} 0%, rgba(10,10,22,0.95) 100%)`,
+                    boxShadow: `0 0 12px ${s.glow}`,
+                  }}
+                  initial={{ opacity: 0, scale: 0.85 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1], delay: i * 0.025 }}
+                >
+                  <span className="mb-1.5 text-2xl">{hero.portrait}</span>
+                  <p className="px-1.5 text-[8.5px] font-bold leading-tight text-cream/80">
+                    {hero.name.split(",")[0]}
+                  </p>
+                  <span className="mt-1 text-[8px] font-bold tracking-wide" style={{ color: s.color }}>
+                    {hero.rarity.toUpperCase()}
+                  </span>
+                  <div className="mt-1 flex items-center gap-1">
+                    <span className="text-[8px]">{ELEMENT_ICON[hero.element]}</span>
+                    {prog.stars > 1 && (
+                      <span className="text-[7px] text-amber-400">{"★".repeat(prog.stars)}</span>
+                    )}
+                  </div>
+                  {copies > 1 && (
+                    <span className="mt-0.5 text-[8px] text-violet/40">×{copies}</span>
+                  )}
+                </motion.button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
-      {/* Card detail sheet */}
+      {/* Hero detail sheet */}
       <AnimatePresence>
         {selected && (
-          <>
-            <motion.div
-              className="absolute inset-0 bg-void/80"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.18 }}
-              onClick={() => setSelected(null)}
-            />
-            <motion.div
-              className="absolute bottom-0 left-0 right-0 rounded-t-2xl border-t border-amber/15 px-6 pb-8 pt-6"
-              style={{ backgroundColor: "rgba(10,10,22,0.98)" }}
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "100%" }}
-              transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
-            >
-              {(() => {
-                const s = RARITY_STYLE[selected.rarity];
-                return (
-                  <>
-                    <div className="mb-5 flex items-start gap-4">
-                      <div
-                        className="flex h-16 w-16 items-center justify-center rounded-xl border text-3xl"
-                        style={{ borderColor: s.border, background: s.glow }}
-                      >
-                        {ELEMENT_ICON[selected.element] ?? "◈"}
-                      </div>
-                      <div>
-                        <p
-                          className="text-lg font-black tracking-wide text-cream"
-                          style={{ fontFamily: "var(--font-cinzel)" }}
-                        >
-                          {selected.name}
-                        </p>
-                        <span className="text-[11px] font-bold" style={{ color: s.color }}>
-                          {selected.rarity}
-                        </span>
-                        <span className="ml-2 text-[11px] text-violet/50">
-                          {selected.element}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="mb-5 flex gap-4">
-                      <Stat label="ATK" value={selected.atk} />
-                      <Stat label="CÓPIAS" value={selected.count} />
-                    </div>
-                    <motion.button
-                      onClick={() => setSelected(null)}
-                      whileTap={{ scale: 0.97 }}
-                      transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
-                      className="w-full rounded-xl border border-violet/20 py-3 text-[11px] font-bold tracking-wider text-violet/60 transition-colors duration-150 hover:border-violet/40 hover:text-violet/80"
-                    >
-                      FECHAR
-                    </motion.button>
-                  </>
-                );
-              })()}
-            </motion.div>
-          </>
+          <HeroDetail
+            hero={selected}
+            copies={collected.find((e) => e.hero.heroId === selected.heroId)?.copies ?? 1}
+            progression={getHeroProgression(selected.heroId)}
+            levelData={getHeroLevel(selected.heroId)}
+            skillData={getHeroSkills(selected.heroId)}
+            detailTab={detailTab}
+            onTabChange={setDetailTab}
+            onClose={() => setSelected(null)}
+          />
         )}
       </AnimatePresence>
     </motion.div>
   );
 }
 
-function Stat({ label, value }: { label: string; value: number }) {
+// ── Hero Detail Sheet ──────────────────────────────────────────────────────────
+
+type DetailProps = {
+  hero: HeroDef;
+  copies: number;
+  progression: SaveData["heroProgression"][0];
+  levelData: SaveData["heroLevels"][0];
+  skillData: SaveData["heroSkills"][0];
+  detailTab: "stats" | "skills";
+  onTabChange: (t: "stats" | "skills") => void;
+  onClose: () => void;
+};
+
+function HeroDetail({ hero, copies, progression, levelData, skillData, detailTab, onTabChange, onClose }: DetailProps) {
+  const s = RARITY_STYLE[hero.rarity];
+  const rank = (["F","E","D","C","B","A","S","SS","SSS"] as const)[progression.rank] ?? "F";
+  const stars = Math.max(1, Math.min(5, progression.stars)) as 1|2|3|4|5;
+  const level = levelData.level;
+  const currentStats = getStatsAtLevel(hero.baseStats, hero.growthPerLevel, level);
+  const secondary = deriveStats(currentStats, rank, stars, level);
+  const xpPct = Math.min(100, (levelData.xp / (100 + level * 50)) * 100);
+
   return (
-    <div className="flex flex-1 flex-col items-center rounded-xl border border-violet/12 py-3" style={{ background: "rgba(122,111,160,0.05)" }}>
-      <span className="text-xl font-black text-cream">{value.toLocaleString("pt-BR")}</span>
-      <span className="text-[9px] font-bold tracking-widest text-violet/50">{label}</span>
+    <>
+      <motion.div
+        className="absolute inset-0 bg-void/80"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.18 }}
+        onClick={onClose}
+      />
+      <motion.div
+        className="absolute bottom-0 left-0 right-0 flex max-h-[85%] flex-col rounded-t-2xl border-t px-5 pb-6 pt-5"
+        style={{ borderColor: s.border, backgroundColor: "rgba(10,10,22,0.98)" }}
+        initial={{ y: "100%" }}
+        animate={{ y: 0 }}
+        exit={{ y: "100%" }}
+        transition={{ duration: 0.32, ease: [0.32, 0.72, 0, 1] }}
+      >
+        {/* Header */}
+        <div className="mb-4 flex items-center gap-3">
+          <div
+            className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-xl border text-2xl"
+            style={{ borderColor: s.border, background: s.glow, boxShadow: `0 0 18px ${s.glow}` }}
+          >
+            {hero.portrait}
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-base font-black tracking-wide text-cream" style={{ fontFamily: "var(--font-cinzel)" }}>
+              {hero.name}
+            </p>
+            <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5">
+              <span className="text-[10px] font-bold" style={{ color: s.color }}>{hero.rarity}</span>
+              <span className="text-[10px] text-violet/50">{hero.heroClass}</span>
+              <span className="text-[10px] font-semibold" style={{ color: ROLE_COLOR[hero.role] ?? "rgb(200,155,60)" }}>
+                {hero.role}
+              </span>
+              <span className="text-[10px] text-violet/50">{ELEMENT_ICON[hero.element]} {ELEMENT_LABEL[hero.element]}</span>
+            </div>
+          </div>
+          <div className="flex flex-col items-end gap-0.5">
+            <span className="text-[10px] font-bold text-amber-400">Nível {level}</span>
+            <span className="text-[10px] text-violet/50">Rank {rank}</span>
+            <span className="text-[9px] text-amber-400">{"★".repeat(stars)}</span>
+          </div>
+        </div>
+
+        {/* XP bar */}
+        <div className="mb-4">
+          <div className="mb-1 flex justify-between">
+            <span className="text-[8px] text-violet/40">XP</span>
+            <span className="text-[8px] text-violet/40">{levelData.xp} / {100 + level * 50}</span>
+          </div>
+          <div className="h-1 w-full overflow-hidden rounded-full bg-violet/10">
+            <motion.div
+              className="h-full rounded-full"
+              style={{ background: s.color }}
+              initial={{ width: 0 }}
+              animate={{ width: `${xpPct}%` }}
+              transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
+            />
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <div className="mb-4 flex gap-1 rounded-xl bg-violet/5 p-1">
+          {(["stats","skills"] as const).map((t) => (
+            <motion.button
+              key={t}
+              onClick={() => onTabChange(t)}
+              whileTap={{ scale: 0.97 }}
+              transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
+              className="flex-1 rounded-lg py-1.5 text-[9px] font-bold tracking-widest transition-colors duration-150"
+              style={{
+                background: detailTab === t ? s.glow : "transparent",
+                color:      detailTab === t ? s.color : "rgba(122,111,160,0.5)",
+                border:     detailTab === t ? `1px solid ${s.border}` : "1px solid transparent",
+              }}
+            >
+              {t === "stats" ? "ATRIBUTOS" : "HABILIDADES"}
+            </motion.button>
+          ))}
+        </div>
+
+        {/* Tab content */}
+        <div className="flex-1 overflow-y-auto">
+          <AnimatePresence mode="wait">
+            {detailTab === "stats" ? (
+              <motion.div
+                key="stats"
+                initial={{ opacity: 0, x: -8 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 8 }}
+                transition={{ duration: 0.15, ease }}
+              >
+                <div className="grid grid-cols-2 gap-2">
+                  <StatRow label="HP" value={Math.round(secondary.hp)} color="rgb(100,220,140)" />
+                  <StatRow label="Mana" value={Math.round(secondary.mana)} color="rgb(90,150,255)" />
+                  <StatRow label="ATQ Fís." value={Math.round(secondary.physAtk)} color="rgb(255,120,80)" />
+                  <StatRow label="ATQ Mag." value={Math.round(secondary.magAtk)} color="rgb(180,110,255)" />
+                  <StatRow label="DEF Fís." value={Math.round(secondary.physDef)} color="rgb(200,155,60)" />
+                  <StatRow label="Res. Mag." value={Math.round(secondary.magRes)} color="rgb(170,130,255)" />
+                  <StatRow label="Crít %" value={`${(secondary.critChance * 100).toFixed(1)}%`} color="rgb(255,200,50)" />
+                  <StatRow label="Vel. Atq" value={secondary.atkSpeed.toFixed(2)} color="rgb(100,210,130)" />
+                </div>
+                <div className="mt-3 grid grid-cols-4 gap-1.5">
+                  {(Object.entries(currentStats) as [string, number][]).map(([k, v]) => (
+                    <div key={k} className="flex flex-col items-center rounded-lg border border-violet/10 py-1.5" style={{ background: "rgba(122,111,160,0.04)" }}>
+                      <span className="text-[11px] font-black text-cream/80">{Math.round(v)}</span>
+                      <span className="text-[8px] font-bold tracking-widest text-violet/40">{k}</span>
+                    </div>
+                  ))}
+                </div>
+                {copies > 1 && (
+                  <p className="mt-3 text-center text-[9px] text-violet/40">
+                    {copies - 1} fragmento{copies - 1 !== 1 ? "s" : ""} de memória acumulado{copies - 1 !== 1 ? "s" : ""}
+                  </p>
+                )}
+              </motion.div>
+            ) : (
+              <motion.div
+                key="skills"
+                initial={{ opacity: 0, x: 8 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -8 }}
+                transition={{ duration: 0.15, ease }}
+                className="flex flex-col gap-2"
+              >
+                {hero.skillIds.map((sid) => {
+                  const skill = SKILL_MAP[sid];
+                  if (!skill) return null;
+                  const userLevel = skillData.skillLevels.find((sl: { skillId: string; level: number }) => sl.skillId === sid)?.level ?? 1;
+                  return (
+                    <div
+                      key={sid}
+                      className="rounded-xl border border-violet/10 px-3 py-2.5"
+                      style={{ background: "rgba(122,111,160,0.04)" }}
+                    >
+                      <div className="mb-0.5 flex items-center justify-between">
+                        <span className="text-[10px] font-bold text-cream/85">{skill.name}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[8px] text-violet/40">{skill.type}</span>
+                          <span className="rounded bg-violet/10 px-1 py-0.5 text-[7px] font-bold text-violet/60">
+                            Nv.{userLevel}
+                          </span>
+                        </div>
+                      </div>
+                      <p className="text-[9px] leading-relaxed text-violet/50">{skill.description}</p>
+                      {skill.manaCost > 0 && (
+                        <div className="mt-1 flex gap-3">
+                          <span className="text-[8px] text-blue-400/60">Mana: {skill.manaCost}</span>
+                          {skill.cooldown > 0 && <span className="text-[8px] text-violet/40">CD: {skill.cooldown}t</span>}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Close */}
+        <motion.button
+          onClick={onClose}
+          whileTap={{ scale: 0.97 }}
+          transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
+          className="mt-4 w-full rounded-xl border border-violet/20 py-3 text-[11px] font-bold tracking-wider text-violet/60 transition-colors duration-150 hover:border-violet/40 hover:text-violet/80"
+        >
+          FECHAR
+        </motion.button>
+      </motion.div>
+    </>
+  );
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────────────
+
+function StatRow({ label, value, color }: { label: string; value: number | string; color: string }) {
+  return (
+    <div className="flex items-center justify-between rounded-lg border border-violet/8 px-3 py-2" style={{ background: "rgba(122,111,160,0.04)" }}>
+      <span className="text-[9px] text-violet/50">{label}</span>
+      <span className="text-[11px] font-black" style={{ color }}>{typeof value === "number" ? value.toLocaleString("pt-BR") : value}</span>
+    </div>
+  );
+}
+
+function EmptyState({ filter }: { filter: FilterRarity }) {
+  return (
+    <div className="flex h-48 flex-col items-center justify-center gap-2">
+      <span className="text-3xl opacity-20">◈</span>
+      <p className="text-[10px] text-violet/30">
+        {filter === "TODOS"
+          ? "Nenhum herói coletado ainda. Vá à aba Invocar!"
+          : `Nenhum herói ${filter} coletado.`}
+      </p>
     </div>
   );
 }
