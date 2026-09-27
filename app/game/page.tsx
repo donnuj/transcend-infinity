@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { GlobeSimple, Cards, Sparkle, Shield, User } from "@phosphor-icons/react";
 import { api } from "@/lib/api";
 import { getUser, isAuthenticated, clearSession } from "@/lib/auth";
 import type { StoredUser } from "@/lib/auth";
@@ -48,12 +49,14 @@ export type Profile = {
 
 type Tab = "mundo" | "cartas" | "invocar" | "guilda" | "perfil";
 
-const TABS: { id: Tab; label: string; icon: string; color: string }[] = [
-  { id: "mundo",   label: "Mundo",   icon: "🌍", color: "rgb(90,160,255)"   },
-  { id: "cartas",  label: "Cartas",  icon: "🃏", color: "rgb(180,110,255)"  },
-  { id: "invocar", label: "Invocar", icon: "✦",  color: "rgb(200,155,60)"   },
-  { id: "guilda",  label: "Guilda",  icon: "⚜",  color: "rgb(100,210,130)"  },
-  { id: "perfil",  label: "Perfil",  icon: "👤", color: "rgb(232,217,160)"  },
+type PhosphorIcon = React.ComponentType<{ weight?: "thin" | "light" | "regular" | "bold" | "fill" | "duotone"; size?: number; color?: string }>;
+
+const TABS: { id: Tab; label: string; Icon: PhosphorIcon; color: string }[] = [
+  { id: "mundo",   label: "Mundo",   Icon: GlobeSimple, color: "rgb(90,160,255)"   },
+  { id: "cartas",  label: "Cartas",  Icon: Cards,       color: "rgb(180,110,255)"  },
+  { id: "invocar", label: "Invocar", Icon: Sparkle,     color: "rgb(200,155,60)"   },
+  { id: "guilda",  label: "Guilda",  Icon: Shield,      color: "rgb(100,210,130)"  },
+  { id: "perfil",  label: "Perfil",  Icon: User,        color: "rgb(232,217,160)"  },
 ];
 
 const ease = [0.23, 1, 0.32, 1] as const;
@@ -189,45 +192,49 @@ export default function GamePage() {
           paddingBottom: "env(safe-area-inset-bottom, 0px)",
         }}
       >
-        {TABS.map(({ id, label, icon, color }) => {
+        {TABS.map(({ id, label, Icon, color }) => {
           const active = tab === id;
           return (
             <motion.button
               key={id}
               onClick={() => setTab(id)}
               whileTap={{ scale: 0.88 }}
-              transition={{ duration: 0.1, ease }}
+              transition={{ type: "spring", stiffness: 500, damping: 28 }}
               className="relative flex flex-1 flex-col items-center justify-center gap-1 py-3.5"
             >
               {active && (
                 <motion.div
                   layoutId="nav-glow"
                   className="absolute inset-0 rounded-t-2xl"
-                  style={{ background: `radial-gradient(ellipse at 50% 100%, ${color}18 0%, transparent 70%)` }}
+                  style={{ background: `radial-gradient(ellipse at 50% 100%, ${color}15 0%, transparent 70%)` }}
                   transition={{ duration: 0.3, ease }}
                 />
               )}
               {active && (
                 <motion.div
                   layoutId="nav-line"
-                  className="absolute top-0 left-1/2 -translate-x-1/2 h-[2px] w-8 rounded-full"
-                  style={{ background: color, boxShadow: `0 0 8px ${color}` }}
+                  className="absolute top-0 left-1/2 -translate-x-1/2 h-[2px] w-7 rounded-full"
+                  style={{ background: color, boxShadow: `0 0 8px ${color}cc` }}
                   transition={{ duration: 0.25, ease }}
                 />
               )}
-              <motion.span
-                className="relative z-10 text-[18px] leading-none"
-                animate={{ scale: active ? 1.1 : 1, y: active ? -1 : 0 }}
-                transition={{ duration: 0.2, ease }}
-                style={{ filter: active ? `drop-shadow(0 0 6px ${color}80)` : "none" }}
+              <motion.div
+                className="relative z-10"
+                animate={{ scale: active ? 1.08 : 1, y: active ? -1 : 0 }}
+                transition={{ type: "spring", stiffness: 400, damping: 22 }}
+                style={{ filter: active ? `drop-shadow(0 0 5px ${color}90)` : "none" }}
               >
-                {icon}
-              </motion.span>
+                <Icon
+                  weight={active ? "fill" : "light"}
+                  size={20}
+                  color={active ? color : "rgba(122,111,160,0.38)"}
+                />
+              </motion.div>
               <span
                 className="relative z-10 text-[7.5px] font-bold tracking-[0.14em]"
                 style={{
-                  color: active ? color : "rgba(122,111,160,0.4)",
-                  transition: "color 200ms",
+                  color: active ? color : "rgba(122,111,160,0.35)",
+                  transition: "color 220ms cubic-bezier(0.23,1,0.32,1)",
                 }}
               >
                 {label.toUpperCase()}
