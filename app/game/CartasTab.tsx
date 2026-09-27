@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGameStore } from "@/lib/game/store";
 import { HERO_MAP } from "@/lib/game/data/heroes";
@@ -45,7 +45,7 @@ export default function CartasTab() {
   const { save, getHeroProgression, getHeroLevel, getHeroSkills } = useGameStore();
   const [filter, setFilter] = useState<FilterRarity>("TODOS");
   const [selected, setSelected] = useState<HeroDef | null>(null);
-  const [detailTab, setDetailTab] = useState<"stats"|"skills">("stats");
+  const [detailTab, setDetailTab] = useState<"stats"|"skills"|"prog">("stats");
 
   const collected = useMemo<HeroEntry[]>(() => {
     const counts = new Map<string, number>();
@@ -175,14 +175,16 @@ export default function CartasTab() {
 
 // ── Hero Detail Sheet ──────────────────────────────────────────────────────────
 
+type DetailTab = "stats" | "skills" | "prog";
+
 type DetailProps = {
   hero: HeroDef;
   copies: number;
   progression: SaveData["heroProgression"][0];
   levelData: SaveData["heroLevels"][0];
   skillData: SaveData["heroSkills"][0];
-  detailTab: "stats" | "skills";
-  onTabChange: (t: "stats" | "skills") => void;
+  detailTab: DetailTab;
+  onTabChange: (t: DetailTab) => void;
   onClose: () => void;
 };
 
@@ -260,20 +262,20 @@ function HeroDetail({ hero, copies, progression, levelData, skillData, detailTab
 
         {/* Tabs */}
         <div className="mb-4 flex gap-1 rounded-xl bg-violet/5 p-1">
-          {(["stats","skills"] as const).map((t) => (
+          {(["stats","skills","prog"] as const).map((t) => (
             <motion.button
               key={t}
               onClick={() => onTabChange(t)}
               whileTap={{ scale: 0.97 }}
               transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
-              className="flex-1 rounded-lg py-1.5 text-[9px] font-bold tracking-widest transition-colors duration-150"
+              className="flex-1 rounded-lg py-1.5 text-[8px] font-bold tracking-widest transition-colors duration-150"
               style={{
                 background: detailTab === t ? s.glow : "transparent",
                 color:      detailTab === t ? s.color : "rgba(122,111,160,0.5)",
                 border:     detailTab === t ? `1px solid ${s.border}` : "1px solid transparent",
               }}
             >
-              {t === "stats" ? "ATRIBUTOS" : "HABILIDADES"}
+              {t === "stats" ? "ATRIBUTOS" : t === "skills" ? "HABILIDADES" : "PROGRESSÃO"}
             </motion.button>
           ))}
         </div>
@@ -313,7 +315,7 @@ function HeroDetail({ hero, copies, progression, levelData, skillData, detailTab
                   </p>
                 )}
               </motion.div>
-            ) : (
+            ) : detailTab === "skills" ? (
               <motion.div
                 key="skills"
                 initial={{ opacity: 0, x: 8 }}
@@ -326,6 +328,9 @@ function HeroDetail({ hero, copies, progression, levelData, skillData, detailTab
                   const skill = SKILL_MAP[sid];
                   if (!skill) return null;
                   const userLevel = skillData.skillLevels.find((sl: { skillId: string; level: number }) => sl.skillId === sid)?.level ?? 1;
+                  const ouro = useGameStore.getState().save.wallet.ouro;
+                  const upgradeCost = 100 * userLevel;
+                  const canUpgrade = userLevel < 5 && ouro >= upgradeCost;
                   return (
                     <div
                       key={sid}
@@ -337,7 +342,7 @@ function HeroDetail({ hero, copies, progression, levelData, skillData, detailTab
                         <div className="flex items-center gap-2">
                           <span className="text-[8px] text-violet/40">{skill.type}</span>
                           <span className="rounded bg-violet/10 px-1 py-0.5 text-[7px] font-bold text-violet/60">
-                            Nv.{userLevel}
+                            Nv.{userLevel}/5
                           </span>
                         </div>
                       </div>
@@ -348,10 +353,24 @@ function HeroDetail({ hero, copies, progression, levelData, skillData, detailTab
                           {skill.cooldown > 0 && <span className="text-[8px] text-violet/40">CD: {skill.cooldown}t</span>}
                         </div>
                       )}
+                      {userLevel < 5 && (
+                        <UpgradeButton
+                          label={`Evoluir — ${upgradeCost.toLocaleString("pt-BR")} ouro`}
+                          enabled={canUpgrade}
+                          color={s.color}
+                          glow={s.glow}
+                          border={s.border}
+                          onPress={() => {
+                            useGameStore.getState().upgradeHeroSkill(hero.heroId, sid);
+                          }}
+                        />
+                      )}
                     </div>
                   );
                 })}
               </motion.div>
+            ) : (
+              <ProgressionTab hero={hero} progression={progression} s={s} />
             )}
           </AnimatePresence>
         </div>
@@ -367,6 +386,162 @@ function HeroDetail({ hero, copies, progression, levelData, skillData, detailTab
         </motion.button>
       </motion.div>
     </>
+  );
+}
+
+// ── Progression Tab ────────────────────────────────────────────────────────────
+
+const RANK_LABELS = ["F","E","D","C","B","A","S","SS","SSS"] as const;
+const RANK_FRAG_COST = [10,20,30,40,50,60];
+const AWAKEN_FRAG_COST = [20,40,60,80,100];
+const AWAKEN_BONUS = ["–","Vel. Atq +5%","Crít +3%","HP +10%","Todos stats +5%","Forma Lendária"];
+const STAR_FRAG_COST = [5,10,15,20];
+
+function ProgressionTab({ hero, progression, s }: {
+  hero: HeroDef;
+  progression: SaveData["heroProgression"][0];
+  s: { color: string; glow: string; border: string };
+}) {
+  const { rankUpHero, upgradeHeroStars, awakenHero, getFragmentos } = useGameStore();
+  const frags = getFragmentos(hero.heroId);
+  const rank = progression.rank;
+  const stars = progression.stars;
+  const awaken = progression.awakenLevel;
+  const rankLabel = RANK_LABELS[rank] ?? "F";
+  const nextRankLabel = rank < 6 ? RANK_LABELS[rank + 1] : null;
+  const rankCost = rank < 6 ? RANK_FRAG_COST[rank] : null;
+  const starCost = stars < 5 ? STAR_FRAG_COST[stars - 1] : null;
+  const awakenCost = awaken < 5 ? AWAKEN_FRAG_COST[awaken] : null;
+
+  return (
+    <motion.div
+      key="prog"
+      initial={{ opacity: 0, x: 8 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -8 }}
+      transition={{ duration: 0.15, ease }}
+      className="flex flex-col gap-3"
+    >
+      {/* Fragment count */}
+      <div className="flex items-center justify-between rounded-xl border border-violet/10 px-4 py-3" style={{ background: "rgba(122,111,160,0.04)" }}>
+        <span className="text-[10px] text-violet/60">Fragmentos de Memória</span>
+        <span className="text-base font-black" style={{ color: s.color }}>{frags}</span>
+      </div>
+
+      {/* Rank */}
+      <ProgSection title="Rank" current={`Rank ${rankLabel}`} next={nextRankLabel ? `→ Rank ${nextRankLabel}` : "MAX"} s={s}>
+        <div className="mb-2 flex gap-1">
+          {RANK_LABELS.slice(0,7).map((r, i) => (
+            <div
+              key={r}
+              className="flex-1 rounded py-1 text-center text-[7px] font-bold"
+              style={{
+                background: i <= rank ? s.glow : "rgba(122,111,160,0.04)",
+                color:      i <= rank ? s.color : "rgba(122,111,160,0.3)",
+                border:     `1px solid ${i <= rank ? s.border : "rgba(122,111,160,0.1)"}`,
+              }}
+            >
+              {r}
+            </div>
+          ))}
+        </div>
+        {rankCost !== null && (
+          <UpgradeButton
+            label={`Evoluir Rank — ${rankCost} fragmentos`}
+            enabled={frags >= rankCost}
+            color={s.color} glow={s.glow} border={s.border}
+            onPress={() => { rankUpHero(hero.heroId); }}
+          />
+        )}
+      </ProgSection>
+
+      {/* Stars */}
+      <ProgSection title="Estrelas" current={"★".repeat(stars) + "☆".repeat(5 - stars)} next={starCost !== null ? `→ ${"★".repeat(stars + 1)}` : "MAX"} s={s}>
+        <div className="mb-2 text-center text-xl">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <span key={i} style={{ color: i < stars ? "rgb(250,190,50)" : "rgba(122,111,160,0.2)" }}>★</span>
+          ))}
+        </div>
+        {starCost !== null && (
+          <UpgradeButton
+            label={`Subir Estrela — ${starCost} fragmentos`}
+            enabled={frags >= starCost}
+            color={s.color} glow={s.glow} border={s.border}
+            onPress={() => { upgradeHeroStars(hero.heroId); }}
+          />
+        )}
+      </ProgSection>
+
+      {/* Despertar de Memória */}
+      <ProgSection title="Despertar de Memória" current={`Nível ${awaken}/5`} next={awakenCost !== null ? AWAKEN_BONUS[awaken + 1] : "COMPLETO"} s={s}>
+        <div className="mb-2 flex gap-1">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div
+              key={i}
+              className="flex-1 rounded py-1.5 text-center text-[8px] font-bold"
+              style={{
+                background: i < awaken ? s.glow : "rgba(122,111,160,0.04)",
+                color:      i < awaken ? s.color : "rgba(122,111,160,0.3)",
+                border:     `1px solid ${i < awaken ? s.border : "rgba(122,111,160,0.1)"}`,
+              }}
+            >
+              {i + 1}
+            </div>
+          ))}
+        </div>
+        {awaken < 5 && <p className="mb-2 text-center text-[9px] text-violet/40">Próximo: {AWAKEN_BONUS[awaken + 1]}</p>}
+        {awakenCost !== null && (
+          <UpgradeButton
+            label={`Despertar — ${awakenCost} fragmentos`}
+            enabled={frags >= awakenCost}
+            color={s.color} glow={s.glow} border={s.border}
+            onPress={() => { awakenHero(hero.heroId); }}
+          />
+        )}
+      </ProgSection>
+    </motion.div>
+  );
+}
+
+function ProgSection({ title, current, next, s, children }: {
+  title: string; current: string; next: string;
+  s: { color: string; glow: string; border: string };
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-xl border border-violet/10 px-3 py-2.5" style={{ background: "rgba(122,111,160,0.04)" }}>
+      <div className="mb-2.5 flex items-center justify-between">
+        <span className="text-[9px] font-bold tracking-widest text-violet/50">{title.toUpperCase()}</span>
+        <div className="flex items-center gap-2">
+          <span className="text-[9px] font-bold" style={{ color: s.color }}>{current}</span>
+          <span className="text-[8px] text-violet/30">{next}</span>
+        </div>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function UpgradeButton({ label, enabled, color, glow, border, onPress }: {
+  label: string; enabled: boolean;
+  color: string; glow: string; border: string;
+  onPress: () => void;
+}) {
+  return (
+    <motion.button
+      onClick={enabled ? onPress : undefined}
+      whileTap={enabled ? { scale: 0.97 } : undefined}
+      transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
+      className="mt-1 w-full rounded-lg py-2 text-[9px] font-bold tracking-wider transition-all duration-150"
+      style={{
+        background: enabled ? glow : "transparent",
+        color:      enabled ? color : "rgba(122,111,160,0.3)",
+        border:     `1px solid ${enabled ? border : "rgba(122,111,160,0.1)"}`,
+        cursor:     enabled ? "pointer" : "default",
+      }}
+    >
+      {label}
+    </motion.button>
   );
 }
 

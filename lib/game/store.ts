@@ -96,7 +96,12 @@ type GameStore = {
   getHeroSkills: (heroId: string) => SaveData["heroSkills"][0];
   getHeroEquipment: (heroId: string) => SaveData["heroEquipment"][0];
   getHeroRunes: (heroId: string) => SaveData["heroRunes"][0];
+  getFragmentos: (heroId: string) => number;
   addHeroXp: (heroId: string, xp: number) => void;
+  rankUpHero: (heroId: string) => boolean;
+  upgradeHeroStars: (heroId: string) => boolean;
+  awakenHero: (heroId: string) => boolean;
+  upgradeHeroSkill: (heroId: string, skillId: string) => boolean;
   equipItem: (heroId: string, slot: "weaponId" | "armorId" | "accessoryId" | "reliquiaId", equipId: string) => void;
   equipRune: (heroId: string, slot: "slot0" | "slot1", runeId: string) => void;
 
@@ -235,6 +240,10 @@ export const useGameStore = create<GameStore>()(
         return get().save.heroRunes.find((h) => h.heroId === heroId) ?? { heroId };
       },
 
+      getFragmentos(heroId) {
+        return get().save.fragmentos.find((f) => f.heroId === heroId)?.count ?? 0;
+      },
+
       addHeroXp(heroId, xp) {
         set((s) => {
           let entry = s.save.heroLevels.find((h) => h.heroId === heroId);
@@ -249,6 +258,77 @@ export const useGameStore = create<GameStore>()(
             entry.level++;
           }
         });
+      },
+
+      rankUpHero(heroId) {
+        const RANK_FRAG_COST = [10, 20, 30, 40, 50, 60];
+        const prog = get().getHeroProgression(heroId);
+        if (prog.rank >= 6) return false;
+        const cost = RANK_FRAG_COST[prog.rank];
+        const frags = get().getFragmentos(heroId);
+        if (frags < cost) return false;
+        set((s) => {
+          const fIdx = s.save.fragmentos.findIndex((f) => f.heroId === heroId);
+          if (fIdx >= 0) s.save.fragmentos[fIdx].count -= cost;
+          let p = s.save.heroProgression.find((h) => h.heroId === heroId);
+          if (!p) { s.save.heroProgression.push({ heroId, rank: 0, stars: 1, awakenLevel: 0, protectionStacks: 0 }); p = s.save.heroProgression[s.save.heroProgression.length - 1]; }
+          p.rank = (p.rank + 1) as typeof p.rank;
+        });
+        return true;
+      },
+
+      upgradeHeroStars(heroId) {
+        const STAR_FRAG_COST = [5, 10, 15, 20];
+        const prog = get().getHeroProgression(heroId);
+        if (prog.stars >= 5) return false;
+        const cost = STAR_FRAG_COST[prog.stars - 1];
+        const frags = get().getFragmentos(heroId);
+        if (frags < cost) return false;
+        set((s) => {
+          const fIdx = s.save.fragmentos.findIndex((f) => f.heroId === heroId);
+          if (fIdx >= 0) s.save.fragmentos[fIdx].count -= cost;
+          let p = s.save.heroProgression.find((h) => h.heroId === heroId);
+          if (!p) { s.save.heroProgression.push({ heroId, rank: 0, stars: 1, awakenLevel: 0, protectionStacks: 0 }); p = s.save.heroProgression[s.save.heroProgression.length - 1]; }
+          p.stars = (p.stars + 1) as typeof p.stars;
+        });
+        return true;
+      },
+
+      awakenHero(heroId) {
+        const AWAKEN_FRAG_COST = [20, 40, 60, 80, 100];
+        const prog = get().getHeroProgression(heroId);
+        if (prog.awakenLevel >= 5) return false;
+        const cost = AWAKEN_FRAG_COST[prog.awakenLevel];
+        const frags = get().getFragmentos(heroId);
+        if (frags < cost) return false;
+        set((s) => {
+          const fIdx = s.save.fragmentos.findIndex((f) => f.heroId === heroId);
+          if (fIdx >= 0) s.save.fragmentos[fIdx].count -= cost;
+          let p = s.save.heroProgression.find((h) => h.heroId === heroId);
+          if (!p) { s.save.heroProgression.push({ heroId, rank: 0, stars: 1, awakenLevel: 0, protectionStacks: 0 }); p = s.save.heroProgression[s.save.heroProgression.length - 1]; }
+          p.awakenLevel++;
+        });
+        return true;
+      },
+
+      upgradeHeroSkill(heroId, skillId) {
+        const SKILL_OURO_COST = (lvl: number) => 100 * lvl;
+        const MAX_SKILL_LEVEL = 5;
+        const skills = get().getHeroSkills(heroId);
+        const current = skills.skillLevels.find((sl) => sl.skillId === skillId)?.level ?? 1;
+        if (current >= MAX_SKILL_LEVEL) return false;
+        const cost = SKILL_OURO_COST(current);
+        const ouro = get().save.wallet.ouro;
+        if (ouro < cost) return false;
+        set((s) => {
+          s.save.wallet.ouro -= cost;
+          let sk = s.save.heroSkills.find((h) => h.heroId === heroId);
+          if (!sk) { s.save.heroSkills.push({ heroId, skillLevels: [] }); sk = s.save.heroSkills[s.save.heroSkills.length - 1]; }
+          const slIdx = sk.skillLevels.findIndex((sl) => sl.skillId === skillId);
+          if (slIdx >= 0) sk.skillLevels[slIdx].level++;
+          else sk.skillLevels.push({ skillId, level: 2 });
+        });
+        return true;
       },
 
       equipItem(heroId, slot, equipId) {
