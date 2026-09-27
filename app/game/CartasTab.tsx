@@ -361,7 +361,7 @@ function HeroDetail({ hero, copies, progression, levelData, skillData, equipData
   return (
     <>
       <motion.div
-        className="absolute inset-0 bg-void/80"
+        className="absolute inset-0 z-50 bg-void/80"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -369,7 +369,7 @@ function HeroDetail({ hero, copies, progression, levelData, skillData, equipData
         onClick={onClose}
       />
       <motion.div
-        className="absolute bottom-0 left-0 right-0 flex max-h-[85%] flex-col rounded-t-2xl border-t px-5 pb-6 pt-5"
+        className="absolute bottom-0 left-0 right-0 z-50 flex max-h-[85%] flex-col rounded-t-2xl border-t px-5 pb-6 pt-5"
         style={{ borderColor: s.border, backgroundColor: "rgba(10,10,22,0.98)" }}
         initial={{ y: "100%" }}
         animate={{ y: 0 }}
