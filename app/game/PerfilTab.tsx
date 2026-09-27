@@ -112,7 +112,7 @@ export default function PerfilTab({
       </div>
 
       {/* Wallet */}
-      <div className="mb-4 grid grid-cols-2 gap-2">
+      <div className="mb-4 grid grid-cols-2 sm:grid-cols-4 gap-2">
         <CurrencyCard icon="◆" label="Ouro" value={wallet.ouro} color="rgb(200,155,60)" />
         <CurrencyCard icon="✦" label="Cristais Astra" value={wallet.cristaisAstra} color="rgb(170,130,255)" />
         <CurrencyCard icon="✦" label="Selos de Invocação" value={wallet.selosDeInvocacao} color="rgb(90,150,255)" />

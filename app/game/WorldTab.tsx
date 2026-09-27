@@ -186,7 +186,7 @@ export default function WorldTab({
         </div>
       </div>
 
-      <div className="px-4">
+      <div className="px-4 md:px-8 lg:px-12 max-w-5xl mx-auto w-full">
         {/* ── Offline Reward ────────────────────────────────────────────── */}
         <AnimatePresence>
           {offlineReward && (
@@ -305,7 +305,7 @@ export default function WorldTab({
 
         {/* ── Section: Batalha ─────────────────────────────────────────── */}
         <SectionLabel Icon={Sword} label="Batalha" />
-        <div className="mb-4 grid grid-cols-2 gap-2.5">
+        <div className="mb-4 grid grid-cols-2 sm:grid-cols-4 gap-2.5">
           {([
             { Icon: CastleTurret, title: "Masmorra", sub: `${clearedDungeons}/${DUNGEONS.length} claras`, color: "rgb(90,150,255)", onClick: onDungeon },
             { Icon: Sword, title: "Arena", sub: `Rating ${save.arena.rating}`, color: "rgb(255,100,80)", onClick: onArena },
@@ -326,7 +326,7 @@ export default function WorldTab({
 
         {/* ── Section: Economia ────────────────────────────────────────── */}
         <SectionLabel Icon={Coins} label="Economia" />
-        <div className="mb-4 grid grid-cols-2 gap-2.5">
+        <div className="mb-4 grid grid-cols-2 sm:grid-cols-4 gap-2.5">
           {([
             { Icon: Sparkle, title: "Invocar", sub: `${wallet.selosDeInvocacao} selos`, color: "rgb(200,155,60)", onClick: onInvocar },
             { Icon: ShoppingCart, title: "Mercado", sub: `${wallet.ouro.toLocaleString("pt-BR")} ouro`, color: "rgb(255,160,60)", onClick: onMercado },
@@ -347,7 +347,7 @@ export default function WorldTab({
 
         {/* ── Section: Exploração ──────────────────────────────────────── */}
         <SectionLabel Icon={Compass} label="Exploração" />
-        <div className="mb-4 grid grid-cols-2 gap-2.5">
+        <div className="mb-4 grid grid-cols-2 sm:grid-cols-4 gap-2.5">
           {([
             { Icon: MapTrifold, title: "Mapa Mundial", sub: `${save.worldMap.discoveredRegions.length} regiões`, color: "rgb(80,200,180)", onClick: onWorldMap },
             { Icon: ChatCircleText, title: "NPCs", sub: "Diálogos & histórias", color: "rgb(100,210,180)", onClick: onNpcDialogue },

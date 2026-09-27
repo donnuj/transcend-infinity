@@ -159,7 +159,7 @@ function GuildaSection({ guild }: { guild: GuildSave }) {
         <h3 className="mb-3 text-xl font-black text-cream" style={{ fontFamily: "var(--font-cinzel)" }}>
           NOVA ORDEM
         </h3>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <GuildStat label="Tesouro" value={`${guild.treasury.toLocaleString("pt-BR")} ouro`} />
           <GuildStat label="Missões" value={String(guild.completedMissions.length)} />
           <GuildStat label="Pesquisas" value={String(guild.completedResearch.length)} />

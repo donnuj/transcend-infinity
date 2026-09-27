@@ -115,58 +115,17 @@ export default function GamePage() {
 
   return (
     <div className="bg-atmosphere flex h-full">
-
-    {/* ── Painel esquerdo — só desktop ─────────────────────────────────────── */}
-    <div
-      className="hidden md:flex flex-1 flex-col items-end justify-center pr-10 pb-16 select-none"
-      style={{ maxWidth: "calc(50% - 224px)" }}
-    >
-      <div className="flex flex-col items-end gap-6">
-        <div
-          className="text-right leading-none"
-          style={{ fontFamily: "var(--font-cinzel)" }}
-        >
-          <div className="text-[11px] font-bold tracking-[0.45em] text-amber/40 mb-2">UNIVERSO</div>
-          <div className="text-[2.6rem] font-black tracking-[0.06em] text-cream/90 leading-none">TRANSCEND</div>
-          <div
-            className="text-[1.3rem] font-bold tracking-[0.28em] mt-1"
-            style={{ color: "rgb(200,155,60)" }}
-          >
-            INFINITY
-          </div>
-        </div>
-        <div
-          className="text-right text-[10px] tracking-[0.18em] leading-relaxed max-w-[200px]"
-          style={{ color: "rgba(122,111,160,0.55)" }}
-        >
-          INVOQUE HERÓIS.<br />TRANSCENDA OS LIMITES.<br />CONQUISTE O INFINITO.
-        </div>
-        <div className="flex flex-col items-end gap-1.5">
-          {(["◈ 200 HERÓIS", "✦ 7 RARIDADES", "◆ SISTEMA GACHA"] as const).map((t) => (
-            <span key={t} className="text-[9px] tracking-[0.2em]" style={{ color: "rgba(200,155,60,0.3)" }}>
-              {t}
-            </span>
-          ))}
-        </div>
-      </div>
-    </div>
-
-    {/* ── Coluna do jogo ──────────────────────────────────────────────────── */}
-    <div
-      className="relative flex h-full w-full max-w-md flex-col flex-shrink-0"
-      style={{
-        boxShadow: "inset 1px 0 0 rgba(200,155,60,0.12), inset -1px 0 0 rgba(200,155,60,0.12)",
-      }}
-    >
+    <div className="relative flex h-full w-full flex-col">
       {/* Top bar */}
       <header
-        className="relative flex items-center justify-between px-4 py-3"
+        className="relative"
         style={{
           background: "linear-gradient(180deg, rgba(6,7,15,0.98) 0%, rgba(10,10,22,0.92) 100%)",
           borderBottom: "1px solid rgba(200,155,60,0.1)",
           boxShadow: "0 1px 0 rgba(200,155,60,0.04), 0 4px 20px rgba(0,0,0,0.4)",
         }}
       >
+      <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
         <div className="flex items-center gap-2.5">
           <div
             className="flex h-7 w-7 items-center justify-center rounded-lg text-[11px] font-black"
@@ -190,6 +149,7 @@ export default function GamePage() {
           <Chip icon="✦" value={wallet.cristaisAstra} color="rgb(170,130,255)" />
           <Chip icon="◆" value={wallet.ouro} color="rgb(200,155,60)" />
         </div>
+      </div>
       </header>
 
       {/* Content */}
@@ -230,7 +190,7 @@ export default function GamePage() {
 
       {/* Bottom nav */}
       <nav
-        className="relative flex"
+        className="relative"
         style={{
           background: "linear-gradient(0deg, rgba(6,7,15,0.99) 0%, rgba(10,10,22,0.96) 100%)",
           borderTop: "1px solid rgba(200,155,60,0.08)",
@@ -238,6 +198,7 @@ export default function GamePage() {
           paddingBottom: "env(safe-area-inset-bottom, 0px)",
         }}
       >
+      <div className="mx-auto flex max-w-5xl">
         {TABS.map(({ id, label, Icon, color }) => {
           const active = tab === id;
           return (
@@ -288,42 +249,9 @@ export default function GamePage() {
             </motion.button>
           );
         })}
+      </div>
       </nav>
     </div>
-
-    {/* ── Painel direito — só desktop ──────────────────────────────────────── */}
-    <div
-      className="hidden md:flex flex-1 flex-col items-start justify-center pl-10 pb-16 select-none"
-      style={{ maxWidth: "calc(50% - 224px)" }}
-    >
-      <div className="flex flex-col items-start gap-5">
-        <div className="text-[9px] font-bold tracking-[0.4em]" style={{ color: "rgba(200,155,60,0.35)" }}>
-          TEMPORADA ATUAL
-        </div>
-        <div style={{ fontFamily: "var(--font-cinzel)" }}>
-          <div className="text-[1.5rem] font-black tracking-[0.06em] text-cream/80 leading-none">
-            ÉONS DA
-          </div>
-          <div className="text-[1.5rem] font-black tracking-[0.06em] leading-none" style={{ color: "rgb(200,155,60)" }}>
-            ETERNIDADE
-          </div>
-        </div>
-        <div className="h-px w-16" style={{ background: "rgba(200,155,60,0.2)" }} />
-        <div className="flex flex-col gap-2.5">
-          {[
-            { label: "HERÓIS DISPONÍVEIS", value: "200" },
-            { label: "RARIDADE MÁXIMA",    value: "DIVINO" },
-            { label: "CLASSES",            value: "10" },
-          ].map(({ label, value }) => (
-            <div key={label} className="flex flex-col gap-0.5">
-              <span className="text-[8px] tracking-[0.25em]" style={{ color: "rgba(122,111,160,0.45)" }}>{label}</span>
-              <span className="text-[11px] font-bold tracking-[0.15em]" style={{ color: "rgba(232,217,160,0.7)" }}>{value}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-
     </div>
   );
 }

@@ -100,7 +100,7 @@ export default function CartasTab() {
       transition={{ duration: 0.2, ease }}
     >
       {/* Filter bar */}
-      <div className="flex gap-2 overflow-x-auto px-4 pb-3 pt-4 scrollbar-none">
+      <div className="mx-auto w-full max-w-5xl flex gap-2 overflow-x-auto px-4 md:px-8 pb-3 pt-4 scrollbar-none">
         {FILTERS.map((f) => {
           const active = filter === f;
           const s = f !== "TODOS" ? RARITY_STYLE[f as GachaRarity] : null;
@@ -124,16 +124,16 @@ export default function CartasTab() {
       </div>
 
       {/* Count */}
-      <p className="px-4 pb-2 text-[9px] text-violet/40">
+      <p className="mx-auto w-full max-w-5xl px-4 md:px-8 pb-2 text-[9px] text-violet/40">
         {visible.length} herói{visible.length !== 1 ? "s" : ""} coletado{visible.length !== 1 ? "s" : ""}
       </p>
 
       {/* Grid */}
-      <div className="flex-1 overflow-y-auto px-4 pb-4">
+      <div className="flex-1 overflow-y-auto px-4 md:px-8 pb-4 max-w-5xl mx-auto w-full">
         {visible.length === 0 ? (
           <EmptyState filter={filter} />
         ) : (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
             {visible.map(({ hero, copies }, i) => {
               const prog = getHeroProgression(hero.heroId);
               return (
