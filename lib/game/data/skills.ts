@@ -1,0 +1,76 @@
+import type { SkillDef } from "../types";
+
+export const SKILLS: SkillDef[] = [
+  // ── Espadachim ──────────────────────────────────────────────────────────────
+  { skillId: "espada_golpe",      name: "Golpe Veloz",       description: "Ataque rápido com a espada.",                  type: "Basic",   effectType: "Damage", targetType: "SingleEnemy", element: "None",      cooldown: 0, manaCost: 0,  damageMult: 1.0, healMult: 0, powerContrib: 5  },
+  { skillId: "espada_corte",      name: "Corte Duplo",       description: "Dois cortes consecutivos.",                    type: "Active",  effectType: "Damage", targetType: "SingleEnemy", element: "None",      cooldown: 3, manaCost: 15, damageMult: 1.8, healMult: 0, powerContrib: 15 },
+  { skillId: "espada_turbilhao",  name: "Turbilhão",         description: "Ataque giratório que atinge todos os inimigos.",type: "Active",  effectType: "Damage", targetType: "AllEnemies",  element: "None",      cooldown: 4, manaCost: 25, damageMult: 1.2, healMult: 0, powerContrib: 20 },
+  { skillId: "espada_ultima",     name: "Lâmina do Infinito",description: "Golpe devastador carregado de Éter.",          type: "Ultimate",effectType: "Damage", targetType: "SingleEnemy", element: "Lightning", cooldown: 8, manaCost: 60, damageMult: 4.5, healMult: 0, powerContrib: 50 },
+  { skillId: "espada_passiva",    name: "Precisão Letal",    description: "+15% chance de crítico.",                      type: "Passive", effectType: "Buff",   targetType: "Self",        element: "None",      cooldown: 0, manaCost: 0,  damageMult: 0,   healMult: 0, powerContrib: 20 },
+
+  // ── Guarda ──────────────────────────────────────────────────────────────────
+  { skillId: "guarda_escudo",     name: "Bloqueio",          description: "Bloqueia o próximo ataque físico.",            type: "Basic",   effectType: "Shield", targetType: "Self",        element: "None",  cooldown: 0, manaCost: 0,  damageMult: 0,   healMult: 0, powerContrib: 5  },
+  { skillId: "guarda_provocar",   name: "Provocação",        description: "Força os inimigos a atacarem você.",           type: "Active",  effectType: "Debuff", targetType: "AllEnemies",  element: "None",  cooldown: 4, manaCost: 20, damageMult: 0,   healMult: 0, powerContrib: 15 },
+  { skillId: "guarda_muralha",    name: "Muralha de Ferro",  description: "Cria escudo para todos os aliados.",           type: "Active",  effectType: "Shield", targetType: "AllAllies",   element: "Earth", cooldown: 5, manaCost: 35, damageMult: 0,   healMult: 0, powerContrib: 25 },
+  { skillId: "guarda_ultima",     name: "Bastião Eterno",    description: "Fica invulnerável por 2 turnos, cura aliados.", type: "Ultimate",effectType: "Shield", targetType: "AllAllies",  element: "Earth", cooldown: 9, manaCost: 70, damageMult: 0,   healMult: 0.8, powerContrib: 55 },
+  { skillId: "guarda_passiva",    name: "Pele de Pedra",     description: "+20% defesa física e mágica.",                 type: "Passive", effectType: "Buff",   targetType: "Self",        element: "None",  cooldown: 0, manaCost: 0,  damageMult: 0,   healMult: 0, powerContrib: 22 },
+
+  // ── Gladiador ───────────────────────────────────────────────────────────────
+  { skillId: "glad_golpe",        name: "Soco de Ferro",     description: "Golpe brutal com o punho.",                    type: "Basic",   effectType: "Damage", targetType: "SingleEnemy", element: "None",  cooldown: 0, manaCost: 0,  damageMult: 1.1, healMult: 0, powerContrib: 5  },
+  { skillId: "glad_esmagar",      name: "Esmagar",           description: "Reduz a defesa do alvo por 2 turnos.",         type: "Active",  effectType: "Debuff", targetType: "SingleEnemy", element: "None",  cooldown: 3, manaCost: 20, damageMult: 1.3, healMult: 0, powerContrib: 18 },
+  { skillId: "glad_furia",        name: "Fúria Berserker",   description: "Entra em fúria: +50% ataque, -30% defesa.",    type: "Active",  effectType: "Buff",   targetType: "Self",        element: "Fire",  cooldown: 5, manaCost: 30, damageMult: 0,   healMult: 0, powerContrib: 22 },
+  { skillId: "glad_ultima",       name: "Golpe da Ruína",    description: "Dano massivo proporcional ao HP perdido.",     type: "Ultimate",effectType: "Damage", targetType: "SingleEnemy", element: "Dark",  cooldown: 8, manaCost: 65, damageMult: 5.0, healMult: 0, powerContrib: 52 },
+  { skillId: "glad_passiva",      name: "Sede de Sangue",    description: "Cada kill restaura 15% do HP máx.",           type: "Passive", effectType: "Heal",   targetType: "Self",        element: "None",  cooldown: 0, manaCost: 0,  damageMult: 0,   healMult: 0.15, powerContrib: 25 },
+
+  // ── Arqueiro ────────────────────────────────────────────────────────────────
+  { skillId: "arq_flecha",        name: "Flecha Certeira",   description: "Flecha de alta precisão.",                     type: "Basic",   effectType: "Damage", targetType: "SingleEnemy", element: "None",  cooldown: 0, manaCost: 0,  damageMult: 1.0, healMult: 0, powerContrib: 5  },
+  { skillId: "arq_chuva",         name: "Chuva de Flechas",  description: "Dispara múltiplas flechas em área.",           type: "Active",  effectType: "Damage", targetType: "AllEnemies",  element: "None",  cooldown: 4, manaCost: 25, damageMult: 0.9, healMult: 0, powerContrib: 20 },
+  { skillId: "arq_explosiva",     name: "Flecha Explosiva",  description: "Flecha com explosão elemental no impacto.",    type: "Active",  effectType: "Damage", targetType: "SingleEnemy", element: "Fire",  cooldown: 3, manaCost: 20, damageMult: 2.0, healMult: 0, powerContrib: 18 },
+  { skillId: "arq_ultima",        name: "Tiro do Horizonte", description: "Flecha que atravessa todos os inimigos.",      type: "Ultimate",effectType: "Damage", targetType: "AllEnemies",  element: "Wind",  cooldown: 8, manaCost: 60, damageMult: 2.8, healMult: 0, powerContrib: 50 },
+  { skillId: "arq_passiva",       name: "Olho de Águia",     description: "+20% dano a inimigos com HP cheio.",           type: "Passive", effectType: "Buff",   targetType: "Self",        element: "None",  cooldown: 0, manaCost: 0,  damageMult: 0,   healMult: 0, powerContrib: 20 },
+
+  // ── Caçador ─────────────────────────────────────────────────────────────────
+  { skillId: "cac_armadilha",     name: "Armadilha",         description: "Imobiliza inimigo por 1 turno.",               type: "Basic",   effectType: "Debuff", targetType: "SingleEnemy", element: "None",  cooldown: 0, manaCost: 0,  damageMult: 0.7, healMult: 0, powerContrib: 5  },
+  { skillId: "cac_veneno",        name: "Dardo Envenenado",  description: "Aplica veneno: dano por 3 turnos.",            type: "Active",  effectType: "Debuff", targetType: "SingleEnemy", element: "Earth", cooldown: 3, manaCost: 18, damageMult: 0.8, healMult: 0, powerContrib: 18 },
+  { skillId: "cac_marcacao",      name: "Marcação de Presa", description: "Marca o alvo: todos atacam ele com +30% dano.",type: "Active",  effectType: "Debuff", targetType: "SingleEnemy", element: "None",  cooldown: 4, manaCost: 22, damageMult: 0,   healMult: 0, powerContrib: 22 },
+  { skillId: "cac_ultima",        name: "Caçada Letal",      description: "Série de 5 ataques rápidos.",                  type: "Ultimate",effectType: "Damage", targetType: "SingleEnemy", element: "Wind",  cooldown: 8, manaCost: 55, damageMult: 1.0, healMult: 0, powerContrib: 50 },
+  { skillId: "cac_passiva",       name: "Instinto Selvagem", description: "+25% esquiva quando HP < 50%.",               type: "Passive", effectType: "Buff",   targetType: "Self",        element: "None",  cooldown: 0, manaCost: 0,  damageMult: 0,   healMult: 0, powerContrib: 22 },
+
+  // ── Curandeiro ──────────────────────────────────────────────────────────────
+  { skillId: "cur_cura",          name: "Cura Básica",       description: "Restaura HP de um aliado.",                   type: "Basic",   effectType: "Heal",   targetType: "SingleAlly",  element: "Light", cooldown: 0, manaCost: 10, damageMult: 0,   healMult: 1.2, powerContrib: 5  },
+  { skillId: "cur_cura_em_area",  name: "Cura em Área",      description: "Restaura HP de todos os aliados.",            type: "Active",  effectType: "Heal",   targetType: "AllAllies",   element: "Light", cooldown: 4, manaCost: 40, damageMult: 0,   healMult: 0.8, powerContrib: 20 },
+  { skillId: "cur_purificacao",   name: "Purificação",       description: "Remove todos os debuffs de um aliado.",       type: "Active",  effectType: "Buff",   targetType: "SingleAlly",  element: "Light", cooldown: 3, manaCost: 25, damageMult: 0,   healMult: 0.5, powerContrib: 18 },
+  { skillId: "cur_ultima",        name: "Milagre da Luz",    description: "Revive um aliado morto com 50% HP.",          type: "Ultimate",effectType: "Revive", targetType: "SingleAlly",  element: "Light", cooldown: 9, manaCost: 80, damageMult: 0,   healMult: 0.5, powerContrib: 60 },
+  { skillId: "cur_passiva",       name: "Toque Sagrado",     description: "+30% poder de cura passivo.",                 type: "Passive", effectType: "Buff",   targetType: "Self",        element: "None",  cooldown: 0, manaCost: 0,  damageMult: 0,   healMult: 0,   powerContrib: 25 },
+
+  // ── Mago ────────────────────────────────────────────────────────────────────
+  { skillId: "mago_faisca",       name: "Faísca Arcana",     description: "Projétil mágico básico.",                     type: "Basic",   effectType: "Damage", targetType: "SingleEnemy", element: "None",  cooldown: 0, manaCost: 5,  damageMult: 1.2, healMult: 0, powerContrib: 5  },
+  { skillId: "mago_bola_de_fogo", name: "Bola de Fogo",      description: "Explosão de fogo em área.",                   type: "Active",  effectType: "Damage", targetType: "AllEnemies",  element: "Fire",  cooldown: 3, manaCost: 30, damageMult: 1.5, healMult: 0, powerContrib: 22 },
+  { skillId: "mago_congelar",     name: "Congelar",          description: "Congela um inimigo por 2 turnos.",            type: "Active",  effectType: "Debuff", targetType: "SingleEnemy", element: "Water", cooldown: 4, manaCost: 28, damageMult: 0.8, healMult: 0, powerContrib: 20 },
+  { skillId: "mago_ultima",       name: "Cataclismo Arcano", description: "Explosão mágica devastadora em toda área.",   type: "Ultimate",effectType: "Damage", targetType: "AllEnemies",  element: "None",  cooldown: 9, manaCost: 90, damageMult: 3.5, healMult: 0, powerContrib: 65 },
+  { skillId: "mago_passiva",      name: "Mente Afiada",      description: "+25% dano mágico.",                           type: "Passive", effectType: "Buff",   targetType: "Self",        element: "None",  cooldown: 0, manaCost: 0,  damageMult: 0,   healMult: 0, powerContrib: 25 },
+
+  // ── Bruxo ───────────────────────────────────────────────────────────────────
+  { skillId: "bruxo_maldicao",    name: "Maldição",          description: "Reduz todas as stats do alvo por 3 turnos.",  type: "Basic",   effectType: "Debuff", targetType: "SingleEnemy", element: "Dark",  cooldown: 0, manaCost: 10, damageMult: 0.6, healMult: 0, powerContrib: 5  },
+  { skillId: "bruxo_drenar",      name: "Drenar Vida",       description: "Rouba HP do inimigo.",                        type: "Active",  effectType: "Damage", targetType: "SingleEnemy", element: "Dark",  cooldown: 3, manaCost: 25, damageMult: 1.4, healMult: 0.5, powerContrib: 20 },
+  { skillId: "bruxo_terror",      name: "Terror das Trevas", description: "Causa medo em todos os inimigos (falham turno).", type: "Active",effectType: "Debuff", targetType: "AllEnemies", element: "Dark", cooldown: 5, manaCost: 40, damageMult: 0,   healMult: 0, powerContrib: 25 },
+  { skillId: "bruxo_ultima",      name: "Maldição Eterna",   description: "Aplica debuff permanente que piora a cada turno.", type: "Ultimate",effectType: "Debuff", targetType: "SingleEnemy", element: "Dark", cooldown: 9, manaCost: 85, damageMult: 2.0, healMult: 0, powerContrib: 60 },
+  { skillId: "bruxo_passiva",     name: "Pacto das Trevas",  description: "+20% dano quando o alvo tem debuff.",         type: "Passive", effectType: "Buff",   targetType: "Self",        element: "None",  cooldown: 0, manaCost: 0,  damageMult: 0,   healMult: 0, powerContrib: 22 },
+
+  // ── Alquimista ──────────────────────────────────────────────────────────────
+  { skillId: "alq_poção",         name: "Poção de Combate",  description: "Lança poção curativa em um aliado.",          type: "Basic",   effectType: "Heal",   targetType: "SingleAlly",  element: "None",  cooldown: 0, manaCost: 5,  damageMult: 0,   healMult: 1.0, powerContrib: 5  },
+  { skillId: "alq_acido",         name: "Bomba Ácida",       description: "Projétil ácido: reduz defesa do alvo.",       type: "Active",  effectType: "Debuff", targetType: "SingleEnemy", element: "Earth", cooldown: 3, manaCost: 22, damageMult: 1.0, healMult: 0,   powerContrib: 18 },
+  { skillId: "alq_buff",          name: "Elixir de Força",   description: "Aumenta ATK e DEF de todos por 3 turnos.",    type: "Active",  effectType: "Buff",   targetType: "AllAllies",   element: "None",  cooldown: 5, manaCost: 45, damageMult: 0,   healMult: 0,   powerContrib: 28 },
+  { skillId: "alq_ultima",        name: "Grande Transmutação",description:"Transforma o campo: cura aliados e corroe inimigos.", type: "Ultimate",effectType: "Damage", targetType: "AllEnemies", element: "Earth", cooldown: 9, manaCost: 80, damageMult: 2.0, healMult: 1.0, powerContrib: 58 },
+  { skillId: "alq_passiva",       name: "Metabolismo Acelerado", description: "+10% regeneração de HP por turno.",      type: "Passive", effectType: "Heal",   targetType: "Self",        element: "None",  cooldown: 0, manaCost: 0,  damageMult: 0,   healMult: 0.1, powerContrib: 20 },
+
+  // ── Ferreiro ────────────────────────────────────────────────────────────────
+  { skillId: "ferr_martelo",      name: "Golpe de Martelo",  description: "Ataque pesado com martelo de guerra.",        type: "Basic",   effectType: "Damage", targetType: "SingleEnemy", element: "None",  cooldown: 0, manaCost: 0,  damageMult: 1.3, healMult: 0, powerContrib: 5  },
+  { skillId: "ferr_forjar",       name: "Forjar Armadura",   description: "Forja armadura temporária para um aliado.",   type: "Active",  effectType: "Shield", targetType: "SingleAlly",  element: "Earth", cooldown: 4, manaCost: 30, damageMult: 0,   healMult: 0, powerContrib: 20 },
+  { skillId: "ferr_afiado",       name: "Afiação de Batalha", description: "Aumenta ATQ de todos os aliados por 2 turnos.", type: "Active",  effectType: "Buff",   targetType: "AllAllies",   element: "None",  cooldown: 4, manaCost: 25, damageMult: 0,   healMult: 0, powerContrib: 22 },
+  { skillId: "ferr_ultima",       name: "Forja Divina",      description: "Cria arma lendária temporária: +100% dano do time.", type: "Ultimate",effectType: "Buff", targetType: "AllAllies", element: "Fire",  cooldown: 9, manaCost: 75, damageMult: 0, healMult: 0, powerContrib: 55 },
+  { skillId: "ferr_passiva",      name: "Couraça Natural",   description: "+15% redução de dano físico.",                type: "Passive", effectType: "Buff",   targetType: "Self",        element: "None",  cooldown: 0, manaCost: 0,  damageMult: 0,   healMult: 0, powerContrib: 18 },
+];
+
+export const SKILL_MAP: Record<string, SkillDef> =
+  Object.fromEntries(SKILLS.map((s) => [s.skillId, s]));
