@@ -118,37 +118,81 @@ export default function CartasTab() {
             {visible.map(({ hero, copies }, i) => {
               const s = RARITY_STYLE[hero.rarity];
               const prog = getHeroProgression(hero.heroId);
+              const isLegendary = hero.rarity === "Lendário" || hero.rarity === "Mítico" || hero.rarity === "Divino";
               return (
                 <motion.button
                   key={hero.heroId}
                   onClick={() => { setSelected(hero); setDetailTab("stats"); }}
-                  whileTap={{ scale: 0.94 }}
-                  className="flex flex-col items-center overflow-hidden rounded-xl border pb-2.5 pt-3 text-center"
+                  whileTap={{ scale: 0.92 }}
+                  className="relative flex flex-col items-center overflow-hidden rounded-2xl pb-3 pt-4 text-center"
                   style={{
-                    borderColor: s.border,
-                    background: `linear-gradient(160deg, ${s.glow} 0%, rgba(10,10,22,0.95) 100%)`,
-                    boxShadow: `0 0 12px ${s.glow}`,
+                    borderTop: `2px solid ${s.color}50`,
+                    borderLeft: `1px solid ${s.border}`,
+                    borderRight: `1px solid ${s.border}`,
+                    borderBottom: `1px solid ${s.border}`,
+                    background: `linear-gradient(180deg, ${s.glow} 0%, rgba(8,8,18,0.98) 60%)`,
+                    boxShadow: `0 4px 20px ${s.glow}, 0 0 0 0.5px ${s.border} inset`,
                   }}
-                  initial={{ opacity: 0, scale: 0.85 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1], delay: i * 0.025 }}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1], delay: i * 0.03 }}
                 >
-                  <span className="mb-1.5 text-2xl">{hero.portrait}</span>
-                  <p className="px-1.5 text-[8.5px] font-bold leading-tight text-cream/80">
-                    {hero.name.split(",")[0]}
-                  </p>
-                  <span className="mt-1 text-[8px] font-bold tracking-wide" style={{ color: s.color }}>
-                    {hero.rarity.toUpperCase()}
-                  </span>
-                  <div className="mt-1 flex items-center gap-1">
-                    <span className="text-[8px]">{ELEMENT_ICON[hero.element]}</span>
-                    {prog.stars > 1 && (
-                      <span className="text-[7px] text-amber-400">{"★".repeat(prog.stars)}</span>
+                  {/* Shine overlay for legendary+ */}
+                  {isLegendary && (
+                    <div
+                      className="pointer-events-none absolute left-0 right-0 top-0 h-16 opacity-30"
+                      style={{
+                        background: `linear-gradient(180deg, ${s.color}40 0%, transparent 100%)`,
+                      }}
+                    />
+                  )}
+                  {/* Copies badge */}
+                  {copies > 1 && (
+                    <div
+                      className="absolute right-1.5 top-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full px-1 text-[7px] font-black"
+                      style={{ background: `${s.color}25`, color: s.color, border: `1px solid ${s.color}30` }}
+                    >
+                      ×{copies}
+                    </div>
+                  )}
+                  {/* Portrait */}
+                  <div
+                    className="relative mb-2 flex h-14 w-14 items-center justify-center rounded-xl text-3xl"
+                    style={{
+                      background: `radial-gradient(circle, ${s.color}18 0%, ${s.color}06 100%)`,
+                      border: `1px solid ${s.color}25`,
+                    }}
+                  >
+                    <span>{hero.portrait}</span>
+                    {prog.awakenLevel > 0 && (
+                      <div
+                        className="absolute -bottom-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full text-[7px]"
+                        style={{ background: "rgb(200,155,60)", color: "rgb(6,7,15)", fontWeight: 900 }}
+                      >
+                        {prog.awakenLevel}
+                      </div>
                     )}
                   </div>
-                  {copies > 1 && (
-                    <span className="mt-0.5 text-[8px] text-violet/40">×{copies}</span>
+                  {/* Name */}
+                  <p className="px-1.5 text-[8.5px] font-bold leading-tight text-cream/90">
+                    {hero.name.split(",")[0]}
+                  </p>
+                  {/* Stars */}
+                  {prog.stars > 0 && (
+                    <div className="mt-1 text-[7px]" style={{ color: s.color }}>
+                      {"★".repeat(prog.stars)}
+                    </div>
                   )}
+                  {/* Element + rarity strip */}
+                  <div
+                    className="mt-2 flex w-full items-center justify-center gap-1 py-1"
+                    style={{ borderTop: `1px solid ${s.border}`, background: `${s.color}06` }}
+                  >
+                    <span className="text-[9px]">{ELEMENT_ICON[hero.element]}</span>
+                    <span className="text-[6.5px] font-black tracking-widest" style={{ color: s.color }}>
+                      {hero.rarity.toUpperCase()}
+                    </span>
+                  </div>
                 </motion.button>
               );
             })}

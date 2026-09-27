@@ -4,53 +4,37 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGameStore } from "@/lib/game/store";
 import { scheduleSave } from "@/lib/game/save";
-import { DUNGEONS, DUNGEON_MAP } from "@/lib/game/data/world";
+import { DUNGEONS } from "@/lib/game/data/world";
 import type { Profile } from "./page";
 
 const ease = [0.23, 1, 0.32, 1] as const;
 
 const LOGIN_REWARDS = [
-  { day: 1, label: "100 Ouro",       icon: "◆", amount: 100, type: "ouro"               },
-  { day: 2, label: "1 Selo",          icon: "✦", amount: 1,   type: "selosDeInvocacao"   },
-  { day: 3, label: "200 Ouro",       icon: "◆", amount: 200, type: "ouro"               },
-  { day: 4, label: "Cristal ×50",    icon: "◈", amount: 50,  type: "cristaisAstra"      },
-  { day: 5, label: "500 Ouro",       icon: "◆", amount: 500, type: "ouro"               },
-  { day: 6, label: "2 Selos",        icon: "✦", amount: 2,   type: "selosDeInvocacao"   },
-  { day: 7, label: "Selo Livre",     icon: "★", amount: 1,   type: "selosLivres"        },
+  { day: 1, label: "100 Ouro",    icon: "◆", amount: 100, type: "ouro"             },
+  { day: 2, label: "1 Selo",       icon: "✦", amount: 1,   type: "selosDeInvocacao" },
+  { day: 3, label: "200 Ouro",    icon: "◆", amount: 200, type: "ouro"             },
+  { day: 4, label: "50 Cristais", icon: "◈", amount: 50,  type: "cristaisAstra"    },
+  { day: 5, label: "500 Ouro",    icon: "◆", amount: 500, type: "ouro"             },
+  { day: 6, label: "2 Selos",     icon: "✦", amount: 2,   type: "selosDeInvocacao" },
+  { day: 7, label: "Selo Livre",  icon: "★", amount: 1,   type: "selosLivres"      },
 ];
 
-const DAILY_MISSIONS = [
-  { id: "dm_login",   label: "Fazer login",        xp: 20,  done: true  },
-  { id: "dm_pull",    label: "Realizar 1 invocação", xp: 30,  done: false },
-  { id: "dm_dungeon", label: "Completar 1 dungeon",  xp: 50,  done: false },
-];
+const RANK_COLORS: Record<string, string> = {
+  SS: "rgb(255,220,80)", S: "rgb(255,160,40)", A: "rgb(180,110,255)",
+  B: "rgb(90,160,255)", C: "rgb(80,200,120)", D: "rgb(160,160,200)", "–": "rgba(122,111,160,0.3)",
+};
 
 export default function WorldTab({
   profile,
-  onInvocar,
-  onDungeon,
-  onArena,
-  onMercado,
-  onBattlePass,
-  onTorre,
-  onDailyChallenges,
-  onBossHunt,
-  onWorldMap,
-  onNpcDialogue,
-  onCaravana,
+  onInvocar, onDungeon, onArena, onMercado,
+  onBattlePass, onTorre, onDailyChallenges,
+  onBossHunt, onWorldMap, onNpcDialogue, onCaravana,
 }: {
   profile: Profile | null;
-  onInvocar: () => void;
-  onDungeon: () => void;
-  onArena: () => void;
-  onMercado: () => void;
-  onBattlePass: () => void;
-  onTorre: () => void;
-  onDailyChallenges: () => void;
-  onBossHunt: () => void;
-  onWorldMap: () => void;
-  onNpcDialogue: () => void;
-  onCaravana: () => void;
+  onInvocar: () => void; onDungeon: () => void; onArena: () => void;
+  onMercado: () => void; onBattlePass: () => void; onTorre: () => void;
+  onDailyChallenges: () => void; onBossHunt: () => void; onWorldMap: () => void;
+  onNpcDialogue: () => void; onCaravana: () => void;
 }) {
   const { save, addCurrency, processLogin, collectOfflineRewards } = useGameStore();
   const [offlineReward, setOfflineReward] = useState<{ ouro: number; xp: number } | null>(null);
@@ -60,14 +44,18 @@ export default function WorldTab({
     if (reward) { setOfflineReward(reward); scheduleSave(); }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
   const playerLevel = save.playerLevel;
   const loginBonus = save.loginBonus;
   const wallet = save.wallet;
   const name = profile?.characterName ?? "Invocador";
+  const initial = name[0].toUpperCase();
 
   const xpPct = Math.min(100, (playerLevel.xp / (200 * playerLevel.level)) * 100);
   const today = new Date().toISOString().split("T")[0];
   const canClaimLogin = !loginBonus.claimedToday || loginBonus.lastClaimDate !== today;
+  const currentReward = LOGIN_REWARDS[(loginBonus.dayInCycle - 1) % LOGIN_REWARDS.length];
+  const clearedDungeons = save.dungeon.filter((d) => d.bestRank !== "").length;
 
   function claimLoginBonus() {
     if (!canClaimLogin) return;
@@ -88,309 +76,396 @@ export default function WorldTab({
     scheduleSave();
   }
 
-  const currentReward = LOGIN_REWARDS[(loginBonus.dayInCycle - 1) % LOGIN_REWARDS.length];
-  const discoveredRegions = save.worldMap.discoveredRegions.length;
-  const totalDungeons = DUNGEONS.length;
-  const clearedDungeons = save.dungeon.filter((d) => d.bestRank !== "").length;
-
   return (
     <motion.div
-      className="flex h-full flex-col overflow-y-auto px-4 pb-6 pt-5"
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
-      transition={{ duration: 0.2, ease }}
+      className="flex h-full flex-col overflow-y-auto pb-6"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.18, ease }}
     >
-      {/* Player banner */}
+      {/* ── Hero Banner ──────────────────────────────────────────────────── */}
       <div
-        className="mb-5 rounded-xl border border-amber/18 px-5 py-5"
+        className="relative overflow-hidden px-4 pb-5 pt-5"
         style={{
-          background: "linear-gradient(135deg, rgba(200,155,60,0.08) 0%, rgba(10,10,22,0.95) 60%)",
-          boxShadow: "0 0 40px rgba(200,155,60,0.06) inset",
+          background: "linear-gradient(180deg, rgba(90,50,160,0.12) 0%, rgba(6,7,15,0) 100%)",
         }}
       >
-        <p className="mb-1 text-[10px] uppercase tracking-[0.25em] text-violet/60">
-          Bem-vindo de volta
-        </p>
-        <h2
-          className="mb-4 text-xl font-black tracking-[0.15em] text-cream"
-          style={{ fontFamily: "var(--font-cinzel)", textShadow: "0 0 24px rgba(200,155,60,0.35)" }}
-        >
-          {name.toUpperCase()}
-        </h2>
-        <div className="mb-1.5 flex items-center justify-between">
-          <span className="text-[10px] font-bold tracking-wider text-violet/70">
-            NÍVEL {playerLevel.level}
-          </span>
-          <span className="text-[10px] text-violet/50">
-            {playerLevel.xp} / {200 * playerLevel.level} EXP
-          </span>
-        </div>
-        <div className="h-1.5 w-full overflow-hidden rounded-full bg-violet/15">
-          <motion.div
-            className="h-full rounded-full bg-amber"
-            initial={{ width: 0 }}
-            animate={{ width: `${xpPct}%` }}
-            transition={{ duration: 0.7, ease, delay: 0.15 }}
-            style={{ boxShadow: "0 0 8px rgba(200,155,60,0.5)" }}
-          />
-        </div>
-        <div className="mt-3 flex gap-4 text-[10px]">
-          <span className="text-violet/50">Login consecutivo: <span className="font-bold text-amber-400">{wallet.loginStreak} dias</span></span>
-          <span className="text-violet/50">Regiões: <span className="font-bold text-cream/70">{discoveredRegions}</span></span>
+        {/* Decorative orbs */}
+        <div
+          className="pointer-events-none absolute -right-8 -top-8 h-40 w-40 rounded-full"
+          style={{ background: "radial-gradient(circle, rgba(200,155,60,0.07) 0%, transparent 70%)" }}
+        />
+        <div
+          className="pointer-events-none absolute -left-12 top-4 h-32 w-32 rounded-full"
+          style={{ background: "radial-gradient(circle, rgba(120,80,200,0.08) 0%, transparent 70%)" }}
+        />
+
+        <div className="relative flex items-start gap-4">
+          {/* Avatar */}
+          <div className="relative shrink-0">
+            <div
+              className="flex h-16 w-16 items-center justify-center rounded-2xl text-2xl font-black"
+              style={{
+                background: "linear-gradient(135deg, rgba(200,155,60,0.22) 0%, rgba(90,50,160,0.18) 100%)",
+                border: "1px solid rgba(200,155,60,0.25)",
+                boxShadow: "0 4px 20px rgba(200,155,60,0.12), 0 0 0 1px rgba(200,155,60,0.08) inset",
+                fontFamily: "var(--font-cinzel)",
+                color: "rgb(200,155,60)",
+              }}
+            >
+              {initial}
+            </div>
+            {/* Level badge */}
+            <div
+              className="absolute -bottom-1.5 -right-1.5 flex h-6 w-6 items-center justify-center rounded-lg text-[9px] font-black"
+              style={{
+                background: "linear-gradient(135deg, rgb(200,155,60) 0%, rgb(160,120,40) 100%)",
+                color: "rgb(6,7,15)",
+                boxShadow: "0 2px 8px rgba(200,155,60,0.4)",
+              }}
+            >
+              {playerLevel.level}
+            </div>
+          </div>
+
+          {/* Info */}
+          <div className="flex-1 pt-0.5">
+            <p className="mb-0.5 text-[9px] uppercase tracking-[0.25em] text-violet/50">Invocador</p>
+            <h2
+              className="text-[18px] font-black leading-none text-cream"
+              style={{ fontFamily: "var(--font-cinzel)", textShadow: "0 0 20px rgba(200,155,60,0.25)" }}
+            >
+              {name}
+            </h2>
+
+            {/* XP bar */}
+            <div className="mt-3">
+              <div className="mb-1.5 flex items-center justify-between">
+                <span className="text-[9px] font-bold tracking-wider text-violet/60">
+                  {playerLevel.xp.toLocaleString("pt-BR")} / {(200 * playerLevel.level).toLocaleString("pt-BR")} XP
+                </span>
+                <span className="text-[9px] font-bold text-amber/80">{Math.round(xpPct)}%</span>
+              </div>
+              <div className="relative h-2 overflow-hidden rounded-full" style={{ background: "rgba(122,111,160,0.1)" }}>
+                <motion.div
+                  className="absolute inset-y-0 left-0 rounded-full"
+                  style={{
+                    background: "linear-gradient(90deg, rgb(160,110,30) 0%, rgb(200,155,60) 50%, rgb(232,195,80) 100%)",
+                    boxShadow: "0 0 10px rgba(200,155,60,0.6)",
+                  }}
+                  initial={{ width: 0 }}
+                  animate={{ width: `${xpPct}%` }}
+                  transition={{ duration: 0.8, ease, delay: 0.1 }}
+                />
+              </div>
+            </div>
+
+            {/* Stats row */}
+            <div className="mt-2.5 flex gap-3">
+              <MiniStat icon="🏆" value={`${clearedDungeons}/${DUNGEONS.length}`} label="Masmorras" />
+              <MiniStat icon="⚡" value={`${wallet.loginStreak}d`} label="Streak" />
+              <MiniStat icon="🗺" value={`${save.worldMap.discoveredRegions.length}`} label="Regiões" />
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Offline reward banner */}
-      <AnimatePresence>
-        {offlineReward && (
-          <motion.div
-            className="mb-5 rounded-xl border border-amber/25 px-5 py-4"
-            style={{ background: "linear-gradient(135deg, rgba(200,155,60,0.1) 0%, rgba(10,10,22,0.95) 80%)" }}
-            initial={{ opacity: 0, y: -8, scale: 0.97 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -8, scale: 0.97 }}
-            transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
-          >
-            <div className="mb-3 flex items-center gap-2">
-              <span className="text-[14px]">⏳</span>
-              <p className="text-[10px] font-bold tracking-[0.15em] text-amber-400">RENDA PASSIVA COLETADA</p>
-            </div>
-            <div className="flex gap-3">
-              <div className="flex items-center gap-1.5 rounded-lg border border-amber/20 px-3 py-2 text-[10px] font-bold text-amber-400">
-                <span>◆</span><span>+{offlineReward.ouro.toLocaleString("pt-BR")} ouro</span>
-              </div>
-              <div className="flex items-center gap-1.5 rounded-lg border border-violet/20 px-3 py-2 text-[10px] font-bold text-violet/70">
-                <span>⬡</span><span>+{offlineReward.xp} XP</span>
-              </div>
-            </div>
-            <motion.button
-              onClick={() => setOfflineReward(null)}
-              whileTap={{ scale: 0.94 }}
-              transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
-              className="mt-3 w-full rounded-lg border border-amber/20 py-2 text-[9px] font-bold tracking-widest text-amber-400/70"
+      <div className="px-4">
+        {/* ── Offline Reward ────────────────────────────────────────────── */}
+        <AnimatePresence>
+          {offlineReward && (
+            <motion.div
+              className="mb-4 overflow-hidden rounded-2xl"
+              style={{
+                background: "linear-gradient(135deg, rgba(200,155,60,0.12) 0%, rgba(160,100,20,0.06) 100%)",
+                border: "1px solid rgba(200,155,60,0.2)",
+                boxShadow: "0 4px 20px rgba(200,155,60,0.06)",
+              }}
+              initial={{ opacity: 0, y: -10, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.96 }}
+              transition={{ duration: 0.3, ease }}
             >
-              ÓTIMO
-            </motion.button>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Login Bonus */}
-      <div className="mb-5 rounded-xl border border-violet/15 px-4 py-3.5" style={{ background: "rgba(122,111,160,0.05)" }}>
-        <div className="mb-3 flex items-center justify-between">
-          <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-violet/50">
-            Bônus Diário — Dia {loginBonus.dayInCycle}
-          </p>
-          {canClaimLogin ? (
-            <motion.button
-              onClick={claimLoginBonus}
-              whileTap={{ scale: 0.94 }}
-              transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
-              className="rounded-lg border border-amber/40 bg-amber/10 px-3 py-1.5 text-[9px] font-bold text-amber-400 tracking-wider"
-            >
-              RESGATAR {currentReward.icon} {currentReward.label}
-            </motion.button>
-          ) : (
-            <span className="text-[9px] text-violet/40">Resgatado hoje</span>
+              <div className="px-4 py-4">
+                <div className="mb-3 flex items-center gap-2">
+                  <span className="text-base">⏳</span>
+                  <p className="text-[10px] font-black tracking-[0.18em] text-amber-400">RENDA PASSIVA</p>
+                </div>
+                <div className="flex gap-2">
+                  <div
+                    className="flex flex-1 items-center justify-center gap-1.5 rounded-xl py-2.5 text-[11px] font-bold text-amber-400"
+                    style={{ background: "rgba(200,155,60,0.1)", border: "1px solid rgba(200,155,60,0.2)" }}
+                  >
+                    <span>◆</span><span>+{offlineReward.ouro.toLocaleString("pt-BR")}</span>
+                  </div>
+                  <div
+                    className="flex flex-1 items-center justify-center gap-1.5 rounded-xl py-2.5 text-[11px] font-bold text-violet/70"
+                    style={{ background: "rgba(122,111,160,0.08)", border: "1px solid rgba(122,111,160,0.15)" }}
+                  >
+                    <span>⬡</span><span>+{offlineReward.xp} XP</span>
+                  </div>
+                  <motion.button
+                    onClick={() => setOfflineReward(null)}
+                    whileTap={{ scale: 0.92 }}
+                    transition={{ duration: 0.08, ease }}
+                    className="flex items-center justify-center rounded-xl px-4 text-[11px] font-black tracking-wider text-amber-400"
+                    style={{ background: "rgba(200,155,60,0.15)", border: "1px solid rgba(200,155,60,0.25)" }}
+                  >
+                    OK
+                  </motion.button>
+                </div>
+              </div>
+            </motion.div>
           )}
-        </div>
-        <div className="flex gap-1">
-          {LOGIN_REWARDS.map((r, i) => {
-            const dayIdx = loginBonus.dayInCycle - 1;
-            const isCurrent = i === dayIdx % LOGIN_REWARDS.length;
-            const isPast = i < dayIdx % LOGIN_REWARDS.length || (loginBonus.cycle > 1 && i < LOGIN_REWARDS.length);
-            return (
-              <div
-                key={r.day}
-                className="flex flex-1 flex-col items-center rounded-lg py-1.5"
+        </AnimatePresence>
+
+        {/* ── Login Bonus ───────────────────────────────────────────────── */}
+        <div
+          className="mb-4 rounded-2xl px-4 py-4"
+          style={{
+            background: "rgba(122,111,160,0.05)",
+            border: "1px solid rgba(122,111,160,0.1)",
+          }}
+        >
+          <div className="mb-3 flex items-center justify-between">
+            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-violet/50">
+              Login Diário · Dia {loginBonus.dayInCycle}
+            </p>
+            {canClaimLogin ? (
+              <motion.button
+                onClick={claimLoginBonus}
+                whileTap={{ scale: 0.92 }}
+                transition={{ duration: 0.08, ease }}
+                className="rounded-lg px-3 py-1.5 text-[9px] font-black tracking-wider text-void"
                 style={{
-                  background: isCurrent ? "rgba(200,155,60,0.15)" : isPast ? "rgba(122,111,160,0.06)" : "transparent",
-                  border: `1px solid ${isCurrent ? "rgba(200,155,60,0.4)" : "rgba(122,111,160,0.1)"}`,
+                  background: "linear-gradient(135deg, rgb(200,155,60) 0%, rgb(180,130,40) 100%)",
+                  boxShadow: "0 2px 10px rgba(200,155,60,0.35)",
                 }}
               >
-                <span className="text-[10px]">{r.icon}</span>
-                <span className="text-[7px] text-violet/40">{r.day}</span>
-              </div>
+                {currentReward.icon} RESGATAR
+              </motion.button>
+            ) : (
+              <span className="text-[9px] text-violet/30">Resgatado ✓</span>
+            )}
+          </div>
+          <div className="flex gap-1.5">
+            {LOGIN_REWARDS.map((r, i) => {
+              const dayIdx = loginBonus.dayInCycle - 1;
+              const isCurrent = i === dayIdx % LOGIN_REWARDS.length;
+              const isPast = i < dayIdx % LOGIN_REWARDS.length;
+              return (
+                <div
+                  key={r.day}
+                  className="flex flex-1 flex-col items-center gap-0.5 rounded-xl py-2"
+                  style={{
+                    background: isCurrent
+                      ? "linear-gradient(135deg, rgba(200,155,60,0.18) 0%, rgba(200,155,60,0.06) 100%)"
+                      : isPast ? "rgba(100,220,120,0.06)" : "rgba(122,111,160,0.04)",
+                    border: `1px solid ${isCurrent ? "rgba(200,155,60,0.35)" : isPast ? "rgba(100,220,120,0.15)" : "rgba(122,111,160,0.08)"}`,
+                    boxShadow: isCurrent ? "0 0 12px rgba(200,155,60,0.1)" : "none",
+                  }}
+                >
+                  <span className="text-[11px]">{isPast ? "✓" : r.icon}</span>
+                  <span className="text-[7px] font-bold" style={{ color: isCurrent ? "rgb(200,155,60)" : isPast ? "rgb(100,220,120)" : "rgba(122,111,160,0.4)" }}>{r.day}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ── Section: Batalha ─────────────────────────────────────────── */}
+        <SectionLabel icon="⚔" label="Batalha" />
+        <div className="mb-4 grid grid-cols-2 gap-2.5">
+          <GameCard icon="🏯" title="Masmorra" sub={`${clearedDungeons}/${DUNGEONS.length} claras`} color="rgb(90,150,255)" onClick={onDungeon} />
+          <GameCard icon="⚔" title="Arena" sub={`Rating ${save.arena.rating}`} color="rgb(255,100,80)" onClick={onArena} />
+          <GameCard icon="🗼" title="Torre" sub={save.tower.bestFloor > 0 ? `${save.tower.bestFloor}F` : "Não iniciada"} color="rgb(170,130,255)" onClick={onTorre} />
+          <GameCard icon="💀" title="Boss Hunt" sub="Chefões semanais" color="rgb(255,80,80)" onClick={onBossHunt} badge={save.bossHunt.weeklyDefeated.length > 0 ? undefined : "!"} />
+        </div>
+
+        {/* ── Section: Economia ────────────────────────────────────────── */}
+        <SectionLabel icon="◆" label="Economia" />
+        <div className="mb-4 grid grid-cols-2 gap-2.5">
+          <GameCard icon="✦" title="Invocar" sub={`${wallet.selosDeInvocacao} selos`} color="rgb(200,155,60)" onClick={onInvocar} />
+          <GameCard icon="🛒" title="Mercado" sub={`${wallet.ouro.toLocaleString("pt-BR")} ouro`} color="rgb(255,160,60)" onClick={onMercado} />
+          <GameCard icon="🐪" title="Caravana" sub={save.caravan.inTransit ? "Em trânsito..." : "Livre"} color="rgb(200,155,60)" onClick={onCaravana} badge={save.caravan.inTransit ? "►" : undefined} />
+          <GameCard icon="🎫" title="Battle Pass" sub={`Nível ${save.battlePass.level}/40`} color="rgb(200,155,60)" onClick={onBattlePass} />
+        </div>
+
+        {/* ── Section: Exploração ──────────────────────────────────────── */}
+        <SectionLabel icon="🌍" label="Exploração" />
+        <div className="mb-4 grid grid-cols-2 gap-2.5">
+          <GameCard icon="🗺" title="Mapa Mundial" sub={`${save.worldMap.discoveredRegions.length} regiões`} color="rgb(80,200,180)" onClick={onWorldMap} />
+          <GameCard icon="💬" title="NPCs" sub="Diálogos & histórias" color="rgb(100,210,180)" onClick={onNpcDialogue} />
+        </div>
+
+        {/* ── Dungeon Progress ─────────────────────────────────────────── */}
+        <SectionLabel icon="🏯" label="Masmorras Recentes" />
+        <div className="mb-4 flex flex-col gap-2">
+          {DUNGEONS.slice(0, 4).map((d, i) => {
+            const prog = save.dungeon.find((dp) => dp.dungeonId === d.dungeonId);
+            const rank = prog?.bestRank ?? "–";
+            const runs = prog?.totalRuns ?? 0;
+            const rankColor = RANK_COLORS[rank] ?? RANK_COLORS["–"];
+            return (
+              <motion.button
+                key={d.dungeonId}
+                onClick={onDungeon}
+                whileTap={{ scale: 0.97 }}
+                transition={{ duration: 0.08, ease }}
+                className="flex items-center gap-3 rounded-xl px-4 py-3 text-left"
+                style={{
+                  background: rank !== "–" ? "rgba(122,111,160,0.06)" : "rgba(122,111,160,0.03)",
+                  border: `1px solid ${rank !== "–" ? "rgba(122,111,160,0.12)" : "rgba(122,111,160,0.07)"}`,
+                }}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                // @ts-expect-error motion custom prop
+                transition={{ duration: 0.25, ease, delay: i * 0.04 }}
+              >
+                <div
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-base"
+                  style={{
+                    background: rank !== "–" ? `${rankColor}15` : "rgba(122,111,160,0.06)",
+                    border: `1px solid ${rank !== "–" ? `${rankColor}25` : "rgba(122,111,160,0.08)"}`,
+                  }}
+                >
+                  🏯
+                </div>
+                <div className="flex-1">
+                  <p className="text-[11px] font-bold text-cream/85">{d.name}</p>
+                  <p className="text-[9px] text-violet/40">Nv.{d.recommendedLevel} · {runs > 0 ? `${runs} run${runs > 1 ? "s" : ""}` : "Nunca explorada"}</p>
+                </div>
+                {rank !== "–" ? (
+                  <div
+                    className="flex h-8 w-8 items-center justify-center rounded-lg text-[11px] font-black"
+                    style={{
+                      background: `${rankColor}15`,
+                      border: `1px solid ${rankColor}35`,
+                      color: rankColor,
+                      boxShadow: `0 0 8px ${rankColor}20`,
+                    }}
+                  >
+                    {rank}
+                  </div>
+                ) : (
+                  <span className="text-[10px] text-violet/30">→</span>
+                )}
+              </motion.button>
             );
           })}
         </div>
-      </div>
 
-      {/* Quick actions */}
-      <p className="mb-3 text-[9px] font-bold uppercase tracking-[0.25em] text-violet/45">
-        Ações Rápidas
-      </p>
-      <div className="mb-5 grid grid-cols-2 gap-3">
-        <ActionCard
-          icon="✦"
-          title="Invocar"
-          sub={`${wallet.selosDeInvocacao} selos disponíveis`}
-          accent="rgba(200,155,60,0.8)"
-          onClick={onInvocar}
-        />
-        <ActionCard
-          icon="⚔"
-          title="Masmorra"
-          sub={`${clearedDungeons}/${totalDungeons} completadas`}
-          accent="rgba(100,160,255,0.7)"
-          onClick={onDungeon}
-        />
-        <ActionCard
-          icon="⚔"
-          title="Arena"
-          sub={`Rating: ${save.arena.rating}`}
-          accent="rgba(100,160,255,0.7)"
-          onClick={onArena}
-        />
-        <ActionCard
-          icon="◆"
-          title="Mercado"
-          sub={`${wallet.ouro.toLocaleString("pt-BR")} ouro`}
-          accent="rgba(255,140,80,0.7)"
-          onClick={onMercado}
-        />
-        <ActionCard
-          icon="★"
-          title="Battle Pass"
-          sub={`Nível ${save.battlePass.level} / 40`}
-          accent="rgba(200,155,60,0.8)"
-          onClick={onBattlePass}
-        />
-        <ActionCard
-          icon="🏛"
-          title="Torre"
-          sub={`Melhor: ${save.tower.bestFloor}F`}
-          accent="rgba(170,130,255,0.8)"
-          onClick={onTorre}
-        />
-        <ActionCard
-          icon="☠"
-          title="Boss Hunt"
-          sub="Chefões semanais"
-          accent="rgba(255,100,60,0.8)"
-          onClick={onBossHunt}
-        />
-        <ActionCard
-          icon="◎"
-          title="Mapa"
-          sub={`${save.worldMap.discoveredRegions.length} regiões`}
-          accent="rgba(100,180,255,0.8)"
-          onClick={onWorldMap}
-        />
-        <ActionCard
-          icon="💬"
-          title="NPCs"
-          sub="Diálogos"
-          accent="rgba(100,220,180,0.8)"
-          onClick={onNpcDialogue}
-        />
-        <ActionCard
-          icon="🐫"
-          title="Caravana"
-          sub={save.caravan.inTransit ? "Em trânsito" : "Livre"}
-          accent="rgba(200,155,60,0.8)"
-          onClick={onCaravana}
-        />
-      </div>
-
-      {/* Dungeon preview */}
-      <p className="mb-3 text-[9px] font-bold uppercase tracking-[0.25em] text-violet/45">
-        Masmorras
-      </p>
-      <div className="flex flex-col gap-2 mb-5">
-        {DUNGEONS.slice(0, 4).map((d) => {
-          const prog = save.dungeon.find((dp) => dp.dungeonId === d.dungeonId);
-          const bestRank = prog?.bestRank ?? "–";
-          const runs = prog?.totalRuns ?? 0;
-          return (
-            <div
-              key={d.dungeonId}
-              className="flex items-center justify-between rounded-xl border border-violet/10 px-4 py-3"
-              style={{ background: "rgba(122,111,160,0.04)" }}
-            >
-              <div>
-                <p className="text-[11px] font-bold text-cream/80">{d.name}</p>
-                <p className="text-[9px] text-violet/40">Nv.{d.recommendedLevel} · {runs} tentativa{runs !== 1 ? "s" : ""}</p>
-              </div>
-              <div className="flex flex-col items-end gap-0.5">
-                <span className="text-[11px] font-black" style={{ color: bestRank !== "–" ? "rgb(200,155,60)" : "rgba(122,111,160,0.3)" }}>
-                  {bestRank !== "–" ? `Rank ${bestRank}` : "Não iniciado"}
-                </span>
-                <span className="text-[8px] text-violet/30">{d.stages} andares</span>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Daily missions */}
-      <div className="mb-3 flex items-center justify-between">
-        <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-violet/45">Missões Diárias</p>
-        <motion.button
-          onClick={onDailyChallenges}
-          whileTap={{ scale: 0.94 }}
-          transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
-          className="text-[8px] font-bold tracking-wider text-amber-400/70"
-        >
-          Ver todas →
-        </motion.button>
-      </div>
-      <div className="flex flex-col gap-2">
-        {DAILY_MISSIONS.map((m) => (
-          <div
-            key={m.id}
-            className="flex items-center justify-between rounded-xl border border-violet/10 px-4 py-3"
-            style={{ background: m.done ? "rgba(100,220,140,0.04)" : "rgba(122,111,160,0.04)" }}
+        {/* ── Daily Missions ────────────────────────────────────────────── */}
+        <div className="mb-2 flex items-center justify-between">
+          <SectionLabel icon="📋" label="Missões Diárias" inline />
+          <motion.button
+            onClick={onDailyChallenges}
+            whileTap={{ scale: 0.94 }}
+            transition={{ duration: 0.08, ease }}
+            className="text-[9px] font-bold tracking-wider text-amber-400/70"
           >
-            <div className="flex items-center gap-3">
+            Ver todas →
+          </motion.button>
+        </div>
+        <div className="mb-2 flex flex-col gap-2">
+          {[
+            { id: "login",   label: "Fazer login hoje",       done: true,  xp: 20  },
+            { id: "invocar", label: "Realizar 1 invocação",   done: false, xp: 30  },
+            { id: "dungeon", label: "Completar 1 masmorra",   done: false, xp: 50  },
+          ].map((m) => (
+            <div
+              key={m.id}
+              className="flex items-center gap-3 rounded-xl px-4 py-3"
+              style={{
+                background: m.done ? "rgba(100,220,120,0.04)" : "rgba(122,111,160,0.04)",
+                border: `1px solid ${m.done ? "rgba(100,220,120,0.12)" : "rgba(122,111,160,0.08)"}`,
+              }}
+            >
               <div
-                className="flex h-5 w-5 items-center justify-center rounded-full border text-[8px] font-bold"
+                className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[9px] font-bold"
                 style={{
-                  borderColor: m.done ? "rgba(100,220,140,0.5)" : "rgba(122,111,160,0.2)",
-                  color: m.done ? "rgb(100,220,140)" : "rgba(122,111,160,0.4)",
+                  background: m.done ? "rgba(100,220,120,0.15)" : "transparent",
+                  border: `1px solid ${m.done ? "rgba(100,220,120,0.4)" : "rgba(122,111,160,0.2)"}`,
+                  color: m.done ? "rgb(100,220,120)" : "rgba(122,111,160,0.4)",
                 }}
               >
-                {m.done ? "✓" : "○"}
+                {m.done ? "✓" : ""}
               </div>
-              <span className="text-[11px]" style={{ color: m.done ? "rgba(255,255,255,0.5)" : "rgba(255,255,255,0.8)" }}>
+              <span className="flex-1 text-[11px]" style={{ color: m.done ? "rgba(255,255,255,0.4)" : "rgba(255,255,255,0.8)" }}>
                 {m.label}
               </span>
+              <span className="text-[9px] font-bold" style={{ color: m.done ? "rgba(122,111,160,0.3)" : "rgb(200,155,60)" }}>
+                +{m.xp} XP
+              </span>
             </div>
-            <span className="text-[9px] font-bold" style={{ color: m.done ? "rgba(122,111,160,0.3)" : "rgb(200,155,60)" }}>
-              +{m.xp} XP
-            </span>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </motion.div>
   );
 }
 
-function ActionCard({
-  icon, title, sub, accent, onClick, disabled,
+function MiniStat({ icon, value, label }: { icon: string; value: string; label: string }) {
+  return (
+    <div className="flex items-center gap-1">
+      <span className="text-[11px]">{icon}</span>
+      <div>
+        <p className="text-[10px] font-bold leading-none text-cream/75">{value}</p>
+        <p className="text-[7px] text-violet/40">{label}</p>
+      </div>
+    </div>
+  );
+}
+
+function SectionLabel({ icon, label, inline }: { icon: string; label: string; inline?: boolean }) {
+  return (
+    <div className={`flex items-center gap-2 ${inline ? "" : "mb-3"}`}>
+      <span className="text-[12px]">{icon}</span>
+      <span className="text-[9px] font-black uppercase tracking-[0.22em] text-violet/50">{label}</span>
+      {!inline && <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg, rgba(122,111,160,0.15) 0%, transparent 100%)" }} />}
+    </div>
+  );
+}
+
+function GameCard({
+  icon, title, sub, color, onClick, badge,
 }: {
-  icon: string; title: string; sub: string; accent: string;
-  onClick?: () => void; disabled?: boolean;
+  icon: string; title: string; sub: string; color: string;
+  onClick: () => void; badge?: string;
 }) {
   return (
     <motion.button
-      onClick={disabled ? undefined : onClick}
-      whileTap={disabled ? undefined : { scale: 0.96 }}
-      transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
-      className="flex flex-col items-start rounded-xl border px-4 py-3.5 text-left"
+      onClick={onClick}
+      whileTap={{ scale: 0.94 }}
+      transition={{ duration: 0.1, ease: [0.23, 1, 0.32, 1] }}
+      className="relative flex flex-col items-start rounded-2xl px-4 py-4 text-left"
       style={{
-        borderColor: disabled ? "rgba(122,111,160,0.12)" : `${accent}30`,
-        background: disabled ? "rgba(10,10,22,0.6)" : `linear-gradient(135deg, ${accent}10 0%, rgba(10,10,22,0.8) 100%)`,
-        opacity: disabled ? 0.5 : 1,
-        cursor: disabled ? "default" : "pointer",
+        background: `linear-gradient(135deg, ${color}12 0%, rgba(6,7,15,0.9) 100%)`,
+        border: `1px solid ${color}20`,
+        boxShadow: `0 4px 16px ${color}06, 0 1px 0 ${color}10 inset`,
       }}
     >
-      <span className="mb-2 text-xl" style={{ color: disabled ? "rgba(122,111,160,0.4)" : accent }}>
+      {badge && (
+        <div
+          className="absolute right-2.5 top-2.5 flex h-4 w-4 items-center justify-center rounded-full text-[8px] font-black"
+          style={{ background: "rgb(255,80,80)", color: "white", boxShadow: "0 0 8px rgba(255,80,80,0.5)" }}
+        >
+          {badge}
+        </div>
+      )}
+      <div
+        className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl text-xl"
+        style={{
+          background: `${color}15`,
+          border: `1px solid ${color}25`,
+          boxShadow: `0 2px 10px ${color}10`,
+        }}
+      >
         {icon}
-      </span>
-      <span className="text-[12px] font-bold tracking-wide text-cream/80">{title}</span>
-      <span className="text-[10px] text-violet/50">{sub}</span>
+      </div>
+      <span className="text-[12px] font-bold leading-tight text-cream/90">{title}</span>
+      <span className="mt-0.5 text-[9px] leading-tight" style={{ color: `${color}90` }}>{sub}</span>
     </motion.button>
   );
 }

@@ -48,12 +48,12 @@ export type Profile = {
 
 type Tab = "mundo" | "cartas" | "invocar" | "guilda" | "perfil";
 
-const TABS: { id: Tab; label: string; icon: string }[] = [
-  { id: "mundo",   label: "Mundo",   icon: "◎" },
-  { id: "cartas",  label: "Cartas",  icon: "▣" },
-  { id: "invocar", label: "Invocar", icon: "✦" },
-  { id: "guilda",  label: "Guilda",  icon: "⚜" },
-  { id: "perfil",  label: "Perfil",  icon: "◉" },
+const TABS: { id: Tab; label: string; icon: string; color: string }[] = [
+  { id: "mundo",   label: "Mundo",   icon: "🌍", color: "rgb(90,160,255)"   },
+  { id: "cartas",  label: "Cartas",  icon: "🃏", color: "rgb(180,110,255)"  },
+  { id: "invocar", label: "Invocar", icon: "✦",  color: "rgb(200,155,60)"   },
+  { id: "guilda",  label: "Guilda",  icon: "⚜",  color: "rgb(100,210,130)"  },
+  { id: "perfil",  label: "Perfil",  icon: "👤", color: "rgb(232,217,160)"  },
 ];
 
 const ease = [0.23, 1, 0.32, 1] as const;
@@ -99,26 +99,46 @@ export default function GamePage() {
 
   if (!user) {
     return (
-      <div className="flex h-full items-center justify-center bg-void">
-        <div className="h-5 w-5 animate-spin rounded-full border-2 border-amber/30 border-t-amber" />
+      <div className="flex h-full items-center justify-center bg-atmosphere">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-amber/20 border-t-amber" />
+          <span className="text-[9px] tracking-[0.3em] text-violet/40">CARREGANDO</span>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex h-full flex-col bg-void">
+    <div className="bg-atmosphere flex h-full flex-col">
       {/* Top bar */}
       <header
-        className="flex items-center justify-between border-b border-amber/12 px-4 py-2.5"
-        style={{ backgroundColor: "rgba(10,10,22,0.97)" }}
+        className="relative flex items-center justify-between px-4 py-3"
+        style={{
+          background: "linear-gradient(180deg, rgba(6,7,15,0.98) 0%, rgba(10,10,22,0.92) 100%)",
+          borderBottom: "1px solid rgba(200,155,60,0.1)",
+          boxShadow: "0 1px 0 rgba(200,155,60,0.04), 0 4px 20px rgba(0,0,0,0.4)",
+        }}
       >
-        <span
-          className="text-[11px] font-black tracking-[0.22em] text-cream/85"
-          style={{ fontFamily: "var(--font-cinzel)" }}
-        >
-          {(profile?.characterName ?? user.username).toUpperCase()}
-        </span>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
+          <div
+            className="flex h-7 w-7 items-center justify-center rounded-lg text-[11px] font-black"
+            style={{
+              background: "linear-gradient(135deg, rgba(200,155,60,0.25) 0%, rgba(200,155,60,0.08) 100%)",
+              border: "1px solid rgba(200,155,60,0.3)",
+              color: "rgb(200,155,60)",
+              fontFamily: "var(--font-cinzel)",
+            }}
+          >
+            {(profile?.characterName ?? user.username)[0].toUpperCase()}
+          </div>
+          <span
+            className="text-[11px] font-black tracking-[0.2em] text-cream/90"
+            style={{ fontFamily: "var(--font-cinzel)" }}
+          >
+            {(profile?.characterName ?? user.username).toUpperCase()}
+          </span>
+        </div>
+        <div className="flex items-center gap-1.5">
           <Chip icon="✦" value={wallet.cristaisAstra} color="rgb(170,130,255)" />
           <Chip icon="◆" value={wallet.ouro} color="rgb(200,155,60)" />
         </div>
@@ -161,32 +181,57 @@ export default function GamePage() {
 
       {/* Bottom nav */}
       <nav
-        className="flex border-t border-amber/12"
-        style={{ backgroundColor: "rgba(10,10,22,0.97)" }}
+        className="relative flex"
+        style={{
+          background: "linear-gradient(0deg, rgba(6,7,15,0.99) 0%, rgba(10,10,22,0.96) 100%)",
+          borderTop: "1px solid rgba(200,155,60,0.08)",
+          boxShadow: "0 -4px 24px rgba(0,0,0,0.5), 0 -1px 0 rgba(200,155,60,0.05)",
+          paddingBottom: "env(safe-area-inset-bottom, 0px)",
+        }}
       >
-        {TABS.map(({ id, label, icon }) => {
+        {TABS.map(({ id, label, icon, color }) => {
           const active = tab === id;
           return (
             <motion.button
               key={id}
               onClick={() => setTab(id)}
-              whileTap={{ scale: 0.9 }}
-              transition={{ duration: 0.08, ease }}
-              className="relative flex flex-1 flex-col items-center justify-center gap-0.5 py-3"
-              style={{
-                color: active ? "rgb(200,155,60)" : "rgba(122,111,160,0.55)",
-                transition: "color 150ms cubic-bezier(0.23,1,0.32,1)",
-              }}
+              whileTap={{ scale: 0.88 }}
+              transition={{ duration: 0.1, ease }}
+              className="relative flex flex-1 flex-col items-center justify-center gap-1 py-3.5"
             >
               {active && (
                 <motion.div
-                  layoutId="nav-pill"
-                  className="absolute top-0 h-[2px] w-10 rounded-full bg-amber"
+                  layoutId="nav-glow"
+                  className="absolute inset-0 rounded-t-2xl"
+                  style={{ background: `radial-gradient(ellipse at 50% 100%, ${color}18 0%, transparent 70%)` }}
+                  transition={{ duration: 0.3, ease }}
+                />
+              )}
+              {active && (
+                <motion.div
+                  layoutId="nav-line"
+                  className="absolute top-0 left-1/2 -translate-x-1/2 h-[2px] w-8 rounded-full"
+                  style={{ background: color, boxShadow: `0 0 8px ${color}` }}
                   transition={{ duration: 0.25, ease }}
                 />
               )}
-              <span className="text-[15px] leading-none">{icon}</span>
-              <span className="text-[8px] font-bold tracking-[0.12em]">{label.toUpperCase()}</span>
+              <motion.span
+                className="relative z-10 text-[18px] leading-none"
+                animate={{ scale: active ? 1.1 : 1, y: active ? -1 : 0 }}
+                transition={{ duration: 0.2, ease }}
+                style={{ filter: active ? `drop-shadow(0 0 6px ${color}80)` : "none" }}
+              >
+                {icon}
+              </motion.span>
+              <span
+                className="relative z-10 text-[7.5px] font-bold tracking-[0.14em]"
+                style={{
+                  color: active ? color : "rgba(122,111,160,0.4)",
+                  transition: "color 200ms",
+                }}
+              >
+                {label.toUpperCase()}
+              </span>
             </motion.button>
           );
         })}
@@ -198,10 +243,15 @@ export default function GamePage() {
 function Chip({ icon, value, color }: { icon: string; value: number; color: string }) {
   return (
     <div
-      className="flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-bold"
-      style={{ borderColor: `${color}33`, color, backgroundColor: `${color}10` }}
+      className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[11px] font-bold"
+      style={{
+        background: `linear-gradient(135deg, ${color}18 0%, ${color}08 100%)`,
+        border: `1px solid ${color}28`,
+        color,
+        boxShadow: `0 1px 6px ${color}10, 0 0 0 0.5px ${color}15 inset`,
+      }}
     >
-      <span>{icon}</span>
+      <span className="text-[10px]">{icon}</span>
       <span>{value.toLocaleString("pt-BR")}</span>
     </div>
   );

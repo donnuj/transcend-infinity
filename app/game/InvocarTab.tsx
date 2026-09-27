@@ -208,25 +208,53 @@ function BannerScreen({
 
       {/* Banner art */}
       <div
-        className="relative mb-4 overflow-hidden rounded-2xl border border-amber/20"
+        className="relative mb-4 overflow-hidden rounded-2xl"
         style={{
-          height: 180,
-          background: "linear-gradient(160deg, rgba(40,25,5,0.95) 0%, rgba(10,10,22,1) 55%, rgba(30,10,50,0.95) 100%)",
-          boxShadow: "0 0 60px rgba(200,155,60,0.07) inset",
+          height: 190,
+          background: "linear-gradient(160deg, rgba(50,30,5,0.98) 0%, rgba(8,8,20,1) 50%, rgba(35,10,60,0.98) 100%)",
+          border: "1px solid rgba(200,155,60,0.18)",
+          boxShadow: "0 8px 40px rgba(0,0,0,0.5), 0 0 60px rgba(200,155,60,0.05) inset",
         }}
       >
-        <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse 70% 60% at 50% 30%, rgba(200,155,60,0.1) 0%, transparent 70%)" }} />
+        {/* Radial glow */}
+        <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse 80% 70% at 50% 20%, rgba(200,155,60,0.13) 0%, transparent 70%)" }} />
+        {/* Corner shine */}
+        <div className="pointer-events-none absolute -left-10 -top-10 h-40 w-40 rounded-full opacity-30" style={{ background: "radial-gradient(circle, rgba(200,155,60,0.2) 0%, transparent 70%)" }} />
+        {/* Decorative stars */}
+        <div className="pointer-events-none absolute right-6 top-8 text-[8px] text-amber/20 animate-pulse-glow">✦</div>
+        <div className="pointer-events-none absolute right-16 top-5 text-[5px] text-amber/15 animate-pulse-glow" style={{ animationDelay: "0.8s" }}>✦</div>
+        <div className="pointer-events-none absolute left-6 top-12 text-[6px] text-violet/20 animate-pulse-glow" style={{ animationDelay: "1.3s" }}>✦</div>
+
         {banner.isLimited && (
-          <div className="absolute right-3 top-3 rounded-full border border-amber/40 px-2 py-0.5 text-[8px] font-bold text-amber/80 bg-amber/10">
-            LIMITADO
+          <div
+            className="absolute right-3 top-3 rounded-full px-2.5 py-1 text-[7.5px] font-black tracking-wider"
+            style={{
+              background: "linear-gradient(135deg, rgba(200,155,60,0.3) 0%, rgba(200,155,60,0.1) 100%)",
+              border: "1px solid rgba(200,155,60,0.4)",
+              color: "rgb(200,155,60)",
+            }}
+          >
+            ⚡ LIMITADO
           </div>
         )}
-        <div className="absolute bottom-0 left-0 right-0 px-5 pb-4">
-          <p className="mb-0.5 text-[9px] font-bold tracking-[0.3em] text-amber/50 uppercase">Banner</p>
-          <h3 className="text-lg font-black tracking-[0.1em] text-cream" style={{ fontFamily: "var(--font-cinzel)", textShadow: "0 0 20px rgba(200,155,60,0.5)" }}>
-            {banner.name.toUpperCase()}
+
+        {/* Big decorative portrait */}
+        <div
+          className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-7xl opacity-15"
+          style={{ filter: "blur(1px)" }}
+        >
+          ✦
+        </div>
+
+        <div className="absolute bottom-0 left-0 right-0 px-5 pb-5">
+          <p className="mb-1 text-[8px] font-black tracking-[0.4em] text-amber/40 uppercase">Invocação</p>
+          <h3
+            className="text-[20px] font-black leading-tight text-cream"
+            style={{ fontFamily: "var(--font-cinzel)", textShadow: "0 0 30px rgba(200,155,60,0.6), 0 2px 4px rgba(0,0,0,0.8)" }}
+          >
+            {banner.name}
           </h3>
-          <p className="text-[10px] text-violet/50 mt-0.5">{banner.lore}</p>
+          <p className="mt-1 text-[9px] text-violet/45">{banner.lore}</p>
         </div>
       </div>
 
@@ -301,27 +329,60 @@ function PullBtn({ label, cost, selos, loading, onClick, highlight }: {
   return (
     <motion.button
       onClick={canAfford && !loading ? onClick : undefined}
-      whileTap={canAfford && !loading ? { scale: 0.97 } : undefined}
-      transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
+      whileTap={canAfford && !loading ? { scale: 0.96 } : undefined}
+      transition={{ duration: 0.1, ease: [0.23, 1, 0.32, 1] }}
       disabled={!canAfford || loading}
-      className="flex items-center justify-between rounded-xl border px-5 py-3.5"
-      style={{
-        borderColor: highlight ? (canAfford ? "rgba(200,155,60,0.6)" : "rgba(200,155,60,0.15)") : (canAfford ? "rgba(122,111,160,0.3)" : "rgba(122,111,160,0.12)"),
-        background: highlight ? (canAfford ? "rgba(200,155,60,0.1)" : "rgba(200,155,60,0.03)") : "rgba(122,111,160,0.05)",
+      className="relative flex items-center justify-between overflow-hidden rounded-2xl px-5 py-4"
+      style={highlight ? {
+        background: canAfford
+          ? "linear-gradient(135deg, rgba(200,155,60,0.22) 0%, rgba(160,100,20,0.12) 100%)"
+          : "rgba(200,155,60,0.04)",
+        border: `1px solid ${canAfford ? "rgba(200,155,60,0.45)" : "rgba(200,155,60,0.12)"}`,
+        boxShadow: canAfford ? "0 4px 20px rgba(200,155,60,0.12), 0 1px 0 rgba(200,155,60,0.15) inset" : "none",
+        opacity: canAfford ? 1 : 0.5,
+        cursor: canAfford && !loading ? "pointer" : "default",
+      } : {
+        background: canAfford ? "rgba(122,111,160,0.07)" : "rgba(122,111,160,0.03)",
+        border: `1px solid ${canAfford ? "rgba(122,111,160,0.2)" : "rgba(122,111,160,0.08)"}`,
         opacity: canAfford ? 1 : 0.45,
         cursor: canAfford && !loading ? "pointer" : "default",
       }}
     >
-      <span className="text-[13px] font-bold tracking-wider" style={{ color: highlight ? "rgb(232,217,160)" : "rgba(122,111,160,0.8)" }}>
-        {label}
-      </span>
-      <div className="flex items-center gap-1.5">
+      {highlight && canAfford && (
+        <div className="pointer-events-none absolute inset-0" style={{ background: "linear-gradient(90deg, transparent 0%, rgba(200,155,60,0.04) 50%, transparent 100%)" }} />
+      )}
+      <div>
+        <p className="text-[13px] font-black tracking-wide" style={{ color: highlight ? "rgb(232,217,160)" : "rgba(200,210,230,0.7)" }}>
+          {label}
+        </p>
+        {highlight && canAfford && (
+          <p className="text-[8px] font-bold tracking-wider" style={{ color: "rgba(200,155,60,0.6)" }}>
+            MELHOR VALOR
+          </p>
+        )}
+      </div>
+      <div className="flex items-center gap-2">
         {loading ? (
-          <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-amber/30 border-t-amber inline-block" />
+          <div className="flex items-center gap-2">
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-amber/30 border-t-amber inline-block" />
+            <span className="text-[10px] text-violet/40">Invocando...</span>
+          </div>
         ) : (
-          <span className="text-[12px] font-bold" style={{ color: highlight ? "rgb(200,155,60)" : "rgba(122,111,160,0.7)" }}>
-            {cost} Selo{cost > 1 ? "s" : ""}
-          </span>
+          <div
+            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-bold"
+            style={highlight ? {
+              background: canAfford ? "rgba(200,155,60,0.2)" : "rgba(200,155,60,0.06)",
+              color: canAfford ? "rgb(200,155,60)" : "rgba(200,155,60,0.4)",
+              border: "1px solid rgba(200,155,60,0.2)",
+            } : {
+              background: "rgba(122,111,160,0.1)",
+              color: "rgba(122,111,160,0.7)",
+              border: "1px solid rgba(122,111,160,0.15)",
+            }}
+          >
+            <span>✦</span>
+            <span>{cost} {cost > 1 ? "Selos" : "Selo"}</span>
+          </div>
         )}
       </div>
     </motion.button>
