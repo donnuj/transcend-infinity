@@ -100,6 +100,13 @@ export default function GamePage() {
     loadCloudSave().finally(() => setUser(u));
   }, [router]);
 
+  // Keep-alive: mantém o backend no Render acordado enquanto o jogador está na sessão
+  useEffect(() => {
+    const ping = () => api.get("/health").catch(() => null);
+    const id = setInterval(ping, 10 * 60 * 1000);
+    return () => clearInterval(id);
+  }, []);
+
   function handleLogout() {
     clearSession();
     router.replace("/login");

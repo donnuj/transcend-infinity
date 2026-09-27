@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { api } from "@/lib/api";
@@ -10,6 +10,7 @@ type Mode = "login" | "register";
 
 type AuthResponse = {
   accessToken: string;
+  refreshToken: string;
   profile: { id: number; username: string; email: string; level: number };
 };
 
@@ -23,6 +24,15 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [feedback, setFeedback] = useState<{ msg: string; ok: boolean } | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [slowServer, setSlowServer] = useState(false);
+  const slowTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (!isPending) {
+      if (slowTimer.current) clearTimeout(slowTimer.current);
+      setSlowServer(false);
+    }
+  }, [isPending]);
 
   function switchMode(next: Mode) {
     setFeedback(null);
@@ -33,22 +43,16 @@ export default function LoginPage() {
     e.preventDefault();
     setFeedback(null);
 
+    slowTimer.current = setTimeout(() => setSlowServer(true), 4000);
+
     startTransition(async () => {
       try {
-        if (mode === "register") {
-          const res = await api.post<AuthResponse>("/auth/register", {
-            email,
-            username,
-            password,
-          });
-          saveSession(res.accessToken, { ...res.profile, id: String(res.profile.id) });
-        } else {
-          const res = await api.post<AuthResponse>("/auth/login", {
-            email,
-            password,
-          });
-          saveSession(res.accessToken, { ...res.profile, id: String(res.profile.id) });
-        }
+        const endpoint = mode === "register" ? "/auth/register" : "/auth/login";
+        const body = mode === "register"
+          ? { email, username, password }
+          : { email, password };
+        const res = await api.post<AuthResponse>(endpoint, body);
+        saveSession(res.accessToken, { ...res.profile, id: String(res.profile.id) }, res.refreshToken);
         router.replace("/game");
       } catch (err) {
         setFeedback({ msg: (err as Error).message, ok: false });
@@ -184,6 +188,21 @@ export default function LoginPage() {
           <AuthButton loading={isPending}>
             {mode === "login" ? "ENTRAR" : "CRIAR CONTA"}
           </AuthButton>
+
+          <AnimatePresence>
+            {slowServer && (
+              <motion.p
+                key="slow"
+                className="mt-3 text-center text-[10px] tracking-wide text-violet/55"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.4 }}
+              >
+                Servidor acordando... pode levar até 30s
+              </motion.p>
+            )}
+          </AnimatePresence>
 
           {/* Divider */}
           <div className="my-5 flex items-center gap-3">
