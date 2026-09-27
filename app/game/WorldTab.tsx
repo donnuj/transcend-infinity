@@ -44,7 +44,7 @@ export default function WorldTab({
   onDailyChallenges: () => void; onBossHunt: () => void; onWorldMap: () => void;
   onNpcDialogue: () => void; onCaravana: () => void;
 }) {
-  const { save, addCurrency, processLogin, collectOfflineRewards } = useGameStore();
+  const { save, addCurrency, processLogin, collectOfflineRewards, incrementDailyProgress } = useGameStore();
   const [offlineReward, setOfflineReward] = useState<{ ouro: number; xp: number } | null>(null);
 
   useEffect(() => {
@@ -76,11 +76,7 @@ export default function WorldTab({
       lb.dayInCycle = lb.dayInCycle >= LOGIN_REWARDS.length ? 1 : lb.dayInCycle + 1;
     });
     processLogin();
-    useGameStore.setState((s) => {
-      const entry = s.save.dailyChallenges.progress.find((p) => p.key === "login_claimed");
-      if (entry) entry.value = 1;
-      else s.save.dailyChallenges.progress.push({ key: "login_claimed", value: 1 });
-    });
+    incrementDailyProgress("login_claimed");
     scheduleSave();
   }
 
