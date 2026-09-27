@@ -16,6 +16,7 @@ type CloudSaveResponse = {
 
 let _revision = 0;
 let _syncTimer: ReturnType<typeof setTimeout> | null = null;
+let _uploading = false;
 
 // Carrega save da nuvem. Retorna true se encontrou um save existente.
 export async function loadCloudSave(): Promise<boolean> {
@@ -23,18 +24,22 @@ export async function loadCloudSave(): Promise<boolean> {
     const res = await api.get<CloudSaveEnvelope | null>("/player/save");
     if (!res || res.data === "null" || !res.data) return false;
 
-    const cloudSave = JSON.parse(res.data);
-    _revision = res.revision ?? 0;
+    let cloudSave: unknown;
+    try { cloudSave = JSON.parse(res.data); } catch { return false; }
+    if (!cloudSave || typeof cloudSave !== "object") return false;
 
-    useGameStore.setState((s) => ({ ...s, save: cloudSave, cloudSynced: true, lastSyncAt: new Date().toISOString() }));
+    _revision = res.revision ?? 0;
+    useGameStore.setState((s) => ({ ...s, save: cloudSave as typeof s.save, cloudSynced: true, lastSyncAt: new Date().toISOString() }));
     return true;
   } catch {
     return false;
   }
 }
 
-// Sobe save para a nuvem.
-export async function uploadCloudSave(): Promise<void> {
+// Sobe save para a nuvem. Em conflito de revisão, re-baixa primeiro e re-tenta uma vez.
+export async function uploadCloudSave(retrying = false): Promise<void> {
+  if (_uploading) return;
+  _uploading = true;
   const { save } = useGameStore.getState();
   const now = new Date().toISOString();
 
@@ -48,8 +53,17 @@ export async function uploadCloudSave(): Promise<void> {
     const res = await api.post<CloudSaveResponse>("/player/save", envelope);
     if (res?.revision != null) _revision = res.revision;
     useGameStore.getState().setCloudSynced(true, now);
-  } catch {
+  } catch (err: unknown) {
+    const status = (err as { status?: number })?.status;
+    if (status === 409 && !retrying) {
+      // Revisão desatualizada — re-sincroniza e tenta uma vez mais
+      await loadCloudSave();
+      _uploading = false;
+      return uploadCloudSave(true);
+    }
     useGameStore.getState().setCloudSynced(false);
+  } finally {
+    _uploading = false;
   }
 }
 

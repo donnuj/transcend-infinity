@@ -8,6 +8,21 @@ import { maxFloorInBudget, calcTowerTimeSeconds, DUNGEON_DURATIONS } from "./dat
 import { COMPANION_MAP } from "./data/companions";
 import { FACTIONS } from "./data/world";
 
+// ── Bonus memo cache (avoids recomputing on every addCurrency call) ───────────
+
+type CompanionBonuses = { xpMult: number; atkMult: number; crystalMult: number; dropMult: number; ouroMult: number };
+type FactionBonuses   = { ouroMult: number; crystalMult: number; xpMult: number; caravanMult: number };
+type HousingBonuses   = { xpMult: number; dropMult: number };
+
+const _bonusCache = {
+  companionKey: "" as unknown,
+  companion: { xpMult: 1, atkMult: 1, crystalMult: 1, dropMult: 1, ouroMult: 1 } as CompanionBonuses,
+  factionKey: null as unknown,
+  faction: { ouroMult: 1, crystalMult: 1, xpMult: 1, caravanMult: 1 } as FactionBonuses,
+  housingKey: null as unknown,
+  housing: { xpMult: 1, dropMult: 1 } as HousingBonuses,
+};
+
 // ── Estado inicial (novo jogador) ─────────────────────────────────────────────
 
 export function newSave(): SaveData {
@@ -630,9 +645,10 @@ export const useGameStore = create<GameStore>()(
         if (!pending) return null;
         if (new Date() < new Date(pending.endTime)) return null;
         set((s) => {
-          const floor = s.save.pendingTower!.targetFloor;
-          if (floor > s.save.tower.bestFloor) s.save.tower.bestFloor = floor;
-          if (floor > s.save.tower.weeklyBest) s.save.tower.weeklyBest = floor;
+          const pt = s.save.pendingTower;
+          if (!pt) return;
+          if (pt.targetFloor > s.save.tower.bestFloor) s.save.tower.bestFloor = pt.targetFloor;
+          if (pt.targetFloor > s.save.tower.weeklyBest) s.save.tower.weeklyBest = pt.targetFloor;
           s.save.pendingTower = null;
         });
         return pending;
@@ -874,9 +890,11 @@ export const useGameStore = create<GameStore>()(
       getCompanionBonuses() {
         const { activeCompanionId, companions } = get().save;
         const comp = companions.find((c) => c.companionId === activeCompanionId);
-        if (!comp) return { xpMult: 1, atkMult: 1, crystalMult: 1, dropMult: 1, ouroMult: 1 };
+        const cacheKey = `${activeCompanionId}|${comp?.form ?? 0}`;
+        if (_bonusCache.companionKey === cacheKey) return _bonusCache.companion;
+        if (!comp) { _bonusCache.companionKey = cacheKey; _bonusCache.companion = { xpMult: 1, atkMult: 1, crystalMult: 1, dropMult: 1, ouroMult: 1 }; return _bonusCache.companion; }
         const def = COMPANION_MAP[comp.companionId];
-        if (!def) return { xpMult: 1, atkMult: 1, crystalMult: 1, dropMult: 1, ouroMult: 1 };
+        if (!def)  { _bonusCache.companionKey = cacheKey; _bonusCache.companion = { xpMult: 1, atkMult: 1, crystalMult: 1, dropMult: 1, ouroMult: 1 }; return _bonusCache.companion; }
         const form = def.forms[comp.form] ?? def.forms[0];
         const bonus = form.bonus;
         let xpMult = 1, atkMult = 1, crystalMult = 1, dropMult = 1, ouroMult = 1;
@@ -886,7 +904,9 @@ export const useGameStore = create<GameStore>()(
         if (bonus.includes("cristais") || bonus.includes("drops cristais")) crystalMult = pct(bonus);
         if (bonus.includes("drop rate")) dropMult = pct(bonus);
         if (bonus.includes("ouro"))   ouroMult    = pct(bonus);
-        return { xpMult, atkMult, crystalMult, dropMult, ouroMult };
+        _bonusCache.companionKey = cacheKey;
+        _bonusCache.companion = { xpMult, atkMult, crystalMult, dropMult, ouroMult };
+        return _bonusCache.companion;
       },
 
       getHeroBonuses(heroId) {
@@ -902,6 +922,7 @@ export const useGameStore = create<GameStore>()(
 
       getFactionBonuses() {
         const reputation = get().save.reputation;
+        if (_bonusCache.factionKey === reputation) return _bonusCache.faction;
         let ouroMult = 1, crystalMult = 1, xpMult = 1, caravanMult = 1;
         for (const entry of reputation) {
           const pts = entry.points;
@@ -916,14 +937,19 @@ export const useGameStore = create<GameStore>()(
             if (pts >= 2000) xpMult = Math.max(xpMult, 1.15);
           }
         }
-        return { ouroMult, crystalMult, xpMult, caravanMult };
+        _bonusCache.factionKey = reputation;
+        _bonusCache.faction = { ouroMult, crystalMult, xpMult, caravanMult };
+        return _bonusCache.faction;
       },
 
       getHousingBonuses() {
         const rooms = get().save.housing.unlockedRooms;
+        if (_bonusCache.housingKey === rooms) return _bonusCache.housing;
         const xpMult = rooms.includes("biblioteca") ? 1.05 : 1;
         const dropMult = rooms.includes("observatorio") ? 1.03 : 1;
-        return { xpMult, dropMult };
+        _bonusCache.housingKey = rooms;
+        _bonusCache.housing = { xpMult, dropMult };
+        return _bonusCache.housing;
       },
 
       // ── Reset ────────────────────────────────────────────────────────────────
