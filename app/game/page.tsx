@@ -28,6 +28,7 @@ import HousingModal from "./HousingModal";
 import CompanionsModal from "./CompanionsModal";
 import AlchemyModal from "./AlchemyModal";
 import WorldMapModal from "./WorldMapModal";
+import NpcDialogueModal from "./NpcDialogueModal";
 
 export type Profile = {
   id: number;
@@ -74,6 +75,7 @@ export default function GamePage() {
   const [showCompanions, setShowCompanions] = useState(false);
   const [showAlchemy, setShowAlchemy] = useState(false);
   const [showWorldMap, setShowWorldMap] = useState(false);
+  const [showNpcDialogue, setShowNpcDialogue] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated()) { router.replace("/login"); return; }
@@ -117,7 +119,7 @@ export default function GamePage() {
       {/* Content */}
       <main className="relative flex-1 overflow-hidden">
         <AnimatePresence mode="wait">
-          {tab === "mundo"   && <WorldTab   key="mundo"   profile={profile} onInvocar={() => setTab("invocar")} onDungeon={() => setShowDungeon(true)} onArena={() => setShowArena(true)} onMercado={() => setShowMercado(true)} onBattlePass={() => setShowBattlePass(true)} onTorre={() => setShowTorre(true)} onDailyChallenges={() => setShowDailyChallenges(true)} onBossHunt={() => setShowBossHunt(true)} onWorldMap={() => setShowWorldMap(true)} />}
+          {tab === "mundo"   && <WorldTab   key="mundo"   profile={profile} onInvocar={() => setTab("invocar")} onDungeon={() => setShowDungeon(true)} onArena={() => setShowArena(true)} onMercado={() => setShowMercado(true)} onBattlePass={() => setShowBattlePass(true)} onTorre={() => setShowTorre(true)} onDailyChallenges={() => setShowDailyChallenges(true)} onBossHunt={() => setShowBossHunt(true)} onWorldMap={() => setShowWorldMap(true)} onNpcDialogue={() => setShowNpcDialogue(true)} />}
           {tab === "cartas"  && <CartasTab  key="cartas" />}
           {tab === "invocar" && <InvocarTab key="invocar" />}
           {tab === "guilda"  && <GuildaTab  key="guilda" onFortress={() => setShowFortress(true)} />}
@@ -142,6 +144,7 @@ export default function GamePage() {
         {showCompanions && <CompanionsModal key="companions" onClose={() => setShowCompanions(false)} />}
         {showAlchemy && <AlchemyModal key="alchemy" onClose={() => setShowAlchemy(false)} />}
         {showWorldMap && <WorldMapModal key="worldmap" onClose={() => setShowWorldMap(false)} />}
+        {showNpcDialogue && <NpcDialogueModal key="npcdialogue" onClose={() => setShowNpcDialogue(false)} />}
       </AnimatePresence>
 
       {/* Bottom nav */}

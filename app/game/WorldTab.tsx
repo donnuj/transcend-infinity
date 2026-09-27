@@ -35,6 +35,7 @@ export default function WorldTab({
   onDailyChallenges,
   onBossHunt,
   onWorldMap,
+  onNpcDialogue,
 }: {
   profile: Profile | null;
   onInvocar: () => void;
@@ -46,6 +47,7 @@ export default function WorldTab({
   onDailyChallenges: () => void;
   onBossHunt: () => void;
   onWorldMap: () => void;
+  onNpcDialogue: () => void;
 }) {
   const { save, addCurrency, processLogin } = useGameStore();
   const playerLevel = save.playerLevel;
@@ -230,6 +232,13 @@ export default function WorldTab({
           sub={`${save.worldMap.discoveredRegions.length} regiões`}
           accent="rgba(100,180,255,0.8)"
           onClick={onWorldMap}
+        />
+        <ActionCard
+          icon="💬"
+          title="NPCs"
+          sub="Diálogos"
+          accent="rgba(100,220,180,0.8)"
+          onClick={onNpcDialogue}
         />
       </div>
 
