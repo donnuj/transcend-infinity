@@ -7,6 +7,7 @@ import { HERO_MAP } from "@/lib/game/data/heroes";
 import { SKILL_MAP } from "@/lib/game/data/skills";
 import { EQUIP_MAP } from "@/lib/game/data/items";
 import { RUNE_MAP } from "@/lib/game/data/items";
+import { HERO_IDENTITY, CLASS_ICON, ELEMENT_RA, RARITY_STARS } from "@/lib/game/data/heroIdentity";
 import { deriveStats, getStatsAtLevel } from "@/lib/game/calc";
 import type { GachaRarity, HeroDef, SaveData } from "@/lib/game/types";
 
@@ -114,86 +115,18 @@ export default function CartasTab() {
         {visible.length === 0 ? (
           <EmptyState filter={filter} />
         ) : (
-          <div className="grid grid-cols-3 gap-2.5">
+          <div className="grid grid-cols-2 gap-3">
             {visible.map(({ hero, copies }, i) => {
-              const s = RARITY_STYLE[hero.rarity];
               const prog = getHeroProgression(hero.heroId);
-              const isLegendary = hero.rarity === "Lendário" || hero.rarity === "Mítico" || hero.rarity === "Divino";
               return (
-                <motion.button
+                <ArtDecoHeroCard
                   key={hero.heroId}
+                  hero={hero}
+                  copies={copies}
+                  progression={prog}
+                  index={i}
                   onClick={() => { setSelected(hero); setDetailTab("stats"); }}
-                  whileTap={{ scale: 0.92 }}
-                  className="relative flex flex-col items-center overflow-hidden rounded-2xl pb-3 pt-4 text-center"
-                  style={{
-                    borderTop: `2px solid ${s.color}50`,
-                    borderLeft: `1px solid ${s.border}`,
-                    borderRight: `1px solid ${s.border}`,
-                    borderBottom: `1px solid ${s.border}`,
-                    background: `linear-gradient(180deg, ${s.glow} 0%, rgba(8,8,18,0.98) 60%)`,
-                    boxShadow: `0 4px 20px ${s.glow}, 0 0 0 0.5px ${s.border} inset`,
-                  }}
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1], delay: i * 0.03 }}
-                >
-                  {/* Shine overlay for legendary+ */}
-                  {isLegendary && (
-                    <div
-                      className="pointer-events-none absolute left-0 right-0 top-0 h-16 opacity-30"
-                      style={{
-                        background: `linear-gradient(180deg, ${s.color}40 0%, transparent 100%)`,
-                      }}
-                    />
-                  )}
-                  {/* Copies badge */}
-                  {copies > 1 && (
-                    <div
-                      className="absolute right-1.5 top-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full px-1 text-[7px] font-black"
-                      style={{ background: `${s.color}25`, color: s.color, border: `1px solid ${s.color}30` }}
-                    >
-                      ×{copies}
-                    </div>
-                  )}
-                  {/* Portrait */}
-                  <div
-                    className="relative mb-2 flex h-14 w-14 items-center justify-center rounded-xl text-3xl"
-                    style={{
-                      background: `radial-gradient(circle, ${s.color}18 0%, ${s.color}06 100%)`,
-                      border: `1px solid ${s.color}25`,
-                    }}
-                  >
-                    <span>{hero.portrait}</span>
-                    {prog.awakenLevel > 0 && (
-                      <div
-                        className="absolute -bottom-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full text-[7px]"
-                        style={{ background: "rgb(200,155,60)", color: "rgb(6,7,15)", fontWeight: 900 }}
-                      >
-                        {prog.awakenLevel}
-                      </div>
-                    )}
-                  </div>
-                  {/* Name */}
-                  <p className="px-1.5 text-[8.5px] font-bold leading-tight text-cream/90">
-                    {hero.name.split(",")[0]}
-                  </p>
-                  {/* Stars */}
-                  {prog.stars > 0 && (
-                    <div className="mt-1 text-[7px]" style={{ color: s.color }}>
-                      {"★".repeat(prog.stars)}
-                    </div>
-                  )}
-                  {/* Element + rarity strip */}
-                  <div
-                    className="mt-2 flex w-full items-center justify-center gap-1 py-1"
-                    style={{ borderTop: `1px solid ${s.border}`, background: `${s.color}06` }}
-                  >
-                    <span className="text-[9px]">{ELEMENT_ICON[hero.element]}</span>
-                    <span className="text-[6.5px] font-black tracking-widest" style={{ color: s.color }}>
-                      {hero.rarity.toUpperCase()}
-                    </span>
-                  </div>
-                </motion.button>
+                />
               );
             })}
           </div>
@@ -220,6 +153,159 @@ export default function CartasTab() {
         )}
       </AnimatePresence>
     </motion.div>
+  );
+}
+
+// ── Art Deco Hero Card ─────────────────────────────────────────────────────────
+
+function ArtDecoHeroCard({ hero, copies, progression, index, onClick }: {
+  hero: HeroDef;
+  copies: number;
+  progression: SaveData["heroProgression"][0];
+  index: number;
+  onClick: () => void;
+}) {
+  const identity = HERO_IDENTITY[hero.heroId] ?? { accentColor: "#806090", bgTone: "rgba(128,96,144,0.14)", patternAngle: 0 };
+  const s = RARITY_STYLE[hero.rarity];
+  const classIcon = CLASS_ICON[hero.heroClass] ?? "ra-skull";
+  const elementIcon = ELEMENT_RA[hero.element] ?? "ra-rune-stone";
+  const stars = Math.max(1, progression.stars || RARITY_STARS[hero.rarity] || 1);
+  const shortName = hero.name.split(",")[0].toUpperCase();
+  const isHighRarity = hero.rarity === "Lendário" || hero.rarity === "Mítico" || hero.rarity === "Divino";
+  const frameColor = s.color;
+
+  return (
+    <motion.button
+      onClick={onClick}
+      whileTap={{ scale: 0.94, transition: { type: "spring", stiffness: 500, damping: 25 } }}
+      className="relative w-full overflow-hidden"
+      style={{
+        aspectRatio: "2/3",
+        background: "rgb(6,7,15)",
+        border: `1px solid ${frameColor}40`,
+        borderRadius: "0.875rem",
+        boxShadow: `0 6px 28px rgba(0,0,0,0.7), 0 0 0 0.5px rgba(0,0,0,0.5), 0 0 22px ${frameColor}05`,
+      }}
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1], delay: index * 0.04 }}
+    >
+      {/* Portrait area */}
+      <div
+        className="absolute inset-0"
+        style={{
+          bottom: "36%",
+          background: `
+            radial-gradient(ellipse at 50% 55%, ${identity.accentColor}22 0%, ${identity.accentColor}08 55%, transparent 100%),
+            linear-gradient(${identity.patternAngle}deg, ${identity.bgTone} 0%, rgba(6,7,15,0.97) 100%)
+          `,
+        }}
+      >
+        {/* Subtle line texture — unique pattern direction per hero */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: `repeating-linear-gradient(${identity.patternAngle + 90}deg, ${identity.accentColor}06 0px, transparent 1px, transparent 14px)`,
+          }}
+        />
+        {/* Class icon — main portrait focal point */}
+        <div className="absolute inset-0 flex items-center justify-center" style={{ paddingTop: "18%" }}>
+          <i
+            className={`ra ${classIcon}`}
+            style={{
+              fontSize: "3.8rem",
+              color: identity.accentColor,
+              filter: `drop-shadow(0 0 18px ${identity.accentColor}70) drop-shadow(0 2px 8px rgba(0,0,0,0.8))`,
+            }}
+          />
+        </div>
+        {/* Fade to bottom */}
+        <div
+          className="absolute bottom-0 left-0 right-0 h-12"
+          style={{ background: "linear-gradient(to bottom, transparent, rgb(6,7,15))" }}
+        />
+      </div>
+
+      {/* Art Deco frame corners */}
+      <div className="absolute left-2 top-2 h-5 w-5" style={{ borderTop: `1.5px solid ${frameColor}60`, borderLeft: `1.5px solid ${frameColor}60` }} />
+      <div className="absolute right-2 top-2 h-5 w-5" style={{ borderTop: `1.5px solid ${frameColor}60`, borderRight: `1.5px solid ${frameColor}60` }} />
+      <div className="absolute bottom-2 left-2 h-5 w-5" style={{ borderBottom: `1.5px solid ${frameColor}60`, borderLeft: `1.5px solid ${frameColor}60` }} />
+      <div className="absolute bottom-2 right-2 h-5 w-5" style={{ borderBottom: `1.5px solid ${frameColor}60`, borderRight: `1.5px solid ${frameColor}60` }} />
+
+      {/* Top diamond ornament */}
+      <div className="absolute left-1/2 top-1.5 z-10 -translate-x-1/2">
+        <div
+          className="h-3 w-3 rotate-45"
+          style={{ background: frameColor, boxShadow: `0 0 6px ${frameColor}cc`, opacity: 0.9 }}
+        />
+      </div>
+
+      {/* Separator line at portrait/info boundary */}
+      <div
+        className="absolute left-4 right-4"
+        style={{
+          bottom: "36%",
+          height: "1px",
+          background: `linear-gradient(90deg, transparent, ${frameColor}50, ${frameColor}50, transparent)`,
+        }}
+      />
+
+      {/* Bottom info */}
+      <div className="absolute bottom-0 left-0 right-0 flex flex-col items-center px-2 pb-3 pt-2">
+        {/* Stars */}
+        <div className="mb-1 flex items-center gap-0.5">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <span key={i} className="text-[10px] leading-none" style={{ color: i < stars ? "rgb(250,190,50)" : "rgba(122,111,160,0.18)" }}>★</span>
+          ))}
+        </div>
+        {/* Name with art deco chevrons */}
+        <div className="flex w-full items-center justify-center gap-1">
+          <span className="flex-shrink-0 text-[10px]" style={{ color: `${frameColor}70` }}>«</span>
+          <span
+            className="truncate text-[8px] font-black tracking-[0.07em] text-cream/88"
+            style={{ fontFamily: "var(--font-cinzel)" }}
+          >
+            {shortName}
+          </span>
+          <span className="flex-shrink-0 text-[10px]" style={{ color: `${frameColor}70` }}>»</span>
+        </div>
+        {/* Class + element */}
+        <div className="mt-0.5 flex items-center gap-1">
+          <i className={`ra ${elementIcon}`} style={{ fontSize: "7px", color: `${frameColor}80` }} />
+          <span className="text-[6px] font-bold tracking-[0.15em]" style={{ color: `${frameColor}65` }}>
+            {hero.heroClass.toUpperCase()}
+          </span>
+        </div>
+      </div>
+
+      {/* Copies badge */}
+      {copies > 1 && (
+        <div
+          className="absolute right-3 top-4 z-20 flex h-4 min-w-[16px] items-center justify-center rounded-full px-1 text-[7px] font-black"
+          style={{ background: `${frameColor}25`, color: frameColor, border: `1px solid ${frameColor}35` }}
+        >
+          ×{copies}
+        </div>
+      )}
+
+      {/* Awaken badge */}
+      {progression.awakenLevel > 0 && (
+        <div
+          className="absolute left-3 top-4 z-20 flex h-4 w-4 items-center justify-center rounded-full text-[7px] font-black"
+          style={{ background: "rgb(200,155,60)", color: "rgb(6,7,15)", boxShadow: "0 0 6px rgba(200,155,60,0.6)" }}
+        >
+          {progression.awakenLevel}
+        </div>
+      )}
+
+      {/* Legendary radial glow */}
+      {isHighRarity && (
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{ background: `radial-gradient(ellipse at 50% 25%, ${frameColor}10 0%, transparent 65%)` }}
+        />
+      )}
+    </motion.button>
   );
 }
 
@@ -271,11 +357,26 @@ function HeroDetail({ hero, copies, progression, levelData, skillData, equipData
       >
         {/* Header */}
         <div className="mb-4 flex items-center gap-3">
+          {/* Art deco portrait thumbnail */}
           <div
-            className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-xl border text-2xl"
-            style={{ borderColor: s.border, background: s.glow, boxShadow: `0 0 18px ${s.glow}` }}
+            className="relative flex h-14 w-14 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl"
+            style={{
+              background: `linear-gradient(135deg, ${HERO_IDENTITY[hero.heroId]?.bgTone ?? s.glow} 0%, rgba(6,7,15,0.95) 100%)`,
+              border: `1px solid ${s.border}`,
+              boxShadow: `0 0 18px ${s.glow}`,
+            }}
           >
-            {hero.portrait}
+            <i
+              className={`ra ${CLASS_ICON[hero.heroClass] ?? "ra-skull"}`}
+              style={{
+                fontSize: "1.9rem",
+                color: HERO_IDENTITY[hero.heroId]?.accentColor ?? s.color,
+                filter: `drop-shadow(0 0 8px ${HERO_IDENTITY[hero.heroId]?.accentColor ?? s.color}80)`,
+              }}
+            />
+            {/* corner brackets */}
+            <div className="absolute left-1 top-1 h-2.5 w-2.5" style={{ borderTop: `1px solid ${s.color}70`, borderLeft: `1px solid ${s.color}70` }} />
+            <div className="absolute right-1 top-1 h-2.5 w-2.5" style={{ borderTop: `1px solid ${s.color}70`, borderRight: `1px solid ${s.color}70` }} />
           </div>
           <div className="min-w-0 flex-1">
             <p className="truncate text-base font-black tracking-wide text-cream" style={{ fontFamily: "var(--font-cinzel)" }}>

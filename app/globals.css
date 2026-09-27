@@ -1,5 +1,49 @@
 @import "tailwindcss";
 
+/* ── RPG Awesome icon font ────────────────────────────────────────────────── */
+
+@font-face {
+  font-family: "rpgawesome-webfont";
+  src: url("/fonts/rpg-awesome/rpgawesome-webfont.woff") format("woff"),
+       url("/fonts/rpg-awesome/rpgawesome-webfont.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+.ra {
+  display: inline-block;
+  font-family: "rpgawesome-webfont";
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.ra-archer::before       { content: "\E90D"; }
+.ra-crystal-wand::before { content: "\E984"; }
+.ra-fizzing-flask::before{ content: "\E9C6"; }
+.ra-broadsword::before   { content: "\E946"; }
+.ra-crystal-ball::before { content: "\E982"; }
+.ra-crossed-swords::before{ content: "\E97D"; }
+.ra-heavy-shield::before { content: "\E9FD"; }
+.ra-flask::before        { content: "\E9CB"; }
+.ra-anvil::before        { content: "\E909"; }
+.ra-crossbow::before     { content: "\E978"; }
+.ra-fire::before         { content: "\E9C3"; }
+.ra-water-drop::before   { content: "\EAE4"; }
+.ra-feather-wing::before { content: "\E9BB"; }
+.ra-mountains::before    { content: "\EA44"; }
+.ra-sun::before          { content: "\EABD"; }
+.ra-death-skull::before  { content: "\E98C"; }
+.ra-lightning-bolt::before{ content: "\EA2D"; }
+.ra-rune-stone::before   { content: "\EA89"; }
+.ra-diamond::before      { content: "\E992"; }
+.ra-skull::before        { content: "\EAA1"; }
+
 /* ── Transcend Infinity — Design Tokens ───────────────────────────────────── */
 
 @theme inline {
