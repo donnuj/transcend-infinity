@@ -66,11 +66,15 @@ export function buildHeroCombatant(
   rank: number,
   stars: 1|2|3|4|5,
   level: number,
+  forgeBonus: number = 0, // total forge enhancement levels across equipped items
+  companionAtkMult: number = 1,
 ): CombatantSnapshot {
   const RANKS = ["F","E","D","C","B","A","S","SS","SSS"] as const;
   const r = RANKS[rank] ?? "F";
   const primary = getStatsAtLevel(hero.baseStats, hero.growthPerLevel, level);
   const stats = deriveStats(primary, r, stars, level);
+  // Each forge level adds 5% to attack stats
+  const forgeMult = 1 + forgeBonus * 0.05;
   return {
     id: hero.heroId,
     heroId: hero.heroId,
@@ -82,7 +86,11 @@ export function buildHeroCombatant(
     maxMana: Math.round(stats.mana),
     hp: Math.round(stats.hp),
     mana: Math.round(stats.mana),
-    stats,
+    stats: {
+      ...stats,
+      physAtk: Math.round(stats.physAtk * forgeMult * companionAtkMult),
+      magAtk: Math.round(stats.magAtk * forgeMult * companionAtkMult),
+    },
     skillIds: hero.skillIds,
   };
 }

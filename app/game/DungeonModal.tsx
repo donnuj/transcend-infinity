@@ -6,7 +6,7 @@ import { useGameStore } from "@/lib/game/store";
 import { HERO_MAP } from "@/lib/game/data/heroes";
 import { DUNGEONS } from "@/lib/game/data/world";
 import { scheduleSave } from "@/lib/game/save";
-import { DUNGEON_DURATIONS, DUNGEON_REWARDS } from "@/lib/game/data/towerData";
+import { DUNGEON_DURATIONS, DUNGEON_REWARDS, rollDungeonLoot } from "@/lib/game/data/towerData";
 import type { DungeonDef, DungeonDifficulty, PendingDungeonRun } from "@/lib/game/types";
 
 const ease = [0.23, 1, 0.32, 1] as const;
@@ -52,6 +52,7 @@ export default function DungeonModal({ onClose }: { onClose: () => void }) {
   const [difficulty, setDifficulty] = useState<DungeonDifficulty>("normal");
   const [team, setTeam] = useState<string[]>([]);
   const [resolvedRun, setResolvedRun] = useState<PendingDungeonRun | null>(null);
+  const [droppedItem, setDroppedItem] = useState<{ itemId: string; qty: number } | null>(null);
   const [now, setNow] = useState(() => Date.now());
 
   const {
@@ -61,8 +62,10 @@ export default function DungeonModal({ onClose }: { onClose: () => void }) {
     cancelDungeonRun,
     getBusyHeroIds,
     addCurrency,
+    addItem,
     updateDungeonProgress,
     incrementDailyProgress,
+    getHousingBonuses,
   } = useGameStore();
 
   const busyIds = getBusyHeroIds();
@@ -97,11 +100,15 @@ export default function DungeonModal({ onClose }: { onClose: () => void }) {
     if (!resolved) return;
 
     const rewards = DUNGEON_REWARDS[resolved.difficulty];
+    const hb = getHousingBonuses();
     addCurrency("ouro", rewards.gold);
     addCurrency("cristaisAstra", rewards.crystals);
+    const loot = rollDungeonLoot(resolved.difficulty, hb.dropMult);
+    if (loot) addItem(loot.itemId, loot.qty, "dungeon");
     updateDungeonProgress(resolved.dungeonId, "A", DUNGEON_DURATIONS[resolved.difficulty]);
     incrementDailyProgress("dungeons_today");
     scheduleSave();
+    setDroppedItem(loot);
     setResolvedRun(resolved);
     setScreen("result");
   }
@@ -177,6 +184,7 @@ export default function DungeonModal({ onClose }: { onClose: () => void }) {
             key="result"
             run={resolvedRun}
             dungeon={DUNGEONS.find((d) => d.dungeonId === resolvedRun.dungeonId)!}
+            droppedItem={droppedItem}
             onClose={onClose}
             onRetry={() => {
               const d = DUNGEONS.find((d) => d.dungeonId === resolvedRun.dungeonId);
@@ -516,15 +524,15 @@ function TeamPicker({ dungeon, difficulty, team, busyIds, onTeamChange, onDispat
 
 // ── Result Screen ──────────────────────────────────────────────────────────────
 
-function ResultScreen({ run, dungeon, onClose, onRetry }: {
+function ResultScreen({ run, dungeon, droppedItem, onClose, onRetry }: {
   run: PendingDungeonRun;
   dungeon: DungeonDef;
+  droppedItem: { itemId: string; qty: number } | null;
   onClose: () => void;
   onRetry: () => void;
 }) {
   const rewards = DUNGEON_REWARDS[run.difficulty];
   const diffColor = DIFFICULTY_COLOR[run.difficulty];
-  const gotItem = Math.random() < rewards.itemChance;
 
   return (
     <motion.div
@@ -561,8 +569,8 @@ function ResultScreen({ run, dungeon, onClose, onRetry }: {
           <RewardRow label="XP" value={`+${rewards.xp.toLocaleString("pt-BR")}`} color="rgb(100,220,140)" />
           <RewardRow
             label="Item"
-            value={gotItem ? `${rewards.itemRarity}` : "Nenhum"}
-            color={gotItem ? "rgb(232,217,160)" : "rgba(122,111,160,0.4)"}
+            value={droppedItem ? `${droppedItem.itemId} ×${droppedItem.qty}` : "Nenhum"}
+            color={droppedItem ? "rgb(232,217,160)" : "rgba(122,111,160,0.4)"}
           />
         </div>
       </div>

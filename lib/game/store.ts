@@ -5,6 +5,8 @@ import type { SaveData, DungeonDifficulty, PendingTowerClimb, PendingDungeonRun 
 import { ACHIEVEMENTS } from "./data/achievements";
 import { DAILY_CHALLENGES } from "./data/challenges";
 import { maxFloorInBudget, calcTowerTimeSeconds, DUNGEON_DURATIONS } from "./data/towerData";
+import { COMPANION_MAP } from "./data/companions";
+import { FACTIONS } from "./data/world";
 
 // ── Estado inicial (novo jogador) ─────────────────────────────────────────────
 
@@ -198,6 +200,12 @@ type GameStore = {
   collectOfflineRewards: () => { ouro: number; xp: number } | null;
   pingLastActive: () => void;
 
+  // Bonus helpers (companion + forge + faction + housing)
+  getCompanionBonuses: () => { xpMult: number; atkMult: number; crystalMult: number; dropMult: number; ouroMult: number };
+  getHeroBonuses: (heroId: string) => { forgeBonus: number; atkMult: number };
+  getFactionBonuses: () => { ouroMult: number; crystalMult: number; xpMult: number; caravanMult: number };
+  getHousingBonuses: () => { xpMult: number; dropMult: number };
+
   // Reset (debug)
   resetSave: () => void;
 };
@@ -217,7 +225,17 @@ export const useGameStore = create<GameStore>()(
 
       addCurrency(type, amount) {
         if (!CURRENCY_KEYS.has(type) || amount <= 0) return;
-        set((s) => { (s.save.wallet[type] as number) += amount; });
+        let final = amount;
+        if (type === "cristaisAstra") {
+          const cb = get().getCompanionBonuses();
+          const fb = get().getFactionBonuses();
+          final = Math.round(amount * cb.crystalMult * fb.crystalMult);
+        } else if (type === "ouro") {
+          const cb = get().getCompanionBonuses();
+          const fb = get().getFactionBonuses();
+          final = Math.round(amount * cb.ouroMult * fb.ouroMult);
+        }
+        set((s) => { (s.save.wallet[type] as number) += final; });
       },
 
       spendCurrency(type, amount) {
@@ -508,9 +526,13 @@ export const useGameStore = create<GameStore>()(
       // ── Player Level ─────────────────────────────────────────────────────────
 
       addPlayerXp(xp) {
+        const cb = get().getCompanionBonuses();
+        const fb = get().getFactionBonuses();
+        const hb = get().getHousingBonuses();
+        const final = Math.round(xp * cb.xpMult * fb.xpMult * hb.xpMult);
         set((s) => {
           const pl = s.save.playerLevel;
-          pl.xp += xp;
+          pl.xp += final;
           const threshold = 200 * pl.level;
           while (pl.xp >= threshold) {
             pl.xp -= threshold;
@@ -545,6 +567,12 @@ export const useGameStore = create<GameStore>()(
           w.loginStreak = consecutive ? w.loginStreak + 1 : 1;
           w.lastLoginDate = today;
           if (w.loginStreak % 7 === 0) w.selosLivres += 1;
+
+          // Jardim produces 10 Herbs per day
+          if (s.save.housing.unlockedRooms.includes("jardim")) {
+            const herb = s.save.fortress.resources.find((r) => r.key === "Herbs");
+            if (herb) herb.value += 10;
+          }
         });
       },
 
@@ -839,6 +867,63 @@ export const useGameStore = create<GameStore>()(
 
       pingLastActive() {
         set((s) => { s.save.offline = { lastActiveAt: new Date().toISOString() }; });
+      },
+
+      // ── Bonus helpers ────────────────────────────────────────────────────────
+
+      getCompanionBonuses() {
+        const { activeCompanionId, companions } = get().save;
+        const comp = companions.find((c) => c.companionId === activeCompanionId);
+        if (!comp) return { xpMult: 1, atkMult: 1, crystalMult: 1, dropMult: 1, ouroMult: 1 };
+        const def = COMPANION_MAP[comp.companionId];
+        if (!def) return { xpMult: 1, atkMult: 1, crystalMult: 1, dropMult: 1, ouroMult: 1 };
+        const form = def.forms[comp.form] ?? def.forms[0];
+        const bonus = form.bonus;
+        let xpMult = 1, atkMult = 1, crystalMult = 1, dropMult = 1, ouroMult = 1;
+        const pct = (str: string) => { const m = str.match(/\+(\d+)%/); return m ? 1 + Number(m[1]) / 100 : 1; };
+        if (bonus.includes("EXP"))    xpMult      = pct(bonus);
+        if (bonus.includes("ATQ"))    atkMult     = pct(bonus);
+        if (bonus.includes("cristais") || bonus.includes("drops cristais")) crystalMult = pct(bonus);
+        if (bonus.includes("drop rate")) dropMult = pct(bonus);
+        if (bonus.includes("ouro"))   ouroMult    = pct(bonus);
+        return { xpMult, atkMult, crystalMult, dropMult, ouroMult };
+      },
+
+      getHeroBonuses(heroId) {
+        const { heroEquipment, forge } = get().save;
+        const equip = heroEquipment.find((h) => h.heroId === heroId);
+        if (!equip) return { forgeBonus: 0, atkMult: get().getCompanionBonuses().atkMult };
+        const slots = [equip.weaponId, equip.armorId, equip.accessoryId, equip.reliquiaId].filter(Boolean) as string[];
+        const forgeBonus = slots.reduce((sum, equipId) => {
+          return sum + (forge.find((f) => f.equipId === equipId)?.level ?? 0);
+        }, 0);
+        return { forgeBonus, atkMult: get().getCompanionBonuses().atkMult };
+      },
+
+      getFactionBonuses() {
+        const reputation = get().save.reputation;
+        let ouroMult = 1, crystalMult = 1, xpMult = 1, caravanMult = 1;
+        for (const entry of reputation) {
+          const pts = entry.points;
+          if (entry.factionId === "fac_mercadores") {
+            if (pts >= 2000) ouroMult = Math.max(ouroMult, 1.20);
+            else if (pts >= 100) caravanMult = Math.max(caravanMult, 1.05);
+          }
+          if (entry.factionId === "fac_arcontes") {
+            if (pts >= 200) crystalMult = Math.max(crystalMult, 1.05);
+          }
+          if (entry.factionId === "fac_ordem_imperial") {
+            if (pts >= 2000) xpMult = Math.max(xpMult, 1.15);
+          }
+        }
+        return { ouroMult, crystalMult, xpMult, caravanMult };
+      },
+
+      getHousingBonuses() {
+        const rooms = get().save.housing.unlockedRooms;
+        const xpMult = rooms.includes("biblioteca") ? 1.05 : 1;
+        const dropMult = rooms.includes("observatorio") ? 1.03 : 1;
+        return { xpMult, dropMult };
       },
 
       // ── Reset ────────────────────────────────────────────────────────────────

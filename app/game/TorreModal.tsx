@@ -10,6 +10,7 @@ import {
   getTierForFloor,
   calcTowerTimeSeconds,
   calcTowerRewards,
+  rollTowerLoot,
   isBossFloor,
 } from "@/lib/game/data/towerData";
 
@@ -43,6 +44,7 @@ export default function TorreModal({ onClose }: { onClose: () => void }) {
   const [reward, setReward] = useState<ReturnType<typeof calcTowerRewards> | null>(null);
   const [claimedFloor, setClaimedFloor] = useState(0);
   const [isNewRecord, setIsNewRecord] = useState(false);
+  const [droppedItem, setDroppedItem] = useState<{ itemId: string; qty: number } | null>(null);
   const [now, setNow] = useState(() => Date.now());
 
   const {
@@ -52,7 +54,9 @@ export default function TorreModal({ onClose }: { onClose: () => void }) {
     cancelTowerClimb,
     getBusyHeroIds,
     addCurrency,
+    addItem,
     incrementDailyProgress,
+    getHousingBonuses,
   } = useGameStore();
 
   const tower = save.tower;
@@ -88,16 +92,21 @@ export default function TorreModal({ onClose }: { onClose: () => void }) {
     const resolved = resolveTowerClimb();
     if (!resolved) return;
     const r = calcTowerRewards(resolved.fromFloor, resolved.targetFloor);
+    const hb = getHousingBonuses();
+    const loot = rollTowerLoot(resolved.targetFloor, hb.dropMult, r.itemChance);
+
     setReward(r);
     setClaimedFloor(resolved.targetFloor);
     setIsNewRecord(resolved.targetFloor > tower.bestFloor);
+    setDroppedItem(loot);
 
     addCurrency("ouro", r.gold);
     addCurrency("cristaisAstra", r.crystals);
+    if (loot) addItem(loot.itemId, loot.qty, "tower");
     incrementDailyProgress("tower_floors_today", resolved.targetFloor - resolved.fromFloor);
     scheduleSave();
     setScreen("result");
-  }, [resolveTowerClimb, tower.bestFloor, addCurrency, incrementDailyProgress]);
+  }, [resolveTowerClimb, tower.bestFloor, addCurrency, addItem, getHousingBonuses, incrementDailyProgress]);
 
   const currentTier = getTierForFloor(Math.max(1, tower.bestFloor));
   const nextBossFloor = (() => {
@@ -428,8 +437,8 @@ export default function TorreModal({ onClose }: { onClose: () => void }) {
                 <RewardRow label="XP" value={`+${reward.xp.toLocaleString("pt-BR")}`} color="rgb(100,220,140)" />
                 <RewardRow
                   label="Item"
-                  value={Math.random() < reward.itemChance ? `${reward.itemRarity} (${Math.round(reward.itemChance * 100)}% chance)` : "Nenhum"}
-                  color={Math.random() < reward.itemChance ? "rgb(232,217,160)" : "rgba(122,111,160,0.4)"}
+                  value={droppedItem ? `${droppedItem.itemId} ×${droppedItem.qty}` : "Nenhum"}
+                  color={droppedItem ? "rgb(232,217,160)" : "rgba(122,111,160,0.4)"}
                 />
               </div>
             </div>

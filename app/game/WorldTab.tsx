@@ -64,6 +64,11 @@ export default function WorldTab({
   const canClaimLogin = !loginBonus.claimedToday || loginBonus.lastClaimDate !== today;
   const currentReward = LOGIN_REWARDS[(loginBonus.dayInCycle - 1) % LOGIN_REWARDS.length];
   const clearedDungeons = save.dungeon.filter((d) => d.bestRank !== "").length;
+  const now = Date.now();
+  const towerReady = !!save.pendingTower && new Date(save.pendingTower.endTime).getTime() <= now;
+  const dungeonReady = save.pendingDungeons.some((r) => new Date(r.endTime).getTime() <= now);
+  const hasPendingTower = !!save.pendingTower;
+  const hasPendingDungeon = save.pendingDungeons.length > 0;
 
   function claimLoginBonus() {
     if (!canClaimLogin) return;
@@ -294,9 +299,9 @@ export default function WorldTab({
         <SectionLabel Icon={Sword} label="Batalha" />
         <div className="mb-4 grid grid-cols-2 sm:grid-cols-4 gap-2.5">
           {([
-            { Icon: CastleTurret, title: "Masmorra", sub: `${clearedDungeons}/${DUNGEONS.length} claras`, color: "rgb(90,150,255)", onClick: onDungeon },
+            { Icon: CastleTurret, title: "Masmorra", sub: hasPendingDungeon ? (dungeonReady ? "Recolher!" : "Em missão...") : `${clearedDungeons}/${DUNGEONS.length} claras`, color: "rgb(90,150,255)", onClick: onDungeon, badge: dungeonReady ? "!" : hasPendingDungeon ? "►" : undefined },
             { Icon: Sword, title: "Arena", sub: `Rating ${save.arena.rating}`, color: "rgb(255,100,80)", onClick: onArena },
-            { Icon: CastleTurret, title: "Torre", sub: save.tower.bestFloor > 0 ? `${save.tower.bestFloor}F` : "Não iniciada", color: "rgb(170,130,255)", onClick: onTorre },
+            { Icon: CastleTurret, title: "Torre", sub: hasPendingTower ? (towerReady ? "Recolher!" : "Escalando...") : (save.tower.bestFloor > 0 ? `${save.tower.bestFloor}F` : "Não iniciada"), color: "rgb(170,130,255)", onClick: onTorre, badge: towerReady ? "!" : hasPendingTower ? "►" : undefined },
             { Icon: Skull, title: "Boss Hunt", sub: "Chefões semanais", color: "rgb(255,80,80)", onClick: onBossHunt, badge: save.bossHunt.weeklyDefeated.length > 0 ? undefined : "!" },
           ] as const).map((card, i) => (
             <motion.div

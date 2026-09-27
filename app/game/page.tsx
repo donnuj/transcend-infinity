@@ -89,16 +89,18 @@ export default function GamePage() {
   const [showProfession, setShowProfession] = useState(false);
   const [showForge, setShowForge] = useState(false);
   const [showWiki, setShowWiki] = useState(false);
+  const [offlineReward, setOfflineReward] = useState<{ ouro: number; xp: number } | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated()) { router.replace("/login"); return; }
     const u = getUser();
     api.get<Profile>("/player/profile").then((p) => setProfile(p)).catch(() => null);
-    // Limpa save local para evitar que novo usuário herde dados de sessão anterior
     localStorage.removeItem("ti_game_save");
     useGameStore.getState().resetSave();
     loadCloudSave().then((found) => {
       if (!found) uploadCloudSave();
+      const reward = useGameStore.getState().collectOfflineRewards();
+      if (reward) { setOfflineReward(reward); uploadCloudSave(); }
     }).finally(() => setUser(u));
   }, [router]);
 
@@ -198,6 +200,51 @@ export default function GamePage() {
         {showProfession && <ProfessionModal key="profession" onClose={() => setShowProfession(false)} />}
         {showForge && <ForgeModal key="forge" onClose={() => setShowForge(false)} />}
         {showWiki && <WikiModal key="wiki" onClose={() => setShowWiki(false)} />}
+      </AnimatePresence>
+
+      {/* Offline reward popup */}
+      <AnimatePresence>
+        {offlineReward && (
+          <motion.div
+            className="absolute inset-0 z-[100] flex items-center justify-center px-6"
+            style={{ background: "rgba(6,7,15,0.85)" }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <motion.div
+              className="w-full max-w-sm rounded-2xl border border-amber/20 px-6 py-7"
+              style={{ background: "linear-gradient(145deg, rgba(10,10,22,0.99), rgba(6,7,15,0.99))" }}
+              initial={{ scale: 0.9, opacity: 0, y: 10 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
+            >
+              <p className="mb-1 text-[9px] uppercase tracking-[0.25em] text-violet/40">Recompensas Offline</p>
+              <p className="mb-4 text-[13px] font-bold text-cream/80">Bem-vindo de volta!</p>
+              <div className="mb-5 flex gap-4">
+                <div className="flex flex-col items-center">
+                  <span className="text-2xl font-black text-amber-400">+{offlineReward.ouro.toLocaleString("pt-BR")}</span>
+                  <span className="text-[8px] text-violet/40">Ouro</span>
+                </div>
+                <div className="w-[1px] bg-violet/10" />
+                <div className="flex flex-col items-center">
+                  <span className="text-2xl font-black text-cream/70">+{offlineReward.xp.toLocaleString("pt-BR")}</span>
+                  <span className="text-[8px] text-violet/40">XP</span>
+                </div>
+              </div>
+              <motion.button
+                onClick={() => setOfflineReward(null)}
+                whileTap={{ scale: 0.97 }}
+                transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
+                className="w-full rounded-xl border border-amber/30 bg-amber/10 py-3 text-[11px] font-bold tracking-widest text-amber-400"
+              >
+                RESGATAR
+              </motion.button>
+            </motion.div>
+          </motion.div>
+        )}
       </AnimatePresence>
 
       {/* Bottom nav */}

@@ -91,7 +91,7 @@ function formatTime(ms: number): string {
 }
 
 export default function CaravanaModal({ onClose }: { onClose: () => void }) {
-  const { save } = useGameStore();
+  const { save, incrementDailyProgress } = useGameStore();
   const caravan = save.caravan;
   const [selected, setSelected] = useState<Route | null>(null);
   const [investAmount, setInvestAmount] = useState(500);
@@ -108,10 +108,18 @@ export default function CaravanaModal({ onClose }: { onClose: () => void }) {
   const timeLeft = Math.max(0, arrivalMs - now);
   const activeRoute = ROUTES.find((r) => r.id === caravan.activeRouteId);
 
+  function getRouteDuration(route: Route): number {
+    const isSea = route.icon === "⛵";
+    if (isSea && save.travel.hasShip) return route.durationMs * 0.5;
+    if (!isSea && save.travel.hasHorse) return route.durationMs * 0.4;
+    return route.durationMs;
+  }
+
   function dispatch(route: Route) {
     if (caravan.inTransit) return;
     if (save.wallet.ouro < investAmount) return;
-    const arrival = new Date(Date.now() + route.durationMs).toISOString();
+    const duration = getRouteDuration(route);
+    const arrival = new Date(Date.now() + duration).toISOString();
     useGameStore.setState((s) => {
       s.save.wallet.ouro -= investAmount;
       s.save.caravan.activeRouteId = route.id;
@@ -135,6 +143,7 @@ export default function CaravanaModal({ onClose }: { onClose: () => void }) {
       s.save.caravan.investedGold = 0;
       s.save.caravan.arrivalTime = "";
     });
+    incrementDailyProgress("caravan_today");
     scheduleSave();
   }
 

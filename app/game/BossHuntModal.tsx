@@ -94,7 +94,7 @@ export default function BossHuntModal({ onClose }: { onClose: () => void }) {
   const [activeBoss, setActiveBoss] = useState<Boss | null>(null);
   const [team, setTeam] = useState<string[]>([]);
   const [result, setResult] = useState<{ won: boolean; bossId: string } | null>(null);
-  const { save, addCurrency } = useGameStore();
+  const { save, addCurrency, incrementDailyProgress } = useGameStore();
 
   const weekStart = getWeekStart();
   const bossHunt = save.bossHunt;
@@ -113,7 +113,8 @@ export default function BossHuntModal({ onClose }: { onClose: () => void }) {
       if (!hero) return null;
       const prog = store.getHeroProgression(heroId);
       const lvl = store.getHeroLevel(heroId);
-      return buildHeroCombatant(hero, prog.rank, Math.max(1, Math.min(5, prog.stars)) as 1|2|3|4|5, lvl.level);
+      const bonuses = store.getHeroBonuses(heroId);
+      return buildHeroCombatant(hero, prog.rank, Math.max(1, Math.min(5, prog.stars)) as 1|2|3|4|5, lvl.level, bonuses.forgeBonus, bonuses.atkMult);
     }).filter((h): h is CombatantSnapshot => h !== null);
 
     const bossSnap = buildBoss(boss);
@@ -134,6 +135,7 @@ export default function BossHuntModal({ onClose }: { onClose: () => void }) {
         bh.weeklyDefeated.push(boss.id);
         if (!bh.allTimeKills.includes(boss.id)) bh.allTimeKills.push(boss.id);
       });
+      incrementDailyProgress("boss_hunt_today");
       scheduleSave();
     }
 

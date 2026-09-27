@@ -57,7 +57,8 @@ export default function ArenaModal({ onClose }: { onClose: () => void }) {
       if (!hero) return null;
       const prog = store.getHeroProgression(heroId);
       const lvl = store.getHeroLevel(heroId);
-      return buildHeroCombatant(hero, prog.rank, Math.max(1, Math.min(5, prog.stars)) as 1|2|3|4|5, lvl.level);
+      const bonuses = store.getHeroBonuses(heroId);
+      return buildHeroCombatant(hero, prog.rank, Math.max(1, Math.min(5, prog.stars)) as 1|2|3|4|5, lvl.level, bonuses.forgeBonus, bonuses.atkMult);
     }).filter((h): h is CombatantSnapshot => h !== null);
 
     const opponents = buildOpponentTeam(arena.rating);

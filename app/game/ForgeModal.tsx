@@ -26,7 +26,7 @@ const ENHANCE_BONUSES = [
 type SortMode = "rarity" | "level" | "name";
 
 export default function ForgeModal({ onClose }: { onClose: () => void }) {
-  const { save, getForgeLevel, forgeEnhance } = useGameStore();
+  const { save, getForgeLevel, forgeEnhance, incrementDailyProgress } = useGameStore();
   const [selected, setSelected] = useState<string | null>(null);
   const [sort, setSort] = useState<SortMode>("rarity");
   const [toast, setToast] = useState("");
@@ -51,6 +51,7 @@ export default function ForgeModal({ onClose }: { onClose: () => void }) {
     if (!selected) return;
     const ok = forgeEnhance(selected);
     if (ok) {
+      incrementDailyProgress("forge_today");
       scheduleSave();
       const lvl = getForgeLevel(selected);
       setToast(`+${lvl} Forja — ${ENHANCE_BONUSES[lvl - 1]}`);

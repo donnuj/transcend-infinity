@@ -1,4 +1,4 @@
-import type { GachaRarity } from "@/lib/game/types";
+import type { GachaRarity, DungeonDifficulty } from "@/lib/game/types";
 
 export type TowerTier = {
   tier: number;
@@ -107,3 +107,50 @@ export const DUNGEON_REWARDS: Record<string, DungeonReward> = {
   epic:      { xp: 10000, gold: 8000,  crystals: 250, itemChance: 0.75, itemRarity: "Épico"    },
   legendary: { xp: 30000, gold: 25000, crystals: 800, itemChance: 0.90, itemRarity: "Lendário" },
 };
+
+// ── Loot tables ───────────────────────────────────────────────────────────────
+
+type LootEntry = { itemId: string; weight: number };
+
+const LOOT_BY_DIFFICULTY: Record<DungeonDifficulty, LootEntry[]> = {
+  easy:      [{ itemId: "pocao_cura_p", weight: 50 }, { itemId: "couro_lobo", weight: 30 }, { itemId: "cristal_mana", weight: 20 }],
+  normal:    [{ itemId: "pocao_cura_m", weight: 35 }, { itemId: "gema_comum", weight: 30 }, { itemId: "cristal_mana", weight: 25 }, { itemId: "essencia_skill", weight: 10 }],
+  hard:      [{ itemId: "pocao_cura_g", weight: 25 }, { itemId: "gema_rara", weight: 30 }, { itemId: "cristal_evolucao", weight: 30 }, { itemId: "essencia_skill", weight: 15 }],
+  epic:      [{ itemId: "cristal_evolucao", weight: 35 }, { itemId: "pedra_ascensao", weight: 25 }, { itemId: "gema_rara", weight: 25 }, { itemId: "essencia_skill", weight: 15 }],
+  legendary: [{ itemId: "pedra_ascensao", weight: 35 }, { itemId: "fragmento_lendario", weight: 30 }, { itemId: "cristal_evolucao", weight: 20 }, { itemId: "essencia_skill", weight: 15 }],
+};
+
+const LOOT_BY_TOWER_TIER: LootEntry[][] = [
+  [{ itemId: "pocao_cura_p", weight: 60 }, { itemId: "couro_lobo", weight: 40 }],
+  [{ itemId: "pocao_cura_m", weight: 50 }, { itemId: "cristal_mana", weight: 50 }],
+  [{ itemId: "gema_comum", weight: 50 }, { itemId: "cristal_mana", weight: 50 }],
+  [{ itemId: "gema_rara", weight: 40 }, { itemId: "cristal_evolucao", weight: 60 }],
+  [{ itemId: "cristal_evolucao", weight: 50 }, { itemId: "essencia_skill", weight: 50 }],
+  [{ itemId: "cristal_evolucao", weight: 40 }, { itemId: "pedra_ascensao", weight: 30 }, { itemId: "essencia_skill", weight: 30 }],
+  [{ itemId: "pedra_ascensao", weight: 50 }, { itemId: "fragmento_lendario", weight: 50 }],
+  [{ itemId: "fragmento_lendario", weight: 50 }, { itemId: "pedra_ascensao", weight: 50 }],
+  [{ itemId: "fragmento_lendario", weight: 60 }, { itemId: "tomo_ancestral", weight: 40 }],
+];
+
+function rollLoot(table: LootEntry[]): string {
+  const total = table.reduce((s, e) => s + e.weight, 0);
+  let r = Math.random() * total;
+  for (const entry of table) {
+    r -= entry.weight;
+    if (r <= 0) return entry.itemId;
+  }
+  return table[0].itemId;
+}
+
+export function rollDungeonLoot(difficulty: DungeonDifficulty, dropMult = 1): { itemId: string; qty: number } | null {
+  const rewards = DUNGEON_REWARDS[difficulty];
+  if (Math.random() > rewards.itemChance * dropMult) return null;
+  return { itemId: rollLoot(LOOT_BY_DIFFICULTY[difficulty]), qty: 1 };
+}
+
+export function rollTowerLoot(toFloor: number, dropMult = 1, itemChance: number): { itemId: string; qty: number } | null {
+  if (Math.random() > itemChance * dropMult) return null;
+  const tier = getTierForFloor(toFloor);
+  const table = LOOT_BY_TOWER_TIER[tier.tier - 1] ?? LOOT_BY_TOWER_TIER[0];
+  return { itemId: rollLoot(table), qty: 1 };
+}
