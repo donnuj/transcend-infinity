@@ -8,7 +8,10 @@ import { saveSession, type StoredUser } from "@/lib/auth";
 
 type Mode = "login" | "register";
 
-type AuthResponse = { access_token: string; user: StoredUser };
+type AuthResponse = {
+  accessToken: string;
+  profile: { id: number; username: string; email: string; level: number };
+};
 
 const ease = [0.23, 1, 0.32, 1] as const;
 
@@ -38,13 +41,13 @@ export default function LoginPage() {
             username,
             password,
           });
-          saveSession(res.access_token, res.user);
+          saveSession(res.accessToken, { ...res.profile, id: String(res.profile.id) });
         } else {
           const res = await api.post<AuthResponse>("/auth/login", {
             email,
             password,
           });
-          saveSession(res.access_token, res.user);
+          saveSession(res.accessToken, { ...res.profile, id: String(res.profile.id) });
         }
         router.replace("/game");
       } catch (err) {
