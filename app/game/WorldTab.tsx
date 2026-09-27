@@ -31,6 +31,7 @@ export default function WorldTab({
   onArena,
   onMercado,
   onBattlePass,
+  onTorre,
 }: {
   profile: Profile | null;
   onInvocar: () => void;
@@ -38,6 +39,7 @@ export default function WorldTab({
   onArena: () => void;
   onMercado: () => void;
   onBattlePass: () => void;
+  onTorre: () => void;
 }) {
   const { save, addCurrency, processLogin } = useGameStore();
   const playerLevel = save.playerLevel;
@@ -196,6 +198,13 @@ export default function WorldTab({
           sub={`Nível ${save.battlePass.level} / 40`}
           accent="rgba(200,155,60,0.8)"
           onClick={onBattlePass}
+        />
+        <ActionCard
+          icon="🏛"
+          title="Torre"
+          sub={`Melhor: ${save.tower.bestFloor}F`}
+          accent="rgba(170,130,255,0.8)"
+          onClick={onTorre}
         />
       </div>
 

@@ -17,6 +17,7 @@ import DungeonModal from "./DungeonModal";
 import ArenaModal from "./ArenaModal";
 import MercadoModal from "./MercadoModal";
 import BattlePassModal from "./BattlePassModal";
+import TorreModal from "./TorreModal";
 
 export type Profile = {
   id: number;
@@ -52,6 +53,7 @@ export default function GamePage() {
   const [showArena, setShowArena] = useState(false);
   const [showMercado, setShowMercado] = useState(false);
   const [showBattlePass, setShowBattlePass] = useState(false);
+  const [showTorre, setShowTorre] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated()) { router.replace("/login"); return; }
@@ -95,7 +97,7 @@ export default function GamePage() {
       {/* Content */}
       <main className="relative flex-1 overflow-hidden">
         <AnimatePresence mode="wait">
-          {tab === "mundo"   && <WorldTab   key="mundo"   profile={profile} onInvocar={() => setTab("invocar")} onDungeon={() => setShowDungeon(true)} onArena={() => setShowArena(true)} onMercado={() => setShowMercado(true)} onBattlePass={() => setShowBattlePass(true)} />}
+          {tab === "mundo"   && <WorldTab   key="mundo"   profile={profile} onInvocar={() => setTab("invocar")} onDungeon={() => setShowDungeon(true)} onArena={() => setShowArena(true)} onMercado={() => setShowMercado(true)} onBattlePass={() => setShowBattlePass(true)} onTorre={() => setShowTorre(true)} />}
           {tab === "cartas"  && <CartasTab  key="cartas" />}
           {tab === "invocar" && <InvocarTab key="invocar" />}
           {tab === "guilda"  && <GuildaTab  key="guilda" />}
@@ -109,6 +111,7 @@ export default function GamePage() {
         {showArena && <ArenaModal key="arena" onClose={() => setShowArena(false)} />}
         {showMercado && <MercadoModal key="mercado" onClose={() => setShowMercado(false)} />}
         {showBattlePass && <BattlePassModal key="battlepass" onClose={() => setShowBattlePass(false)} />}
+        {showTorre && <TorreModal key="torre" onClose={() => setShowTorre(false)} />}
       </AnimatePresence>
 
       {/* Bottom nav */}
