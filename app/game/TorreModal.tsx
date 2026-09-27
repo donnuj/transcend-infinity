@@ -88,6 +88,7 @@ export default function TorreModal({ onClose }: { onClose: () => void }) {
         const reached = result.won ? floor : floor - 1;
         setFinalFloor(reached);
         updateTower(reached);
+        if (reached > 0) useGameStore.getState().incrementDailyProgress("tower_floors_today", reached);
 
         const ouroReward = Math.min(5000, reached * 20);
         addCurrency("ouro", ouroReward);

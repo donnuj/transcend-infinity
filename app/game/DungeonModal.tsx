@@ -75,6 +75,7 @@ export default function DungeonModal({ onClose }: { onClose: () => void }) {
       store.addCurrency("ouro", r.ouroReward);
       store.addPlayerXp(r.xpReward);
       for (const drop of r.itemDrops) store.addItem(drop.itemId, drop.qty);
+      store.incrementDailyProgress("dungeons_today");
     }
     scheduleSave();
   }

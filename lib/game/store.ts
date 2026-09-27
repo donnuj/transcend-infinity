@@ -3,6 +3,7 @@ import { immer } from "zustand/middleware/immer";
 import { persist, createJSONStorage } from "zustand/middleware";
 import type { SaveData } from "./types";
 import { ACHIEVEMENTS } from "./data/achievements";
+import { DAILY_CHALLENGES } from "./data/challenges";
 
 // ── Estado inicial (novo jogador) ─────────────────────────────────────────────
 
@@ -141,6 +142,12 @@ type GameStore = {
 
   // Cloud sync
   setCloudSynced: (synced: boolean, at?: string) => void;
+
+  // Daily Challenges
+  resetDailyChallengesIfNeeded: () => void;
+  incrementDailyProgress: (key: string, amount?: number) => void;
+  claimDailyReward: (challengeId: string) => boolean;
+  getDailyProgress: (key: string) => number;
 
   // Achievements
   checkAchievements: () => string[];
@@ -515,6 +522,50 @@ export const useGameStore = create<GameStore>()(
           s.cloudSynced = synced;
           if (at) s.lastSyncAt = at;
         });
+      },
+
+      // ── Daily Challenges ─────────────────────────────────────────────────────
+
+      resetDailyChallengesIfNeeded() {
+        const today = new Date().toISOString().split("T")[0];
+        if (get().save.dailyChallenges.lastReset !== today) {
+          set((s) => {
+            s.save.dailyChallenges.lastReset = today;
+            s.save.dailyChallenges.completed = [];
+            s.save.dailyChallenges.progress = [];
+          });
+        }
+      },
+
+      incrementDailyProgress(key, amount = 1) {
+        get().resetDailyChallengesIfNeeded();
+        set((s) => {
+          const entry = s.save.dailyChallenges.progress.find((p) => p.key === key);
+          if (entry) entry.value += amount;
+          else s.save.dailyChallenges.progress.push({ key, value: amount });
+        });
+      },
+
+      claimDailyReward(challengeId) {
+        get().resetDailyChallengesIfNeeded();
+        const dc = get().save.dailyChallenges;
+        if (dc.completed.includes(challengeId)) return false;
+        const def = DAILY_CHALLENGES.find((c) => c.id === challengeId);
+        if (!def) return false;
+        const progress = dc.progress.find((p) => p.key === def.progressKey)?.value ?? 0;
+        if (progress < def.target) return false;
+        if (def.rewardType === "playerXp") {
+          get().addPlayerXp(def.rewardAmount);
+        } else {
+          get().addCurrency(def.rewardType, def.rewardAmount);
+        }
+        set((s) => { s.save.dailyChallenges.completed.push(challengeId); });
+        return true;
+      },
+
+      getDailyProgress(key) {
+        get().resetDailyChallengesIfNeeded();
+        return get().save.dailyChallenges.progress.find((p) => p.key === key)?.value ?? 0;
       },
 
       // ── Achievements ─────────────────────────────────────────────────────────

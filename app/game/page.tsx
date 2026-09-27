@@ -19,6 +19,7 @@ import MercadoModal from "./MercadoModal";
 import BattlePassModal from "./BattlePassModal";
 import TorreModal from "./TorreModal";
 import AchievementsModal from "./AchievementsModal";
+import DailyChallengesModal from "./DailyChallengesModal";
 
 export type Profile = {
   id: number;
@@ -56,6 +57,7 @@ export default function GamePage() {
   const [showBattlePass, setShowBattlePass] = useState(false);
   const [showTorre, setShowTorre] = useState(false);
   const [showAchievements, setShowAchievements] = useState(false);
+  const [showDailyChallenges, setShowDailyChallenges] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated()) { router.replace("/login"); return; }
@@ -99,7 +101,7 @@ export default function GamePage() {
       {/* Content */}
       <main className="relative flex-1 overflow-hidden">
         <AnimatePresence mode="wait">
-          {tab === "mundo"   && <WorldTab   key="mundo"   profile={profile} onInvocar={() => setTab("invocar")} onDungeon={() => setShowDungeon(true)} onArena={() => setShowArena(true)} onMercado={() => setShowMercado(true)} onBattlePass={() => setShowBattlePass(true)} onTorre={() => setShowTorre(true)} />}
+          {tab === "mundo"   && <WorldTab   key="mundo"   profile={profile} onInvocar={() => setTab("invocar")} onDungeon={() => setShowDungeon(true)} onArena={() => setShowArena(true)} onMercado={() => setShowMercado(true)} onBattlePass={() => setShowBattlePass(true)} onTorre={() => setShowTorre(true)} onDailyChallenges={() => setShowDailyChallenges(true)} />}
           {tab === "cartas"  && <CartasTab  key="cartas" />}
           {tab === "invocar" && <InvocarTab key="invocar" />}
           {tab === "guilda"  && <GuildaTab  key="guilda" />}
@@ -115,6 +117,7 @@ export default function GamePage() {
         {showBattlePass && <BattlePassModal key="battlepass" onClose={() => setShowBattlePass(false)} />}
         {showTorre && <TorreModal key="torre" onClose={() => setShowTorre(false)} />}
         {showAchievements && <AchievementsModal key="achievements" onClose={() => setShowAchievements(false)} />}
+        {showDailyChallenges && <DailyChallengesModal key="daily" onClose={() => setShowDailyChallenges(false)} />}
       </AnimatePresence>
 
       {/* Bottom nav */}

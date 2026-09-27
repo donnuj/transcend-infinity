@@ -32,6 +32,7 @@ export default function WorldTab({
   onMercado,
   onBattlePass,
   onTorre,
+  onDailyChallenges,
 }: {
   profile: Profile | null;
   onInvocar: () => void;
@@ -40,6 +41,7 @@ export default function WorldTab({
   onMercado: () => void;
   onBattlePass: () => void;
   onTorre: () => void;
+  onDailyChallenges: () => void;
 }) {
   const { save, addCurrency, processLogin } = useGameStore();
   const playerLevel = save.playerLevel;
@@ -62,6 +64,11 @@ export default function WorldTab({
       lb.dayInCycle = lb.dayInCycle >= LOGIN_REWARDS.length ? 1 : lb.dayInCycle + 1;
     });
     processLogin();
+    useGameStore.setState((s) => {
+      const entry = s.save.dailyChallenges.progress.find((p) => p.key === "login_claimed");
+      if (entry) entry.value = 1;
+      else s.save.dailyChallenges.progress.push({ key: "login_claimed", value: 1 });
+    });
     scheduleSave();
   }
 
@@ -239,9 +246,17 @@ export default function WorldTab({
       </div>
 
       {/* Daily missions */}
-      <p className="mb-3 text-[9px] font-bold uppercase tracking-[0.25em] text-violet/45">
-        Missões Diárias
-      </p>
+      <div className="mb-3 flex items-center justify-between">
+        <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-violet/45">Missões Diárias</p>
+        <motion.button
+          onClick={onDailyChallenges}
+          whileTap={{ scale: 0.94 }}
+          transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
+          className="text-[8px] font-bold tracking-wider text-amber-400/70"
+        >
+          Ver todas →
+        </motion.button>
+      </div>
       <div className="flex flex-col gap-2">
         {DAILY_MISSIONS.map((m) => (
           <div

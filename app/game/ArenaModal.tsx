@@ -71,6 +71,7 @@ export default function ArenaModal({ onClose }: { onClose: () => void }) {
       else { a.losses++; a.rating = newRating; }
     });
     store.addCurrency("ouro", r.won ? 200 : 50);
+    if (r.won) store.incrementDailyProgress("arena_wins_today");
     scheduleSave();
     setResult({ won: r.won, ratingChange });
     setScreen("result");

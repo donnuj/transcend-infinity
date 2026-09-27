@@ -117,6 +117,7 @@ export default function InvocarTab() {
       }
 
       store.setPity(activeBannerId, currentPity);
+      store.incrementDailyProgress("pulls_today", count);
       scheduleSave();
 
       setResults(pullResults);
