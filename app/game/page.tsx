@@ -24,6 +24,7 @@ import CodexModal from "./CodexModal";
 import FortressModal from "./FortressModal";
 import BossHuntModal from "./BossHuntModal";
 import SeasonModal from "./SeasonModal";
+import HousingModal from "./HousingModal";
 
 export type Profile = {
   id: number;
@@ -66,6 +67,7 @@ export default function GamePage() {
   const [showFortress, setShowFortress] = useState(false);
   const [showBossHunt, setShowBossHunt] = useState(false);
   const [showSeason, setShowSeason] = useState(false);
+  const [showHousing, setShowHousing] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated()) { router.replace("/login"); return; }
@@ -113,7 +115,7 @@ export default function GamePage() {
           {tab === "cartas"  && <CartasTab  key="cartas" />}
           {tab === "invocar" && <InvocarTab key="invocar" />}
           {tab === "guilda"  && <GuildaTab  key="guilda" onFortress={() => setShowFortress(true)} />}
-          {tab === "perfil"  && <PerfilTab  key="perfil" profile={profile} onLogout={handleLogout} onAchievements={() => setShowAchievements(true)} onCodex={() => setShowCodex(true)} onSeason={() => setShowSeason(true)} />}
+          {tab === "perfil"  && <PerfilTab  key="perfil" profile={profile} onLogout={handleLogout} onAchievements={() => setShowAchievements(true)} onCodex={() => setShowCodex(true)} onSeason={() => setShowSeason(true)} onHousing={() => setShowHousing(true)} />}
         </AnimatePresence>
       </main>
 
@@ -130,6 +132,7 @@ export default function GamePage() {
         {showFortress && <FortressModal key="fortress" onClose={() => setShowFortress(false)} />}
         {showBossHunt && <BossHuntModal key="bosshunt" onClose={() => setShowBossHunt(false)} />}
         {showSeason && <SeasonModal key="season" onClose={() => setShowSeason(false)} />}
+        {showHousing && <HousingModal key="housing" onClose={() => setShowHousing(false)} />}
       </AnimatePresence>
 
       {/* Bottom nav */}

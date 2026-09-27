@@ -14,12 +14,14 @@ export default function PerfilTab({
   onAchievements,
   onCodex,
   onSeason,
+  onHousing,
 }: {
   profile: Profile | null;
   onLogout: () => void;
   onAchievements: () => void;
   onCodex: () => void;
   onSeason: () => void;
+  onHousing: () => void;
 }) {
   const { save } = useGameStore();
   const unlockedAchievements = save.achievements.unlockedIds.length;
@@ -182,6 +184,18 @@ export default function PerfilTab({
         <InfoRow label="E-mail" value={profile?.email ?? "—"} />
         <InfoRow label="ID" value={profile ? `#${profile.id}` : "—"} last />
       </div>
+
+      {/* Housing button */}
+      <motion.button
+        onClick={onHousing}
+        whileTap={{ scale: 0.97 }}
+        transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
+        className="mb-3 flex w-full items-center justify-between rounded-xl border border-violet/15 px-4 py-3.5"
+        style={{ background: "rgba(122,111,160,0.04)" }}
+      >
+        <span className="text-[12px] font-bold tracking-[0.15em] text-cream/70">MORADIA</span>
+        <span className="text-[10px] text-violet/40">{save.housing.unlockedRooms.length} cômodos →</span>
+      </motion.button>
 
       {/* Season button */}
       <motion.button
