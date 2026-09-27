@@ -36,6 +36,7 @@ export default function WorldTab({
   onBossHunt,
   onWorldMap,
   onNpcDialogue,
+  onCaravana,
 }: {
   profile: Profile | null;
   onInvocar: () => void;
@@ -48,6 +49,7 @@ export default function WorldTab({
   onBossHunt: () => void;
   onWorldMap: () => void;
   onNpcDialogue: () => void;
+  onCaravana: () => void;
 }) {
   const { save, addCurrency, processLogin } = useGameStore();
   const playerLevel = save.playerLevel;
@@ -239,6 +241,13 @@ export default function WorldTab({
           sub="Diálogos"
           accent="rgba(100,220,180,0.8)"
           onClick={onNpcDialogue}
+        />
+        <ActionCard
+          icon="🐫"
+          title="Caravana"
+          sub={save.caravan.inTransit ? "Em trânsito" : "Livre"}
+          accent="rgba(200,155,60,0.8)"
+          onClick={onCaravana}
         />
       </div>
 
