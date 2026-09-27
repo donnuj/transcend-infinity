@@ -6,6 +6,7 @@ import {
   X, BookOpen, Star, Sword, Coins, Calendar, ArrowRight,
   CheckCircle, Warning, Info, Trophy, Sparkle, Shield,
   Lightning, Crown, ListChecks, ArrowsClockwise, Lock,
+  type Icon as PhosphorIcon,
 } from "@phosphor-icons/react";
 
 const ease = [0.23, 1, 0.32, 1] as const;
@@ -20,7 +21,7 @@ type SectionId =
   | "diario"
   | "avancado";
 
-const SECTIONS: { id: SectionId; label: string; icon: React.ComponentType<{ weight?: string; size?: number; color?: string }> }[] = [
+const SECTIONS: { id: SectionId; label: string; icon: PhosphorIcon }[] = [
   { id: "inicio",    label: "Primeiros Passos", icon: Star       },
   { id: "economia",  label: "Economia",          icon: Coins      },
   { id: "herois",    label: "Heróis",            icon: Crown      },
@@ -639,7 +640,7 @@ function SectionAvancado() {
 
 // ── Sub-componentes ────────────────────────────────────────────────────────────
 
-function WikiHeader({ icon: Icon, title, subtitle }: { icon: React.ComponentType<{ weight?: string; size?: number; color?: string }>; title: string; subtitle: string }) {
+function WikiHeader({ icon: Icon, title, subtitle }: { icon: PhosphorIcon; title: string; subtitle: string }) {
   return (
     <div className="flex items-start gap-3 pb-1">
       <div
