@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   UnauthorizedException,
@@ -6,7 +7,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
-import { randomUUID } from 'node:crypto';
+import { randomUUID, randomBytes, createHash } from 'node:crypto';
 import type { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import {
@@ -16,6 +17,7 @@ import {
   type RegisterInput,
 } from './auth.schemas';
 import { AuthAttemptLimiter } from './auth-attempt-limiter';
+import { EmailService } from './email.service';
 import {
   createRefreshToken,
   hashRefreshToken,
@@ -31,6 +33,7 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
     private readonly attemptLimiter: AuthAttemptLimiter,
+    private readonly email: EmailService,
     private readonly config: ConfigService,
   ) {}
 
@@ -169,6 +172,52 @@ export class AuthService {
       });
     }
     return authActionResponseSchema.parse({ success: true });
+  }
+
+  async forgotPassword(email: string): Promise<void> {
+    const account = await this.prisma.account.findUnique({ where: { email } });
+    if (!account || account.passwordHash === '!oauth' || account.isBanned) return;
+
+    const token = randomBytes(32).toString('hex');
+    const tokenHash = createHash('sha256').update(token).digest('hex');
+
+    await this.prisma.$transaction([
+      this.prisma.passwordResetToken.deleteMany({ where: { accountId: account.id } }),
+      this.prisma.passwordResetToken.create({
+        data: { tokenHash, accountId: account.id, expiresAt: new Date(Date.now() + 3_600_000) },
+      }),
+    ]);
+
+    await this.email.sendPasswordReset(account.email, token);
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<void> {
+    const tokenHash = createHash('sha256').update(token).digest('hex');
+    const stored = await this.prisma.passwordResetToken.findUnique({
+      where: { tokenHash },
+      include: { account: true },
+    });
+
+    if (!stored || stored.usedAt || stored.expiresAt <= new Date()) {
+      throw new BadRequestException('Token inválido ou expirado.');
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+
+    await this.prisma.$transaction([
+      this.prisma.passwordResetToken.update({ where: { id: stored.id }, data: { usedAt: new Date() } }),
+      this.prisma.account.update({ where: { id: stored.accountId }, data: { passwordHash } }),
+      this.prisma.refreshToken.updateMany({
+        where: { accountId: stored.accountId, revokedAt: null },
+        data: { revokedAt: new Date() },
+      }),
+    ]);
+
+    this.attemptLimiter.clear(stored.account.email);
+  }
+
+  async deleteAccount(accountId: number): Promise<void> {
+    await this.prisma.account.delete({ where: { id: accountId } });
   }
 
   async buildGoogleAuthResponse(account: any) {

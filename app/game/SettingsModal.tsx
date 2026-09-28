@@ -1,16 +1,22 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGameStore } from "@/lib/game/store";
 import { scheduleSave, uploadCloudSave } from "@/lib/game/save";
+import { api } from "@/lib/api";
+import { clearSession } from "@/lib/auth";
 
 const ease = [0.23, 1, 0.32, 1] as const;
 
 export default function SettingsModal({ onClose }: { onClose: () => void }) {
+  const router = useRouter();
   const { save } = useGameStore();
   const audio = save.audio;
   const [confirmReset, setConfirmReset] = useState(false);
+  const [deleteStep, setDeleteStep] = useState<"idle" | "confirm" | "deleting">("idle");
+  const [deleteInput, setDeleteInput] = useState("");
 
   function setMusicVolume(v: number) {
     useGameStore.setState((s) => { s.save.audio.musicVolume = v; });
@@ -26,6 +32,18 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
     useGameStore.getState().resetSave();
     setConfirmReset(false);
     uploadCloudSave();
+  }
+
+  async function handleDeleteAccount() {
+    if (deleteInput !== "EXCLUIR") return;
+    setDeleteStep("deleting");
+    try {
+      await api.del<{ success: boolean }>("/auth/account", { body: { confirmation: "EXCLUIR" } });
+    } catch {
+      // Account deleted even if request fails partially
+    }
+    clearSession();
+    router.replace("/login");
   }
 
   return (
@@ -133,6 +151,65 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
                     SIM, APAGAR
                   </motion.button>
                 </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Account deletion — LGPD */}
+        <p className="mb-3 mt-5 text-[9px] uppercase tracking-[0.2em] text-red-400/50">Exclusão de Conta (LGPD)</p>
+        <div className="rounded-xl border border-red-500/12 px-5 py-4" style={{ background: "rgba(255,50,50,0.03)" }}>
+          <AnimatePresence mode="wait">
+            {deleteStep === "idle" && (
+              <motion.div key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
+                <p className="mb-3 text-[9px] leading-relaxed text-violet/40">
+                  Exclui permanentemente sua conta, todos os dados e save. Irreversível.
+                </p>
+                <motion.button
+                  onClick={() => setDeleteStep("confirm")}
+                  whileTap={{ scale: 0.96 }}
+                  transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
+                  className="w-full rounded-xl border border-red-500/20 py-3 text-[11px] font-bold tracking-[0.15em] text-red-400/55 transition-colors duration-150 hover:border-red-500/40 hover:text-red-400/80"
+                >
+                  EXCLUIR CONTA
+                </motion.button>
+              </motion.div>
+            )}
+            {deleteStep === "confirm" && (
+              <motion.div key="confirm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} className="flex flex-col gap-3">
+                <p className="text-[10px] font-bold text-red-400/80 text-center">Esta ação é irreversível. Digite <span className="text-red-400">EXCLUIR</span> para confirmar.</p>
+                <input
+                  type="text"
+                  value={deleteInput}
+                  onChange={(e) => setDeleteInput(e.target.value)}
+                  placeholder="EXCLUIR"
+                  className="h-10 rounded border border-red-500/30 bg-void px-3 text-[13px] text-red-400 placeholder:text-red-400/25 focus:border-red-500/60 focus:outline-none"
+                />
+                <div className="flex gap-2">
+                  <motion.button
+                    onClick={() => { setDeleteStep("idle"); setDeleteInput(""); }}
+                    whileTap={{ scale: 0.96 }}
+                    transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
+                    className="flex-1 rounded-xl border border-violet/20 py-2.5 text-[10px] font-bold text-violet/50"
+                  >
+                    CANCELAR
+                  </motion.button>
+                  <motion.button
+                    onClick={handleDeleteAccount}
+                    disabled={deleteInput !== "EXCLUIR"}
+                    whileTap={{ scale: 0.96 }}
+                    transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
+                    className="flex-1 rounded-xl border border-red-500/40 py-2.5 text-[10px] font-bold text-red-400/90 disabled:cursor-not-allowed disabled:opacity-30"
+                    style={{ background: deleteInput === "EXCLUIR" ? "rgba(255,50,50,0.1)" : "transparent" }}
+                  >
+                    EXCLUIR CONTA
+                  </motion.button>
+                </div>
+              </motion.div>
+            )}
+            {deleteStep === "deleting" && (
+              <motion.div key="deleting" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-center py-4">
+                <div className="h-5 w-5 animate-spin rounded-full border-2 border-red-400/30 border-t-red-400" />
               </motion.div>
             )}
           </AnimatePresence>

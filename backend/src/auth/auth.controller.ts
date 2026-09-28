@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Post,
   Req,
@@ -12,11 +13,18 @@ import { AuthGuard } from '@nestjs/passport';
 import { ConfigService } from '@nestjs/config';
 import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import {
   loginSchema,
   registerSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
+  deleteAccountSchema,
   type LoginInput,
   type RegisterInput,
+  type ForgotPasswordInput,
+  type ResetPasswordInput,
+  type DeleteAccountInput,
 } from './auth.schemas';
 import { ZodValidationPipe } from '../common/validation/zod-validation.pipe';
 import type { Environment } from '../config/env.schema';
@@ -88,6 +96,34 @@ export class AuthController {
     const token = getRefreshFromCookie(req);
     res.clearCookie(REFRESH_COOKIE, { ...COOKIE_OPTS, maxAge: undefined });
     return this.authService.logoutAll(token);
+  }
+
+  @Post('forgot-password')
+  async forgotPassword(
+    @Body(new ZodValidationPipe(forgotPasswordSchema)) input: ForgotPasswordInput,
+  ) {
+    await this.authService.forgotPassword(input.email);
+    return { success: true };
+  }
+
+  @Post('reset-password')
+  async resetPassword(
+    @Body(new ZodValidationPipe(resetPasswordSchema)) input: ResetPasswordInput,
+  ) {
+    await this.authService.resetPassword(input.token, input.password);
+    return { success: true };
+  }
+
+  @Delete('account')
+  @UseGuards(JwtAuthGuard)
+  async deleteAccount(
+    @Req() req: Request & { user: { sub: number } },
+    @Body(new ZodValidationPipe(deleteAccountSchema)) _input: DeleteAccountInput,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    await this.authService.deleteAccount((req.user as { sub: number }).sub);
+    res.clearCookie(REFRESH_COOKIE, { ...COOKIE_OPTS, maxAge: undefined });
+    return { success: true };
   }
 
   @Get('google')

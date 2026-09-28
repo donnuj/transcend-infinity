@@ -325,28 +325,76 @@ export default function BossHuntModal({ onClose }: { onClose: () => void }) {
         {screen === "result" && result && activeBoss && (
           <motion.div
             key="result"
-            className="flex flex-1 flex-col items-center justify-center gap-5 px-6"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.3, ease }}
+            className="flex flex-1 flex-col items-center justify-center gap-0 px-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.25, ease }}
           >
-            <div className="text-6xl">{result.won ? activeBoss.portrait : "💔"}</div>
-            <div className="text-center">
-              <p className="text-2xl font-black tracking-[0.2em] text-cream" style={{ fontFamily: "var(--font-cinzel)" }}>
+            {/* Outcome banner */}
+            <motion.div
+              className="relative mb-5 flex w-full flex-col items-center overflow-hidden rounded-2xl py-8"
+              initial={{ scale: 0.88, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.35, ease }}
+              style={{
+                background: result.won
+                  ? "linear-gradient(160deg, rgba(255,100,60,0.12), rgba(255,100,60,0.04))"
+                  : "linear-gradient(160deg, rgba(255,100,100,0.08), rgba(255,100,100,0.03))",
+                border: `1px solid ${result.won ? "rgba(255,130,80,0.3)" : "rgba(255,100,100,0.2)"}`,
+              }}
+            >
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-px" style={{ background: result.won ? "rgba(255,130,80,0.7)" : "rgba(255,100,100,0.5)" }} />
+              <motion.div
+                className="mb-3 text-5xl"
+                initial={{ scale: 0, rotate: -15 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ type: "spring", stiffness: 500, damping: 26, delay: 0.1 }}
+              >
+                {result.won ? activeBoss.portrait : "💔"}
+              </motion.div>
+              <p
+                className="text-2xl font-black tracking-[0.25em]"
+                style={{
+                  fontFamily: "var(--font-cinzel)",
+                  color: result.won ? "rgb(255,130,80)" : "rgb(255,100,100)",
+                }}
+              >
                 {result.won ? "DERROTADO!" : "DERROTA"}
               </p>
-              {result.won && (
-                <div className="mt-3 flex flex-col gap-1 text-[11px] font-bold">
-                  <p className="text-amber-400">+{activeBoss.ouroReward.toLocaleString("pt-BR")} Ouro</p>
-                  <p style={{ color: "rgb(170,130,255)" }}>+{activeBoss.cristaisReward} Cristais</p>
-                  <p style={{ color: "rgb(90,150,255)" }}>+{activeBoss.selosReward} Selos</p>
-                </div>
-              )}
               {!result.won && (
-                <p className="mt-2 text-[11px] text-violet/50">Fortaleça seu time e tente novamente.</p>
+                <p className="mt-2 text-[10px] text-violet/50">Fortaleça seu time e tente novamente.</p>
               )}
-            </div>
-            <div className="flex w-full gap-3">
+            </motion.div>
+
+            {/* Rewards */}
+            {result.won && (
+              <motion.div
+                className="mb-5 flex w-full gap-2"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.25, ease, delay: 0.15 }}
+              >
+                <div className="flex flex-1 flex-col items-center rounded-xl border border-violet/12 py-3" style={{ background: "rgba(122,111,160,0.05)" }}>
+                  <span className="text-[8px] uppercase tracking-widest text-violet/40">Ouro</span>
+                  <span className="mt-1 text-base font-black text-amber-400">+{activeBoss.ouroReward.toLocaleString("pt-BR")}</span>
+                </div>
+                <div className="flex flex-1 flex-col items-center rounded-xl border border-violet/12 py-3" style={{ background: "rgba(122,111,160,0.05)" }}>
+                  <span className="text-[8px] uppercase tracking-widest text-violet/40">Cristais</span>
+                  <span className="mt-1 text-base font-black" style={{ color: "rgb(170,130,255)" }}>+{activeBoss.cristaisReward}</span>
+                </div>
+                <div className="flex flex-1 flex-col items-center rounded-xl border border-violet/12 py-3" style={{ background: "rgba(122,111,160,0.05)" }}>
+                  <span className="text-[8px] uppercase tracking-widest text-violet/40">Selos</span>
+                  <span className="mt-1 text-base font-black" style={{ color: "rgb(90,150,255)" }}>+{activeBoss.selosReward}</span>
+                </div>
+              </motion.div>
+            )}
+
+            <motion.div
+              className="flex w-full gap-3"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.22, ease, delay: result.won ? 0.3 : 0.2 }}
+            >
               <motion.button
                 onClick={() => { setTeam([]); setScreen("select"); }}
                 whileTap={{ scale: 0.97 }}
@@ -364,7 +412,7 @@ export default function BossHuntModal({ onClose }: { onClose: () => void }) {
               >
                 SAIR
               </motion.button>
-            </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

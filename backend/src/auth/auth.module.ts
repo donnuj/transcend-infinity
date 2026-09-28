@@ -8,6 +8,7 @@ import { AuthService } from './auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { AuthAttemptLimiter } from './auth-attempt-limiter';
+import { EmailService } from './email.service';
 
 @Module({
   imports: [
@@ -29,7 +30,7 @@ import { AuthAttemptLimiter } from './auth-attempt-limiter';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, AuthAttemptLimiter, JwtStrategy, GoogleStrategy],
+  providers: [AuthService, AuthAttemptLimiter, EmailService, JwtStrategy, GoogleStrategy],
   exports: [JwtModule],
 })
 export class AuthModule {}

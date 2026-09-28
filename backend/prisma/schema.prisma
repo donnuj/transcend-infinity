@@ -22,6 +22,7 @@ model Account {
   banReason     String?
   player        Player?
   refreshTokens RefreshToken[]
+  resetTokens   PasswordResetToken[]
 }
 
 model Player {
@@ -74,4 +75,16 @@ model SaveAudit {
   @@unique([playerId, revision])
   @@index([playerId])
   @@index([createdAt])
+}
+
+model PasswordResetToken {
+  id        Int       @id @default(autoincrement())
+  tokenHash String    @unique
+  accountId Int
+  account   Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([accountId])
 }

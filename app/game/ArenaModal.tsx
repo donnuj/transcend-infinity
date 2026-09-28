@@ -228,22 +228,94 @@ export default function ArenaModal({ onClose }: { onClose: () => void }) {
         {screen === "result" && result && (
           <motion.div
             key="result"
-            className="flex flex-1 flex-col items-center justify-center gap-5 px-6"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.3, ease }}
+            className="flex flex-1 flex-col items-center justify-center gap-0 px-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.25, ease }}
           >
-            <div className="text-6xl">{result.won ? "🏆" : "💔"}</div>
-            <div className="text-center">
-              <p className="text-2xl font-black tracking-[0.2em] text-cream" style={{ fontFamily: "var(--font-cinzel)" }}>
+            {/* Outcome banner */}
+            <motion.div
+              className="relative mb-5 flex w-full flex-col items-center overflow-hidden rounded-2xl py-8"
+              initial={{ scale: 0.88, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.35, ease }}
+              style={{
+                background: result.won
+                  ? "linear-gradient(160deg, rgba(100,220,140,0.12), rgba(100,220,140,0.04))"
+                  : "linear-gradient(160deg, rgba(255,100,100,0.12), rgba(255,100,100,0.04))",
+                border: `1px solid ${result.won ? "rgba(100,220,140,0.25)" : "rgba(255,100,100,0.25)"}`,
+              }}
+            >
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-px" style={{ background: result.won ? "rgba(100,220,140,0.6)" : "rgba(255,100,100,0.6)" }} />
+              <motion.div
+                className="mb-3 text-5xl"
+                initial={{ scale: 0, rotate: -15 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ type: "spring", stiffness: 500, damping: 26, delay: 0.1 }}
+              >
+                {result.won ? "🏆" : "💔"}
+              </motion.div>
+              <p
+                className="text-2xl font-black tracking-[0.25em]"
+                style={{
+                  fontFamily: "var(--font-cinzel)",
+                  color: result.won ? "rgb(100,220,140)" : "rgb(255,100,100)",
+                }}
+              >
                 {result.won ? "VITÓRIA" : "DERROTA"}
               </p>
-              <p className="mt-2 text-[14px] font-bold" style={{ color: result.ratingChange > 0 ? "rgb(100,220,140)" : "rgb(255,100,100)" }}>
-                {result.ratingChange > 0 ? "+" : ""}{result.ratingChange} Rating
-              </p>
-              <p className="text-[11px] text-violet/50">Novo rating: {save.arena.rating}</p>
-            </div>
-            <div className="flex w-full gap-3">
+            </motion.div>
+
+            {/* Stats row */}
+            <motion.div
+              className="mb-5 flex w-full gap-3"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.25, ease, delay: 0.15 }}
+            >
+              <div className="flex flex-1 flex-col items-center rounded-xl border border-violet/12 py-3.5" style={{ background: "rgba(122,111,160,0.05)" }}>
+                <span className="text-[9px] uppercase tracking-widest text-violet/40">Rating</span>
+                <span
+                  className="mt-1 text-xl font-black"
+                  style={{ color: result.ratingChange > 0 ? "rgb(100,220,140)" : "rgb(255,100,100)" }}
+                >
+                  {result.ratingChange > 0 ? "+" : ""}{result.ratingChange}
+                </span>
+              </div>
+              <div className="flex flex-1 flex-col items-center rounded-xl border border-violet/12 py-3.5" style={{ background: "rgba(122,111,160,0.05)" }}>
+                <span className="text-[9px] uppercase tracking-widest text-violet/40">Novo Rating</span>
+                <span className="mt-1 text-xl font-black text-cream/80">{save.arena.rating}</span>
+              </div>
+              <div className="flex flex-1 flex-col items-center rounded-xl border border-violet/12 py-3.5" style={{ background: "rgba(122,111,160,0.05)" }}>
+                <span className="text-[9px] uppercase tracking-widest text-violet/40">Ouro</span>
+                <span className="mt-1 text-xl font-black text-amber-400">+{result.won ? 200 : 50}</span>
+              </div>
+            </motion.div>
+
+            {/* Rank badge */}
+            <motion.div
+              className="mb-5 flex items-center gap-2"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.2, delay: 0.25 }}
+            >
+              <div
+                className="rounded-full px-3 py-1 text-[10px] font-bold tracking-[0.15em]"
+                style={{ background: `${tier.color}18`, border: `1px solid ${tier.color}40`, color: tier.color }}
+              >
+                {tier.label}
+              </div>
+              <span className="text-[10px] text-violet/40">
+                {save.arena.wins}V · {save.arena.losses}D
+              </span>
+            </motion.div>
+
+            <motion.div
+              className="flex w-full gap-3"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.22, ease, delay: 0.3 }}
+            >
               <motion.button
                 onClick={() => setScreen("select")}
                 whileTap={{ scale: 0.97 }}
@@ -261,7 +333,7 @@ export default function ArenaModal({ onClose }: { onClose: () => void }) {
               >
                 SAIR
               </motion.button>
-            </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

@@ -59,6 +59,22 @@ export const authActionResponseSchema = z.object({
   success: z.literal(true),
 });
 
+export const forgotPasswordSchema = z.object({ email: emailSchema }).strict();
+
+export const resetPasswordSchema = z
+  .object({
+    token: z.string().min(32).max(128),
+    password: passwordSchema,
+  })
+  .strict();
+
+export const deleteAccountSchema = z
+  .object({ confirmation: z.literal('EXCLUIR') })
+  .strict();
+
 export type LoginInput = z.infer<typeof loginSchema>;
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type RefreshInput = z.infer<typeof refreshSchema>;
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+export type DeleteAccountInput = z.infer<typeof deleteAccountSchema>;

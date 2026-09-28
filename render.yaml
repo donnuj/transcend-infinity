@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: transcend-infinity-api
+    name: gacha-infinite-backend
     runtime: node
     rootDir: backend
     buildCommand: npm ci && npx prisma generate && npx prisma migrate deploy && npm run build
@@ -13,8 +13,26 @@ services:
       - key: DIRECT_URL
         sync: false
       - key: JWT_SECRET
-        generateValue: true
+        sync: false
       - key: JWT_EXPIRES_IN
         value: 7d
+      - key: JWT_REFRESH_EXPIRES_IN
+        value: 30d
+      - key: JWT_ISSUER
+        value: transcend-infinity-api
+      - key: JWT_AUDIENCE
+        value: transcend-infinity-web
       - key: CORS_ORIGINS
+        value: https://transcend-infinity.pages.dev
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_CALLBACK_URL
+        value: https://gacha-infinite-backend.onrender.com/api/v1/auth/google/callback
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        value: noreply@transcend-infinity.games
+      - key: FRONTEND_URL
         value: https://transcend-infinity.pages.dev

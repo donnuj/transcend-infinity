@@ -219,6 +219,18 @@ export default function LoginPage() {
             error={mode === "register" ? passwordError ?? undefined : undefined}
           />
 
+          {mode === "login" && (
+            <div className="mt-1.5 flex justify-end">
+              <button
+                type="button"
+                onClick={() => router.push("/forgot-password")}
+                className="text-[10px] tracking-wide text-violet/45 transition-colors hover:text-violet/70"
+              >
+                Esqueceu a senha?
+              </button>
+            </div>
+          )}
+
           {/* Feedback */}
           <AnimatePresence>
             {feedback && (
