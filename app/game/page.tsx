@@ -114,7 +114,12 @@ export default function GamePage() {
     return () => clearInterval(id);
   }, []);
 
-  function handleLogout() {
+  async function handleLogout() {
+    try {
+      await api.post("/auth/logout");
+    } catch {
+      // cookie já expirado ou servidor offline — continua com logout local
+    }
     clearSession();
     router.replace("/login");
   }

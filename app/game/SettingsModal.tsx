@@ -1,6 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useGameStore } from "@/lib/game/store";
 import { scheduleSave } from "@/lib/game/save";
 
@@ -9,6 +10,7 @@ const ease = [0.23, 1, 0.32, 1] as const;
 export default function SettingsModal({ onClose }: { onClose: () => void }) {
   const { save } = useGameStore();
   const audio = save.audio;
+  const [confirmReset, setConfirmReset] = useState(false);
 
   function setMusicVolume(v: number) {
     useGameStore.setState((s) => { s.save.audio.musicVolume = v; });
@@ -22,6 +24,7 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
 
   function resetSave() {
     useGameStore.getState().resetSave();
+    setConfirmReset(false);
   }
 
   return (
@@ -89,14 +92,49 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
           <p className="mb-3 text-[9px] leading-relaxed text-violet/40">
             Redefinir o save apaga todo o progresso permanentemente. Não há como desfazer.
           </p>
-          <motion.button
-            onClick={resetSave}
-            whileTap={{ scale: 0.96 }}
-            transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
-            className="w-full rounded-xl border border-red-500/20 py-3 text-[11px] font-bold tracking-[0.15em] text-red-400/55 transition-colors duration-150 hover:border-red-500/40 hover:text-red-400/80"
-          >
-            REDEFINIR SAVE
-          </motion.button>
+          <AnimatePresence mode="wait">
+            {!confirmReset ? (
+              <motion.button
+                key="reset-btn"
+                onClick={() => setConfirmReset(true)}
+                whileTap={{ scale: 0.96 }}
+                transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
+                className="w-full rounded-xl border border-red-500/20 py-3 text-[11px] font-bold tracking-[0.15em] text-red-400/55 transition-colors duration-150 hover:border-red-500/40 hover:text-red-400/80"
+              >
+                REDEFINIR SAVE
+              </motion.button>
+            ) : (
+              <motion.div
+                key="reset-confirm"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.15 }}
+                className="flex flex-col gap-2"
+              >
+                <p className="text-center text-[10px] font-bold text-red-400/80">Tem certeza? Isso é irreversível.</p>
+                <div className="flex gap-2">
+                  <motion.button
+                    onClick={() => setConfirmReset(false)}
+                    whileTap={{ scale: 0.96 }}
+                    transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
+                    className="flex-1 rounded-xl border border-violet/20 py-2.5 text-[10px] font-bold text-violet/50"
+                  >
+                    CANCELAR
+                  </motion.button>
+                  <motion.button
+                    onClick={resetSave}
+                    whileTap={{ scale: 0.96 }}
+                    transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
+                    className="flex-1 rounded-xl border border-red-500/40 py-2.5 text-[10px] font-bold text-red-400/90"
+                    style={{ background: "rgba(255,50,50,0.08)" }}
+                  >
+                    SIM, APAGAR
+                  </motion.button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </motion.div>
