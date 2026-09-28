@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { GlobeSimple, Cards, Sparkle, Shield, User } from "@phosphor-icons/react";
@@ -93,8 +93,55 @@ export default function GamePage() {
   const [showWiki, setShowWiki] = useState(false);
   const [offlineReward, setOfflineReward] = useState<{ ouro: number; xp: number } | null>(null);
 
+  // Modal callbacks — stable references
+  const openInvocar      = useCallback(() => setTab("invocar"), []);
+  const openDungeon      = useCallback(() => setShowDungeon(true), []);
+  const closeDungeon     = useCallback(() => setShowDungeon(false), []);
+  const openArena        = useCallback(() => setShowArena(true), []);
+  const closeArena       = useCallback(() => setShowArena(false), []);
+  const openMercado      = useCallback(() => setShowMercado(true), []);
+  const closeMercado     = useCallback(() => setShowMercado(false), []);
+  const openBattlePass   = useCallback(() => setShowBattlePass(true), []);
+  const closeBattlePass  = useCallback(() => setShowBattlePass(false), []);
+  const openTorre        = useCallback(() => setShowTorre(true), []);
+  const closeTorre       = useCallback(() => setShowTorre(false), []);
+  const openAchievements = useCallback(() => setShowAchievements(true), []);
+  const closeAchievements= useCallback(() => setShowAchievements(false), []);
+  const openDaily        = useCallback(() => setShowDailyChallenges(true), []);
+  const closeDaily       = useCallback(() => setShowDailyChallenges(false), []);
+  const openCodex        = useCallback(() => setShowCodex(true), []);
+  const closeCodex       = useCallback(() => setShowCodex(false), []);
+  const openFortress     = useCallback(() => setShowFortress(true), []);
+  const closeFortress    = useCallback(() => setShowFortress(false), []);
+  const openBossHunt     = useCallback(() => setShowBossHunt(true), []);
+  const closeBossHunt    = useCallback(() => setShowBossHunt(false), []);
+  const openSeason       = useCallback(() => setShowSeason(true), []);
+  const closeSeason      = useCallback(() => setShowSeason(false), []);
+  const openHousing      = useCallback(() => setShowHousing(true), []);
+  const closeHousing     = useCallback(() => setShowHousing(false), []);
+  const openCompanions   = useCallback(() => setShowCompanions(true), []);
+  const closeCompanions  = useCallback(() => setShowCompanions(false), []);
+  const openAlchemy      = useCallback(() => setShowAlchemy(true), []);
+  const closeAlchemy     = useCallback(() => setShowAlchemy(false), []);
+  const openWorldMap     = useCallback(() => setShowWorldMap(true), []);
+  const closeWorldMap    = useCallback(() => setShowWorldMap(false), []);
+  const openNpcDialogue  = useCallback(() => setShowNpcDialogue(true), []);
+  const closeNpcDialogue = useCallback(() => setShowNpcDialogue(false), []);
+  const openCaravana     = useCallback(() => setShowCaravana(true), []);
+  const closeCaravana    = useCallback(() => setShowCaravana(false), []);
+  const openSettings     = useCallback(() => setShowSettings(true), []);
+  const closeSettings    = useCallback(() => setShowSettings(false), []);
+  const openProfession   = useCallback(() => setShowProfession(true), []);
+  const closeProfession  = useCallback(() => setShowProfession(false), []);
+  const openForge        = useCallback(() => setShowForge(true), []);
+  const closeForge       = useCallback(() => setShowForge(false), []);
+  const openWiki         = useCallback(() => setShowWiki(true), []);
+  const closeWiki        = useCallback(() => setShowWiki(false), []);
+
   useEffect(() => {
-    const offline = new URLSearchParams(window.location.search).get("offline") === "1";
+    const offline = localStorage.getItem("ti_offline") === "1";
+    if (offline) localStorage.removeItem("ti_offline");
+
     if (!offline && !isAuthenticated()) { router.replace("/login"); return; }
     if (offline) {
       setUser({ id: "offline", username: "Viajante", email: "", level: 1 });
@@ -182,37 +229,37 @@ export default function GamePage() {
       {/* Content */}
       <main className="relative flex-1 overflow-hidden">
         <AnimatePresence mode="wait">
-          {tab === "mundo"   && <WorldTab   key="mundo"   profile={profile} onInvocar={() => setTab("invocar")} onDungeon={() => setShowDungeon(true)} onArena={() => setShowArena(true)} onMercado={() => setShowMercado(true)} onBattlePass={() => setShowBattlePass(true)} onTorre={() => setShowTorre(true)} onDailyChallenges={() => setShowDailyChallenges(true)} onBossHunt={() => setShowBossHunt(true)} onWorldMap={() => setShowWorldMap(true)} onNpcDialogue={() => setShowNpcDialogue(true)} onCaravana={() => setShowCaravana(true)} />}
+          {tab === "mundo"   && <WorldTab   key="mundo"   profile={profile} onInvocar={openInvocar} onDungeon={openDungeon} onArena={openArena} onMercado={openMercado} onBattlePass={openBattlePass} onTorre={openTorre} onDailyChallenges={openDaily} onBossHunt={openBossHunt} onWorldMap={openWorldMap} onNpcDialogue={openNpcDialogue} onCaravana={openCaravana} />}
           {tab === "cartas"  && <CartasTab  key="cartas" />}
           {tab === "invocar" && <InvocarTab key="invocar" />}
-          {tab === "guilda"  && <GuildaTab  key="guilda" onFortress={() => setShowFortress(true)} />}
-          {tab === "perfil"  && <PerfilTab  key="perfil" profile={profile} onLogout={handleLogout} onAchievements={() => setShowAchievements(true)} onCodex={() => setShowCodex(true)} onSeason={() => setShowSeason(true)} onHousing={() => setShowHousing(true)} onCompanions={() => setShowCompanions(true)} onAlchemy={() => setShowAlchemy(true)} onSettings={() => setShowSettings(true)} onProfession={() => setShowProfession(true)} onForge={() => setShowForge(true)} onWiki={() => setShowWiki(true)} />}
+          {tab === "guilda"  && <GuildaTab  key="guilda" onFortress={openFortress} />}
+          {tab === "perfil"  && <PerfilTab  key="perfil" profile={profile} onLogout={handleLogout} onAchievements={openAchievements} onCodex={openCodex} onSeason={openSeason} onHousing={openHousing} onCompanions={openCompanions} onAlchemy={openAlchemy} onSettings={openSettings} onProfession={openProfession} onForge={openForge} onWiki={openWiki} />}
         </AnimatePresence>
       </main>
 
-      {/* Dungeon overlay */}
+      {/* Modals */}
       <AnimatePresence>
-        {showDungeon && <DungeonModal key="dungeon" onClose={() => setShowDungeon(false)} />}
-        {showArena && <ArenaModal key="arena" onClose={() => setShowArena(false)} />}
-        {showMercado && <MercadoModal key="mercado" onClose={() => setShowMercado(false)} />}
-        {showBattlePass && <BattlePassModal key="battlepass" onClose={() => setShowBattlePass(false)} />}
-        {showTorre && <TorreModal key="torre" onClose={() => setShowTorre(false)} />}
-        {showAchievements && <AchievementsModal key="achievements" onClose={() => setShowAchievements(false)} />}
-        {showDailyChallenges && <DailyChallengesModal key="daily" onClose={() => setShowDailyChallenges(false)} />}
-        {showCodex && <CodexModal key="codex" onClose={() => setShowCodex(false)} />}
-        {showFortress && <FortressModal key="fortress" onClose={() => setShowFortress(false)} />}
-        {showBossHunt && <BossHuntModal key="bosshunt" onClose={() => setShowBossHunt(false)} />}
-        {showSeason && <SeasonModal key="season" onClose={() => setShowSeason(false)} />}
-        {showHousing && <HousingModal key="housing" onClose={() => setShowHousing(false)} />}
-        {showCompanions && <CompanionsModal key="companions" onClose={() => setShowCompanions(false)} />}
-        {showAlchemy && <AlchemyModal key="alchemy" onClose={() => setShowAlchemy(false)} />}
-        {showWorldMap && <WorldMapModal key="worldmap" onClose={() => setShowWorldMap(false)} />}
-        {showNpcDialogue && <NpcDialogueModal key="npcdialogue" onClose={() => setShowNpcDialogue(false)} />}
-        {showCaravana && <CaravanaModal key="caravana" onClose={() => setShowCaravana(false)} />}
-        {showSettings && <SettingsModal key="settings" onClose={() => setShowSettings(false)} />}
-        {showProfession && <ProfessionModal key="profession" onClose={() => setShowProfession(false)} />}
-        {showForge && <ForgeModal key="forge" onClose={() => setShowForge(false)} />}
-        {showWiki && <WikiModal key="wiki" onClose={() => setShowWiki(false)} />}
+        {showDungeon    && <DungeonModal        key="dungeon"    onClose={closeDungeon} />}
+        {showArena      && <ArenaModal          key="arena"      onClose={closeArena} />}
+        {showMercado    && <MercadoModal        key="mercado"    onClose={closeMercado} />}
+        {showBattlePass && <BattlePassModal     key="battlepass" onClose={closeBattlePass} />}
+        {showTorre      && <TorreModal          key="torre"      onClose={closeTorre} />}
+        {showAchievements && <AchievementsModal key="achievements" onClose={closeAchievements} />}
+        {showDailyChallenges && <DailyChallengesModal key="daily" onClose={closeDaily} />}
+        {showCodex      && <CodexModal          key="codex"      onClose={closeCodex} />}
+        {showFortress   && <FortressModal       key="fortress"   onClose={closeFortress} />}
+        {showBossHunt   && <BossHuntModal       key="bosshunt"   onClose={closeBossHunt} />}
+        {showSeason     && <SeasonModal         key="season"     onClose={closeSeason} />}
+        {showHousing    && <HousingModal        key="housing"    onClose={closeHousing} />}
+        {showCompanions && <CompanionsModal     key="companions" onClose={closeCompanions} />}
+        {showAlchemy    && <AlchemyModal        key="alchemy"    onClose={closeAlchemy} />}
+        {showWorldMap   && <WorldMapModal       key="worldmap"   onClose={closeWorldMap} />}
+        {showNpcDialogue && <NpcDialogueModal   key="npcdialogue" onClose={closeNpcDialogue} />}
+        {showCaravana   && <CaravanaModal       key="caravana"   onClose={closeCaravana} />}
+        {showSettings   && <SettingsModal       key="settings"   onClose={closeSettings} />}
+        {showProfession && <ProfessionModal     key="profession" onClose={closeProfession} />}
+        {showForge      && <ForgeModal          key="forge"      onClose={closeForge} />}
+        {showWiki       && <WikiModal           key="wiki"       onClose={closeWiki} />}
       </AnimatePresence>
 
       {/* Offline reward popup */}

@@ -4,7 +4,7 @@ import { useState, useTransition, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { api } from "@/lib/api";
-import { saveSession, type StoredUser } from "@/lib/auth";
+import { saveSession } from "@/lib/auth";
 
 type Mode = "login" | "register";
 
@@ -15,12 +15,30 @@ type AuthResponse = {
 
 const ease = [0.23, 1, 0.32, 1] as const;
 
+const API_ORIGIN = (() => {
+  try {
+    return new URL(process.env.NEXT_PUBLIC_API_URL || "https://gacha-infinite-backend.onrender.com/api/v1").origin;
+  } catch {
+    return "https://gacha-infinite-backend.onrender.com";
+  }
+})();
+
+function validatePassword(pwd: string): string | null {
+  if (pwd.length < 14) return "Mínimo 14 caracteres";
+  if (!/[A-Z]/.test(pwd)) return "Inclua uma letra maiúscula";
+  if (!/[a-z]/.test(pwd)) return "Inclua uma letra minúscula";
+  if (!/[0-9]/.test(pwd)) return "Inclua um número";
+  if (!/[^a-zA-Z0-9]/.test(pwd)) return "Inclua um símbolo (!@#...)";
+  return null;
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const [mode, setMode] = useState<Mode>("login");
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordError, setPasswordError] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<{ msg: string; ok: boolean } | null>(null);
   const [isPending, startTransition] = useTransition();
   const [slowServer, setSlowServer] = useState(false);
@@ -35,6 +53,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     function onMessage(event: MessageEvent) {
+      if (event.origin !== API_ORIGIN) return;
       if (event.data?.type !== "GOOGLE_AUTH") return;
       const res = event.data.payload as AuthResponse;
       saveSession(res.accessToken, { ...res.profile, id: String(res.profile.id) });
@@ -46,12 +65,27 @@ export default function LoginPage() {
 
   function switchMode(next: Mode) {
     setFeedback(null);
+    setPasswordError(null);
     setMode(next);
+  }
+
+  function handlePasswordChange(v: string) {
+    setPassword(v);
+    if (mode === "register" && v.length > 0) {
+      setPasswordError(validatePassword(v));
+    } else {
+      setPasswordError(null);
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setFeedback(null);
+
+    if (mode === "register") {
+      const err = validatePassword(password);
+      if (err) { setPasswordError(err); return; }
+    }
 
     slowTimer.current = setTimeout(() => setSlowServer(true), 4000);
 
@@ -178,10 +212,11 @@ export default function LoginPage() {
             label="SENHA"
             type="password"
             value={password}
-            onChange={setPassword}
+            onChange={handlePasswordChange}
             placeholder={mode === "register" ? "Mínimo 14 caracteres" : "••••••••"}
             autoComplete={mode === "login" ? "current-password" : "new-password"}
-            hint={mode === "register" ? "Mín. 14 caracteres — maiúscula, número e símbolo obrigatórios" : undefined}
+            hint={mode === "register" && !passwordError ? "Mín. 14 chars — maiúscula, minúscula, número e símbolo" : undefined}
+            error={mode === "register" ? passwordError ?? undefined : undefined}
           />
 
           {/* Feedback */}
@@ -244,7 +279,10 @@ export default function LoginPage() {
           {/* Offline */}
           <motion.button
             type="button"
-            onClick={() => router.push("/game?offline=1")}
+            onClick={() => {
+              localStorage.setItem("ti_offline", "1");
+              router.push("/game");
+            }}
             whileTap={{ scale: 0.97 }}
             transition={{ duration: 0.08, ease }}
             className="w-full rounded border border-violet/15 py-2.5 text-[11px] tracking-wider text-violet/60 transition-colors duration-150 hover:border-amber/25 hover:text-amber/80"
@@ -270,13 +308,7 @@ export default function LoginPage() {
 /* ── Sub-components ────────────────────────────────────────────────────────── */
 
 function Field({
-  label,
-  type,
-  value,
-  onChange,
-  placeholder,
-  autoComplete,
-  hint,
+  label, type, value, onChange, placeholder, autoComplete, hint, error,
 }: {
   label: string;
   type: string;
@@ -285,6 +317,7 @@ function Field({
   placeholder: string;
   autoComplete?: string;
   hint?: string;
+  error?: string;
 }) {
   return (
     <div className="mt-4 flex flex-col gap-1.5">
@@ -298,24 +331,17 @@ function Field({
         placeholder={placeholder}
         autoComplete={autoComplete}
         required
-        minLength={type === "password" && hint ? 14 : undefined}
+        minLength={type === "password" && (hint || error) ? 14 : undefined}
         className="h-12 rounded border border-violet/30 bg-void px-3.5 text-[14px] text-cream placeholder:text-cream/25 transition-colors duration-200 focus:border-amber/70 focus:bg-void/100"
         style={{ transitionTimingFunction: "cubic-bezier(0.23,1,0.32,1)" }}
       />
-      {hint && (
-        <p className="text-[10px] text-violet/45">{hint}</p>
-      )}
+      {error && <p className="text-[10px] text-red-400/80">{error}</p>}
+      {hint && !error && <p className="text-[10px] text-violet/45">{hint}</p>}
     </div>
   );
 }
 
-function AuthButton({
-  children,
-  loading,
-}: {
-  children: React.ReactNode;
-  loading: boolean;
-}) {
+function AuthButton({ children, loading }: { children: React.ReactNode; loading: boolean }) {
   return (
     <motion.button
       type="submit"

@@ -60,8 +60,8 @@ export async function uploadCloudSave(retrying = false): Promise<void> {
   } catch (err: unknown) {
     const status = (err as { status?: number })?.status;
     if (status === 409 && !retrying) {
-      // Revisão desatualizada — re-sincroniza e tenta uma vez mais
       await loadCloudSave();
+      await new Promise<void>((r) => setTimeout(r, 1000));
       _uploading = false;
       return uploadCloudSave(true);
     }

@@ -868,7 +868,7 @@ export const useGameStore = create<GameStore>()(
         } else {
           const lastActive = get().save.offline?.lastActiveAt;
           if (!lastActive) { get().pingLastActive(); return null; }
-          elapsed = Math.min(Date.now() - new Date(lastActive).getTime(), 8 * 3600 * 1000);
+          elapsed = Math.max(0, Math.min(Date.now() - new Date(lastActive).getTime(), 8 * 3600 * 1000));
         }
         if (elapsed < 5 * 60 * 1000) { get().pingLastActive(); return null; }
         const level = get().save.playerLevel.level;

@@ -63,10 +63,8 @@ export class AuthAttemptLimiter {
   }
 
   private enforceCapacity(incomingKey: string): void {
-    if (
-      this.attempts.has(incomingKey) ||
-      this.attempts.size < MAX_TRACKED_IDENTITIES
-    ) {
+    const threshold = Math.floor(MAX_TRACKED_IDENTITIES * 0.9);
+    if (this.attempts.has(incomingKey) || this.attempts.size < threshold) {
       return;
     }
 
@@ -76,9 +74,14 @@ export class AuthAttemptLimiter {
       }
     }
 
-    if (this.attempts.size >= MAX_TRACKED_IDENTITIES) {
-      const oldestKey = this.attempts.keys().next().value;
-      if (oldestKey) this.attempts.delete(oldestKey);
+    if (this.attempts.size >= threshold) {
+      const toEvict = Math.ceil(MAX_TRACKED_IDENTITIES * 0.1);
+      let evicted = 0;
+      for (const key of this.attempts.keys()) {
+        if (evicted >= toEvict) break;
+        this.attempts.delete(key);
+        evicted++;
+      }
     }
   }
 }

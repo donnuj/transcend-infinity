@@ -19,7 +19,7 @@ export const MONOTONIC_PATHS: Array<{ path: string[]; max: number }> = [
   { path: ['tower', 'bestFloor'],    max: 200 },
   { path: ['tower', 'weeklyBest'],   max: 200 },
   { path: ['playerLevel', 'level'],  max: 500 },
-  { path: ['playerLevel', 'totalXp'], max: 1_000_000_000 },
+  { path: ['playerLevel', 'xp'], max: 1_000_000_000 },
 ];
 
 const PROTECTED_SAVE_FIELDS = new Set<string>([]);
