@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGameStore } from "@/lib/game/store";
-import { scheduleSave } from "@/lib/game/save";
+import { scheduleSave, uploadCloudSave } from "@/lib/game/save";
 
 const ease = [0.23, 1, 0.32, 1] as const;
 
@@ -25,6 +25,7 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
   function resetSave() {
     useGameStore.getState().resetSave();
     setConfirmReset(false);
+    uploadCloudSave();
   }
 
   return (

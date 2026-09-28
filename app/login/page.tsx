@@ -33,6 +33,17 @@ export default function LoginPage() {
     }
   }, [isPending]);
 
+  useEffect(() => {
+    function onMessage(event: MessageEvent) {
+      if (event.data?.type !== "GOOGLE_AUTH") return;
+      const res = event.data.payload as AuthResponse;
+      saveSession(res.accessToken, { ...res.profile, id: String(res.profile.id) });
+      router.replace("/game");
+    }
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, [router]);
+
   function switchMode(next: Mode) {
     setFeedback(null);
     setMode(next);
@@ -168,9 +179,9 @@ export default function LoginPage() {
             type="password"
             value={password}
             onChange={setPassword}
-            placeholder={mode === "register" ? "Mínimo 12 caracteres" : "••••••••"}
+            placeholder={mode === "register" ? "Mínimo 14 caracteres" : "••••••••"}
             autoComplete={mode === "login" ? "current-password" : "new-password"}
-            hint={mode === "register" ? "Mínimo 12 caracteres, inclua letras e números" : undefined}
+            hint={mode === "register" ? "Mín. 14 caracteres — maiúscula, número e símbolo obrigatórios" : undefined}
           />
 
           {/* Feedback */}
@@ -215,6 +226,20 @@ export default function LoginPage() {
             <span className="text-[10px] tracking-[0.2em] text-violet/60">OU</span>
             <div className="h-px flex-1 bg-violet/20" />
           </div>
+
+          {/* Google */}
+          <motion.button
+            type="button"
+            onClick={() => {
+              const base = process.env.NEXT_PUBLIC_API_URL || "https://gacha-infinite-backend.onrender.com/api/v1";
+              window.open(`${base}/auth/google`, "google_auth", "width=500,height=620,left=200,top=100");
+            }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ duration: 0.08, ease }}
+            className="mb-2 w-full rounded border border-violet/20 py-2.5 text-[11px] tracking-wider text-violet/60 transition-colors duration-150 hover:border-violet/40 hover:text-cream/70"
+          >
+            ENTRAR COM GOOGLE
+          </motion.button>
 
           {/* Offline */}
           <motion.button
@@ -273,7 +298,7 @@ function Field({
         placeholder={placeholder}
         autoComplete={autoComplete}
         required
-        minLength={type === "password" && hint ? 12 : undefined}
+        minLength={type === "password" && hint ? 14 : undefined}
         className="h-12 rounded border border-violet/30 bg-void px-3.5 text-[14px] text-cream placeholder:text-cream/25 transition-colors duration-200 focus:border-amber/70 focus:bg-void/100"
         style={{ transitionTimingFunction: "cubic-bezier(0.23,1,0.32,1)" }}
       />

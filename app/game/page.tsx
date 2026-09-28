@@ -94,7 +94,12 @@ export default function GamePage() {
   const [offlineReward, setOfflineReward] = useState<{ ouro: number; xp: number } | null>(null);
 
   useEffect(() => {
-    if (!isAuthenticated()) { router.replace("/login"); return; }
+    const offline = new URLSearchParams(window.location.search).get("offline") === "1";
+    if (!offline && !isAuthenticated()) { router.replace("/login"); return; }
+    if (offline) {
+      setUser({ id: "offline", username: "Viajante", email: "", level: 1 });
+      return;
+    }
     const u = getUser();
     api.get<Profile>("/player/profile").then((p) => setProfile(p)).catch(() => null);
     localStorage.removeItem("ti_game_save");

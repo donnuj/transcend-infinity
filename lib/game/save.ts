@@ -6,7 +6,7 @@ import { useGameStore } from "./store";
 type CloudSaveEnvelope = {
   schemaVersion: number;
   revision: number;
-  data: string; // JSON stringified SaveData
+  data: Record<string, unknown>;
 };
 
 type CloudSaveDownload = {
@@ -50,7 +50,7 @@ export async function uploadCloudSave(retrying = false): Promise<void> {
   const envelope: CloudSaveEnvelope = {
     schemaVersion: 1,
     revision: _revision,
-    data: JSON.stringify({ ...save, savedAt: now }),
+    data: { ...save, savedAt: now },
   };
 
   try {
