@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920, height=1080">
+    <title>Transcend Infinity — Brag Video</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+
+      body {
+        background: rgb(6, 7, 15);
+        font-family: 'Inter', system-ui, sans-serif;
+        overflow: hidden;
+      }
+
+      #root {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      .clip {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      /* ── Scene 1: Hook ─────────────────────────────────────── */
+      #s1-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 24px;
+        text-align: center;
+      }
+
+      #hook-line1 {
+        font-family: 'Cinzel', Georgia, serif;
+        font-size: 72px;
+        font-weight: 400;
+        letter-spacing: 0.12em;
+        color: rgb(232, 217, 160);
+        will-change: transform, opacity;
+      }
+
+      #hook-line2 {
+        font-family: 'Cinzel', Georgia, serif;
+        font-size: 108px;
+        font-weight: 900;
+        letter-spacing: 0.1em;
+        color: rgb(200, 155, 60);
+        text-shadow:
+          0 0 40px rgba(200, 155, 60, 0.5),
+          0 0 80px rgba(200, 155, 60, 0.2);
+        will-change: transform, opacity;
+      }
+
+      /* ── Scene 2: Gacha Pull ──────────────────────────────── */
+      #s2-pull {
+        flex-direction: column;
+        gap: 32px;
+      }
+
+      #pull-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 1320px;
+        padding: 0 8px;
+      }
+
+      #pull-banner-name {
+        font-family: 'Cinzel', Georgia, serif;
+        font-size: 22px;
+        font-weight: 700;
+        letter-spacing: 0.15em;
+        color: rgb(200, 155, 60);
+        text-transform: uppercase;
+      }
+
+      #pull-pity {
+        font-family: 'Inter', sans-serif;
+        font-size: 18px;
+        color: rgba(122, 111, 160, 0.9);
+      }
+
+      #pull-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 232px);
+        grid-template-rows: repeat(2, 288px);
+        gap: 16px;
+        width: 1224px;
+      }
+
+      .pull-card {
+        border-radius: 14px;
+        padding: 3px;
+        position: relative;
+        will-change: transform, opacity;
+      }
+
+      .pull-card-inner {
+        width: 100%;
+        height: 100%;
+        border-radius: 11px;
+        background: linear-gradient(160deg, rgba(13,12,26,0.98), rgba(6,7,15,0.99));
+        box-shadow: inset 0 1px 1px rgba(255,255,255,0.04);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-end;
+        padding: 16px 12px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .pull-card-portrait {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center 20%;
+        border-radius: 11px;
+        mask-image: linear-gradient(to bottom, black 58%, transparent 100%);
+        -webkit-mask-image: linear-gradient(to bottom, black 58%, transparent 100%);
+        opacity: 0.85;
+      }
+
+      .pull-card-name {
+        font-family: 'Cinzel', Georgia, serif;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-align: center;
+        position: relative;
+        z-index: 1;
+        text-shadow: 0 1px 4px rgba(0,0,0,0.9);
+      }
+
+      .pull-card-rarity {
+        font-size: 10px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        opacity: 0.8;
+        margin-top: 4px;
+        position: relative;
+        z-index: 1;
+      }
+
+      /* Rarity styles for pull cards */
+      .r-comum    { background: linear-gradient(145deg, rgba(180,180,210,0.1), rgba(180,180,210,0.04)); border: 1px solid rgba(180,180,210,0.2); }
+      .r-incomum  { background: linear-gradient(145deg, rgba(80,200,100,0.1),  rgba(80,200,100,0.04));  border: 1px solid rgba(80,200,100,0.25); }
+      .r-raro     { background: linear-gradient(145deg, rgba(60,120,220,0.12), rgba(60,120,220,0.05));  border: 1px solid rgba(60,120,220,0.3);  }
+      .r-epico    { background: linear-gradient(145deg, rgba(160,80,220,0.14), rgba(160,80,220,0.06)); border: 1px solid rgba(160,80,220,0.35); }
+      .r-lendario { background: linear-gradient(145deg, rgba(200,155,60,0.2),  rgba(200,155,60,0.08)); border: 1px solid rgba(200,155,60,0.55);  }
+
+      .r-comum    .pull-card-name { color: rgb(200,200,225); }
+      .r-incomum  .pull-card-name { color: rgb(100,220,130); }
+      .r-raro     .pull-card-name { color: rgb(90,150,255);  }
+      .r-epico    .pull-card-name { color: rgb(180,110,255); }
+      .r-lendario .pull-card-name { color: rgb(232,200,100); }
+
+      .r-comum    .pull-card-rarity { color: rgb(180,180,210); }
+      .r-incomum  .pull-card-rarity { color: rgb(80,200,100); }
+      .r-raro     .pull-card-rarity { color: rgb(60,120,220); }
+      .r-epico    .pull-card-rarity { color: rgb(160,80,220); }
+      .r-lendario .pull-card-rarity { color: rgb(200,155,60); }
+
+      /* Lendário flash overlay */
+      #lendario-flash {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(ellipse at center, rgba(200,155,60,0.35) 0%, transparent 70%);
+        pointer-events: none;
+        will-change: opacity;
+      }
+
+      /* ── Scene 3: Hero Collection ──────────────────────────── */
+      #s3-cards {
+        flex-direction: column;
+        gap: 48px;
+      }
+
+      #hero-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 220px);
+        grid-template-rows: repeat(2, 280px);
+        gap: 20px;
+        width: 940px;
+      }
+
+      .hero-card {
+        border-radius: 18px;
+        padding: 3px;
+        will-change: transform, opacity;
+      }
+
+      .hero-card-inner {
+        width: 100%;
+        height: 100%;
+        border-radius: 15px;
+        background: linear-gradient(160deg, rgba(13,12,26,0.98), rgba(6,7,15,0.99));
+        box-shadow: inset 0 1px 1px rgba(255,255,255,0.04);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-end;
+        padding: 16px 12px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      /* Art deco corners */
+      .hero-card-inner::before,
+      .hero-card-inner::after {
+        content: '';
+        position: absolute;
+        width: 14px;
+        height: 14px;
+        pointer-events: none;
+      }
+      .hero-card-inner::before {
+        top: 8px; left: 8px;
+        border-top: 2px solid currentColor;
+        border-left: 2px solid currentColor;
+        opacity: 0.6;
+      }
+      .hero-card-inner::after {
+        bottom: 8px; right: 8px;
+        border-bottom: 2px solid currentColor;
+        border-right: 2px solid currentColor;
+        opacity: 0.6;
+      }
+
+      .hero-card-portrait-bg {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center 20%;
+        border-radius: 15px;
+        mask-image: linear-gradient(to bottom, black 62%, transparent 100%);
+        -webkit-mask-image: linear-gradient(to bottom, black 62%, transparent 100%);
+        opacity: 0.88;
+      }
+
+      .hero-name {
+        font-family: 'Cinzel', Georgia, serif;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-align: center;
+        position: relative;
+        z-index: 1;
+        text-shadow: 0 1px 6px rgba(0,0,0,0.95);
+        text-transform: uppercase;
+      }
+
+      .hero-rarity-stars {
+        font-size: 9px;
+        margin-top: 4px;
+        opacity: 0.85;
+        position: relative;
+        z-index: 1;
+      }
+
+      /* Hero card variants */
+      .hc-lendario { background: linear-gradient(145deg, rgba(200,155,60,0.18), rgba(200,155,60,0.06)); border: 1px solid rgba(200,155,60,0.5); color: rgb(200,155,60); }
+      .hc-lendario .hero-name  { color: rgb(232,200,100); }
+      .hc-lendario .hero-rarity-stars { color: rgb(200,155,60); }
+
+      .hc-epico    { background: linear-gradient(145deg, rgba(160,80,220,0.14), rgba(160,80,220,0.05)); border: 1px solid rgba(160,80,220,0.4); color: rgb(160,80,220); }
+      .hc-epico    .hero-name  { color: rgb(190,140,255); }
+      .hc-epico    .hero-rarity-stars { color: rgb(160,80,220); }
+
+      .hc-raro     { background: linear-gradient(145deg, rgba(60,120,220,0.12), rgba(60,120,220,0.04)); border: 1px solid rgba(60,120,220,0.35); color: rgb(60,120,220); }
+      .hc-raro     .hero-name  { color: rgb(100,160,255); }
+      .hc-raro     .hero-rarity-stars { color: rgb(60,120,220); }
+
+      .hc-mitico   { background: linear-gradient(145deg, rgba(255,60,60,0.18),  rgba(255,60,60,0.06));  border: 1px solid rgba(255,60,60,0.5);  color: rgb(255,80,80); }
+      .hc-mitico   .hero-name  { color: rgb(255,140,140); }
+      .hc-mitico   .hero-rarity-stars { color: rgb(255,60,60); }
+
+      #cards-caption {
+        font-family: 'Cinzel', Georgia, serif;
+        font-size: 52px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        color: rgb(232, 217, 160);
+        text-align: center;
+        will-change: transform, opacity;
+      }
+
+      /* ── Scene 4: Systems ─────────────────────────────────── */
+      #s4-systems {
+        flex-direction: column;
+        gap: 40px;
+        align-items: center;
+      }
+
+      #sys-list {
+        display: flex;
+        flex-direction: row;
+        gap: 40px;
+        align-items: center;
+        flex-wrap: wrap;
+        justify-content: center;
+        max-width: 1400px;
+      }
+
+      .sys-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 24px;
+        border-radius: 10px;
+        background: rgba(122, 111, 160, 0.08);
+        border: 1px solid rgba(122, 111, 160, 0.18);
+        will-change: transform, opacity;
+      }
+
+      .sys-icon {
+        font-size: 32px;
+        line-height: 1;
+      }
+
+      .sys-label {
+        font-family: 'Cinzel', Georgia, serif;
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        color: rgb(232, 217, 160);
+        text-transform: uppercase;
+      }
+
+      #sys-count {
+        font-family: 'Cinzel', Georgia, serif;
+        font-size: 96px;
+        font-weight: 900;
+        letter-spacing: 0.08em;
+        color: rgb(200, 155, 60);
+        text-shadow:
+          0 0 60px rgba(200, 155, 60, 0.4),
+          0 0 120px rgba(200, 155, 60, 0.15);
+        will-change: transform, opacity;
+      }
+
+      /* ── Scene 5: Outro ────────────────────────────────────── */
+      #s5-outro {
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+      }
+
+      #outro-glow {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 800px;
+        height: 800px;
+        margin-top: -400px;
+        margin-left: -400px;
+        border-radius: 50%;
+        background: radial-gradient(ellipse at center, rgba(200,155,60,0.18) 0%, transparent 70%);
+        pointer-events: none;
+        will-change: opacity;
+      }
+
+      #outro-logo {
+        font-family: 'Cinzel', Georgia, serif;
+        font-size: 96px;
+        font-weight: 900;
+        letter-spacing: 0.18em;
+        color: rgb(200, 155, 60);
+        text-shadow:
+          0 0 40px rgba(200, 155, 60, 0.6),
+          0 0 100px rgba(200, 155, 60, 0.25);
+        line-height: 1;
+        position: relative;
+        z-index: 1;
+        will-change: transform, opacity;
+      }
+
+      #outro-tagline {
+        font-family: 'Cinzel', Georgia, serif;
+        font-size: 28px;
+        font-weight: 400;
+        letter-spacing: 0.2em;
+        color: rgb(232, 217, 160);
+        position: relative;
+        z-index: 1;
+        will-change: opacity;
+      }
+
+      #outro-url {
+        font-family: 'Inter', sans-serif;
+        font-size: 18px;
+        letter-spacing: 0.1em;
+        color: rgba(122, 111, 160, 0.8);
+        position: relative;
+        z-index: 1;
+        margin-top: 8px;
+        will-change: opacity;
+      }
+    </style>
+  </head>
+  <body>
+    <div data-hf-id="hf-g29d" id="root" data-composition-id="ti-brag" data-start="0" data-width="1920" data-height="1080" data-duration="20">
+
+      <!-- ── Scene 1: Hook (0–3s) ─────────────────────────── -->
+      <section data-hf-id="hf-15va" id="s1-hook" class="clip" data-start="0" data-duration="3" data-track-index="1">
+        <div data-hf-id="hf-kfwi" id="s1-inner">
+          <div data-hf-id="hf-nfk3" id="hook-line1">Um RPG gacha.</div>
+          <div data-hf-id="hf-gz2u" id="hook-line2">No browser.</div>
+        </div>
+      </section>
+
+      <!-- ── Scene 2: Gacha Pull (3–9s) ─────────────────── -->
+      <section data-hf-id="hf-iomz" id="s2-pull" class="clip" data-start="3" data-duration="6" data-track-index="1">
+        <div data-hf-id="hf-4tlm" id="pull-header">
+          <span data-hf-id="hf-jglk" id="pull-banner-name">☆ &#160; INVOCAR — BANNER LENDÁRIO &#160; ☆</span>
+          <span data-hf-id="hf-kb1d" id="pull-pity">Pity: 74 / 90</span>
+        </div>
+        <div data-hf-id="hf-mj29" id="pull-grid">
+          <!-- Card 0 — Incomum -->
+          <div data-hf-id="hf-h8wy" class="pull-card r-incomum" id="pc0">
+            <div data-hf-id="hf-w9x3" class="pull-card-inner">
+              <img data-hf-id="hf-nqdc" class="pull-card-portrait" src="assets/heroes/theron_guardiao.png" alt="">
+              <div data-hf-id="hf-9kym" class="pull-card-name">Theron</div>
+              <div data-hf-id="hf-1w2q" class="pull-card-rarity">Incomum</div>
+            </div>
+          </div>
+          <!-- Card 1 — Raro -->
+          <div data-hf-id="hf-djgd" class="pull-card r-raro" id="pc1">
+            <div data-hf-id="hf-p4jb" class="pull-card-inner">
+              <img data-hf-id="hf-epn7" class="pull-card-portrait" src="assets/heroes/selene_maga.png" alt="">
+              <div data-hf-id="hf-1rhu" class="pull-card-name">Selene</div>
+              <div data-hf-id="hf-eg3q" class="pull-card-rarity">Raro</div>
+            </div>
+          </div>
+          <!-- Card 2 — Comum -->
+          <div data-hf-id="hf-mc7l" class="pull-card r-comum" id="pc2">
+            <div data-hf-id="hf-oq8a" class="pull-card-inner">
+              <img data-hf-id="hf-aly6" class="pull-card-portrait" src="assets/heroes/tilda_curadora.png" alt="">
+              <div data-hf-id="hf-cgu7" class="pull-card-name">Brynn</div>
+              <div data-hf-id="hf-2mg7" class="pull-card-rarity">Comum</div>
+            </div>
+          </div>
+          <!-- Card 3 — Raro -->
+          <div data-hf-id="hf-lfof" class="pull-card r-raro" id="pc3">
+            <div data-hf-id="hf-obx9" class="pull-card-inner">
+              <img data-hf-id="hf-ginq" class="pull-card-portrait" src="assets/heroes/aldric_cavaleiro_negro.png" alt="">
+              <div data-hf-id="hf-yt0g" class="pull-card-name">Vael</div>
+              <div data-hf-id="hf-w8p6" class="pull-card-rarity">Raro</div>
+            </div>
+          </div>
+          <!-- Card 4 — Épico -->
+          <div data-hf-id="hf-odia" class="pull-card r-epico" id="pc4">
+            <div data-hf-id="hf-r42g" class="pull-card-inner">
+              <img data-hf-id="hf-mjg9" class="pull-card-portrait" src="assets/heroes/ossirus_necromante.png" alt="">
+              <div data-hf-id="hf-d5f4" class="pull-card-name">Ossirus</div>
+              <div data-hf-id="hf-r5xe" class="pull-card-rarity">Épico</div>
+            </div>
+          </div>
+          <!-- Card 5 — Raro -->
+          <div data-hf-id="hf-q5g9" class="pull-card r-raro" id="pc5">
+            <div data-hf-id="hf-qprf" class="pull-card-inner">
+              <img data-hf-id="hf-zd7s" class="pull-card-portrait" src="assets/heroes/zephyr_vento.png" alt="">
+              <div data-hf-id="hf-ioqu" class="pull-card-name">Zephyr</div>
+              <div data-hf-id="hf-wn07" class="pull-card-rarity">Raro</div>
+            </div>
+          </div>
+          <!-- Card 6 — Incomum -->
+          <div data-hf-id="hf-xpjg" class="pull-card r-incomum" id="pc6">
+            <div data-hf-id="hf-qbge" class="pull-card-inner">
+              <img data-hf-id="hf-2o4v" class="pull-card-portrait" src="assets/heroes/nyx_elfa.png" alt="">
+              <div data-hf-id="hf-rmiw" class="pull-card-name">Daro</div>
+              <div data-hf-id="hf-hwue" class="pull-card-rarity">Incomum</div>
+            </div>
+          </div>
+          <!-- Card 7 — Épico -->
+          <div data-hf-id="hf-kfe9" class="pull-card r-epico" id="pc7">
+            <div data-hf-id="hf-px5d" class="pull-card-inner">
+              <img data-hf-id="hf-vel0" class="pull-card-portrait" src="assets/heroes/morghul_titan.png" alt="">
+              <div data-hf-id="hf-v14g" class="pull-card-name">Morghul</div>
+              <div data-hf-id="hf-kbom" class="pull-card-rarity">Épico</div>
+            </div>
+          </div>
+          <!-- Card 8 — Raro -->
+          <div data-hf-id="hf-47e4" class="pull-card r-raro" id="pc8">
+            <div data-hf-id="hf-spak" class="pull-card-inner">
+              <img data-hf-id="hf-fyis" class="pull-card-portrait" src="assets/heroes/bren_flecha.png" alt="">
+              <div data-hf-id="hf-9p37" class="pull-card-name">Lyrane</div>
+              <div data-hf-id="hf-x1b8" class="pull-card-rarity">Raro</div>
+            </div>
+          </div>
+          <!-- Card 9 — LENDÁRIO -->
+          <div data-hf-id="hf-ccq9" class="pull-card r-lendario" id="pc9">
+            <div data-hf-id="hf-sazj" class="pull-card-inner">
+              <img data-hf-id="hf-b3yy" class="pull-card-portrait" src="assets/heroes/kaelith_eterno.png" alt="">
+              <div data-hf-id="hf-aitp" class="pull-card-name">Kaelith Eterno</div>
+              <div data-hf-id="hf-l9aq" class="pull-card-rarity">✦ Lendário ✦</div>
+            </div>
+          </div>
+        </div>
+        <!-- Flash overlay for Lendário reveal -->
+        <div data-hf-id="hf-9cnu" id="lendario-flash"></div>
+      </section>
+
+      <!-- ── Scene 3: Hero Collection (9–13s) ──────────── -->
+      <section data-hf-id="hf-hhgy" id="s3-cards" class="clip" data-start="9" data-duration="4" data-track-index="1">
+        <div data-hf-id="hf-4pva" id="hero-grid">
+          <div data-hf-id="hf-kcpo" class="hero-card hc-lendario" id="hc0">
+            <div data-hf-id="hf-ogd8" class="hero-card-inner">
+              <img data-hf-id="hf-xaef" class="hero-card-portrait-bg" src="assets/heroes/kaelith_eterno.png" alt="">
+              <div data-hf-id="hf-svz5" class="hero-name">Kaelith Eterno</div>
+              <div data-hf-id="hf-7s8v" class="hero-rarity-stars">★★★★★</div>
+            </div>
+          </div>
+          <div data-hf-id="hf-7qd0" class="hero-card hc-mitico" id="hc1">
+            <div data-hf-id="hf-y7ys" class="hero-card-inner">
+              <img data-hf-id="hf-sh8p" class="hero-card-portrait-bg" src="assets/heroes/azara_serafim.png" alt="">
+              <div data-hf-id="hf-4jz0" class="hero-name">Azara Serafim</div>
+              <div data-hf-id="hf-1gpa" class="hero-rarity-stars">★★★★★★</div>
+            </div>
+          </div>
+          <div data-hf-id="hf-s3zc" class="hero-card hc-epico" id="hc2">
+            <div data-hf-id="hf-x11p" class="hero-card-inner">
+              <img data-hf-id="hf-cglg" class="hero-card-portrait-bg" src="assets/heroes/ossirus_necromante.png" alt="">
+              <div data-hf-id="hf-ogpo" class="hero-name">Ossirus</div>
+              <div data-hf-id="hf-2i74" class="hero-rarity-stars">★★★★</div>
+            </div>
+          </div>
+          <div data-hf-id="hf-06q3" class="hero-card hc-raro" id="hc3">
+            <div data-hf-id="hf-xfcq" class="hero-card-inner">
+              <img data-hf-id="hf-vi7o" class="hero-card-portrait-bg" src="assets/heroes/selene_maga.png" alt="">
+              <div data-hf-id="hf-7xji" class="hero-name">Selene</div>
+              <div data-hf-id="hf-u605" class="hero-rarity-stars">★★★</div>
+            </div>
+          </div>
+          <div data-hf-id="hf-k7ra" class="hero-card hc-epico" id="hc4">
+            <div data-hf-id="hf-zevv" class="hero-card-inner">
+              <img data-hf-id="hf-qv5p" class="hero-card-portrait-bg" src="assets/heroes/morghul_titan.png" alt="">
+              <div data-hf-id="hf-6chh" class="hero-name">Morghul Sombrio</div>
+              <div data-hf-id="hf-rteg" class="hero-rarity-stars">★★★★</div>
+            </div>
+          </div>
+          <div data-hf-id="hf-dgwd" class="hero-card hc-raro" id="hc5">
+            <div data-hf-id="hf-zt6w" class="hero-card-inner">
+              <img data-hf-id="hf-aun3" class="hero-card-portrait-bg" src="assets/heroes/zephyr_vento.png" alt="">
+              <div data-hf-id="hf-xbfm" class="hero-name">Zephyr</div>
+              <div data-hf-id="hf-f77d" class="hero-rarity-stars">★★★</div>
+            </div>
+          </div>
+          <div data-hf-id="hf-3w36" class="hero-card hc-lendario" id="hc6">
+            <div data-hf-id="hf-ym9t" class="hero-card-inner">
+              <img data-hf-id="hf-bo93" class="hero-card-portrait-bg" src="assets/heroes/serah_celestial.png" alt="">
+              <div data-hf-id="hf-etdl" class="hero-name">Serah Celestial</div>
+              <div data-hf-id="hf-arwf" class="hero-rarity-stars">★★★★★</div>
+            </div>
+          </div>
+          <div data-hf-id="hf-nkq7" class="hero-card hc-raro" id="hc7">
+            <div data-hf-id="hf-z0ku" class="hero-card-inner">
+              <img data-hf-id="hf-us5r" class="hero-card-portrait-bg" src="assets/heroes/aria_valquiria.png" alt="">
+              <div data-hf-id="hf-cskc" class="hero-name">Lyrane Vesper</div>
+              <div data-hf-id="hf-ge4g" class="hero-rarity-stars">★★★</div>
+            </div>
+          </div>
+        </div>
+        <div data-hf-id="hf-xdjp" id="cards-caption">200 heróis. 7 raridades.</div>
+      </section>
+
+      <!-- ── Scene 4: Scale (13–16s) ─────────────────────── -->
+      <section data-hf-id="hf-8p4s" id="s4-systems" class="clip" data-start="13" data-duration="3" data-track-index="1">
+        <div data-hf-id="hf-0n0h" id="sys-list">
+          <div data-hf-id="hf-drwa" class="sys-item" id="sys0"><span data-hf-id="hf-91xq" class="sys-icon">⚔</span><span data-hf-id="hf-1byc" class="sys-label">Arena</span></div>
+          <div data-hf-id="hf-hq0b" class="sys-item" id="sys1"><span data-hf-id="hf-8dci" class="sys-icon">◈</span><span data-hf-id="hf-9tbl" class="sys-label">Dungeon</span></div>
+          <div data-hf-id="hf-6uio" class="sys-item" id="sys2"><span data-hf-id="hf-rkz4" class="sys-icon">◉</span><span data-hf-id="hf-217p" class="sys-label">Boss Hunt</span></div>
+          <div data-hf-id="hf-9ts9" class="sys-item" id="sys3"><span data-hf-id="hf-9g8r" class="sys-icon">⚗</span><span data-hf-id="hf-7l7i" class="sys-label">Alquimia</span></div>
+          <div data-hf-id="hf-yyam" class="sys-item" id="sys4"><span data-hf-id="hf-8imn" class="sys-icon">▲</span><span data-hf-id="hf-jo1v" class="sys-label">Torre</span></div>
+          <div data-hf-id="hf-2wen" class="sys-item" id="sys5"><span data-hf-id="hf-y0fj" class="sys-icon">▸</span><span data-hf-id="hf-rfbo" class="sys-label">Battle Pass</span></div>
+        </div>
+        <div data-hf-id="hf-0rim" id="sys-count">21 sistemas.</div>
+      </section>
+
+      <!-- ── Scene 5: Outro (16–20s) ─────────────────────── -->
+      <section data-hf-id="hf-oblw" id="s5-outro" class="clip" data-start="16" data-duration="4" data-track-index="1">
+        <div data-hf-id="hf-48h0" id="outro-glow"></div>
+        <div data-hf-id="hf-n4bm" id="outro-logo">TRANSCEND INFINITY</div>
+        <div data-hf-id="hf-pxtr" id="outro-tagline">Transcend os limites do browser.</div>
+        <div data-hf-id="hf-itqy" id="outro-url">transcendinfinity.com.br</div>
+      </section>
+
+      <!-- ── Audio ─────────────────────────────────────────── -->
+      <audio data-hf-id="hf-mxq9" id="bg-music" data-start="0" data-track-index="0" data-volume="0.75" src="assets/music/happy-beats-business-moves-vol-12-by-ende-dot-app.mp3"></audio>
+      <!-- SFX: Lendário hit at beat 8.74s -->
+      <audio data-hf-id="hf-6tqr" id="sfx-legendary" data-start="8.74" data-track-index="2" data-volume="0.7" src="assets/sfx/impactBell_heavy_000.ogg"></audio>
+      <!-- SFX: logo slam at beat 17.47s (1.47s into scene 5) -->
+      <audio data-hf-id="hf-pux3" id="sfx-logo" data-start="17.47" data-track-index="3" data-volume="0.6" src="assets/sfx/bong_001.ogg"></audio>
+    </div>
+
+    <script>
+      var root = document.querySelector('[data-composition-id]');
+      var compositionId = root.dataset.compositionId;
+      var tl = gsap.timeline({ paused: true });
+
+      var ease = 'cubic-bezier(0.23, 1, 0.32, 1)';
+
+      // ── Scene 1: Hook (0–3s) ────────────────────────────────
+      // Line 1: slams at ~1.09s (beat-grid) // beat-locked: 1.09s
+      tl.fromTo('#hook-line1',
+        { opacity: 0, y: 50 },
+        { opacity: 1, y: 0, duration: 0.35, ease: 'power3.out' },
+        1.09
+      );
+
+      // Line 2: slams at ~2.19s (beat-grid) // beat-locked: 2.19s
+      tl.fromTo('#hook-line2',
+        { opacity: 0, y: 60, scale: 0.88 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: 'back.out(1.4)' },
+        2.19
+      );
+
+      // ── Scene 2: Gacha Pull (3–9s) ─────────────────────────
+      // Beat grid: 3.27, 3.82, 4.39, 4.91, 5.34, 6.00, 6.56, 7.09, 7.64, 8.19
+      // Cards reveal one by one // beat-grid: pc0@3.27s pc1@3.82s ... pc9@8.19s
+      var cardBeats = [3.27, 3.82, 4.39, 4.91, 5.34, 6.00, 6.56, 7.09, 7.64, 8.19];
+      for (var i = 0; i < 10; i++) {
+        tl.fromTo('#pc' + i,
+          { opacity: 0, scale: 0.72, y: 30 },
+          { opacity: 1, scale: 1, y: 0, duration: 0.28, ease: 'back.out(1.6)', immediateRender: false },
+          cardBeats[i]
+        );
+      }
+
+      // Lendário flash at strong beat 8.74s // beat-locked: 8.74s
+      tl.fromTo('#lendario-flash',
+        { opacity: 0 },
+        { opacity: 1, duration: 0.18, ease: 'power2.in', immediateRender: false },
+        8.74
+      );
+      tl.to('#lendario-flash',
+        { opacity: 0, duration: 0.55, ease: 'power2.out' },
+        8.92
+      );
+
+      // ── Scene 3: Hero Collection (9–13s) ────────────────────
+      // 8 hero cards in stagger from 9.29s // beat-grid: hc0@9.29s hc1@9.83s ... (every beat)
+      var heroBeats = [9.29, 9.83, 10.37, 10.93, 11.46, 11.46, 12.02, 12.02];
+      // 4 cards per row: row 1 starts at 9.29, row 2 at ~10.37
+      var heroIds = ['#hc0','#hc1','#hc2','#hc3','#hc4','#hc5','#hc6','#hc7'];
+      for (var j = 0; j < 8; j++) {
+        var heroDelay = 9.29 + j * 0.28;
+        tl.fromTo(heroIds[j],
+          { opacity: 0, scale: 0.78, y: 24 },
+          { opacity: 1, scale: 1, y: 0, duration: 0.32, ease: 'back.out(1.4)', immediateRender: false },
+          heroDelay
+        );
+      }
+
+      // Caption "200 heróis. 7 raridades." at ~11.5s
+      tl.fromTo('#cards-caption',
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, duration: 0.45, ease: 'power3.out', immediateRender: false },
+        11.6
+      );
+
+      // ── Scene 4: Scale (13–16s) ──────────────────────────────
+      // 6 system icons stagger // beat-grid: sys0@13.11 sys1@13.64 ... sys5@15.29
+      // beat-locked: 13.11s
+      var sysBeats = [13.11, 13.64, 14.20, 14.73, 15.29, 15.84];
+      for (var k = 0; k < 6; k++) {
+        tl.fromTo('#sys' + k,
+          { opacity: 0, y: 22, scale: 0.85 },
+          { opacity: 1, y: 0, scale: 1, duration: 0.3, ease: 'back.out(1.5)', immediateRender: false },
+          sysBeats[k]
+        );
+      }
+
+      // "21 sistemas." at strong beat area ~15.84s
+      tl.fromTo('#sys-count',
+        { opacity: 0, scale: 0.8 },
+        { opacity: 1, scale: 1, duration: 0.42, ease: 'back.out(1.4)', immediateRender: false },
+        15.84
+      );
+
+      // ── Scene 5: Outro (16–20s) ──────────────────────────────
+      // Glow bloom
+      tl.fromTo('#outro-glow',
+        { opacity: 0 },
+        { opacity: 1, duration: 0.8, ease: 'power2.out', immediateRender: false },
+        16.2
+      );
+
+      // Logo slam at strong beat 17.47s // beat-locked: 17.47s
+      tl.fromTo('#outro-logo',
+        { opacity: 0, scale: 0.88 },
+        { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(1.2)', immediateRender: false },
+        17.47
+      );
+
+      // Tagline at 18.56s (strong beat) // beat-locked: 18.56s
+      tl.fromTo('#outro-tagline',
+        { opacity: 0, y: 18 },
+        { opacity: 1, y: 0, duration: 0.45, ease: 'power3.out', immediateRender: false },
+        18.56
+      );
+
+      // URL fades in at ~19.1s
+      tl.fromTo('#outro-url',
+        { opacity: 0 },
+        { opacity: 1, duration: 0.5, ease: 'power2.out', immediateRender: false },
+        19.1
+      );
+
+      window.__timelines[compositionId] = tl;
+    </script>
+  </body>
+</html>

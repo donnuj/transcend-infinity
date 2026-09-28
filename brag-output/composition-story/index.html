@@ -1,0 +1,626 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>Transcend Infinity — Story</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Inter:wght@400;500;700&display=swap" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+
+      body {
+        background: rgb(6, 7, 15);
+        font-family: 'Inter', system-ui, sans-serif;
+        overflow: hidden;
+      }
+
+      #root {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      .clip {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      /* ── Scene 1: Hook ──────────────────────────────────────── */
+      #s1-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 32px;
+        text-align: center;
+        padding: 0 60px;
+      }
+
+      #hook-line1 {
+        font-family: 'Cinzel', Georgia, serif;
+        font-size: 68px;
+        font-weight: 400;
+        letter-spacing: 0.12em;
+        color: rgb(232, 217, 160);
+        will-change: transform, opacity;
+      }
+
+      #hook-line2 {
+        font-family: 'Cinzel', Georgia, serif;
+        font-size: 104px;
+        font-weight: 900;
+        letter-spacing: 0.1em;
+        color: rgb(200, 155, 60);
+        text-shadow: 0 0 40px rgba(200,155,60,0.5), 0 0 80px rgba(200,155,60,0.2);
+        will-change: transform, opacity;
+      }
+
+      /* ── Scene 2: Gacha Pull ─────────────────────────────────── */
+      #s2-pull { flex-direction: column; gap: 24px; }
+
+      #pull-header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        width: 960px;
+      }
+
+      #pull-banner-name {
+        font-family: 'Cinzel', Georgia, serif;
+        font-size: 20px;
+        font-weight: 700;
+        letter-spacing: 0.15em;
+        color: rgb(200, 155, 60);
+        text-transform: uppercase;
+        text-align: center;
+      }
+
+      #pull-pity {
+        font-family: 'Inter', sans-serif;
+        font-size: 16px;
+        color: rgba(122, 111, 160, 0.9);
+      }
+
+      /* 2 cols × 5 rows for portrait format */
+      #pull-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 468px);
+        grid-template-rows: repeat(5, 294px);
+        gap: 12px;
+        width: 948px;
+      }
+
+      .pull-card {
+        border-radius: 14px;
+        padding: 3px;
+        position: relative;
+        will-change: transform, opacity;
+      }
+
+      .pull-card-inner {
+        width: 100%;
+        height: 100%;
+        border-radius: 11px;
+        background: linear-gradient(160deg, rgba(13,12,26,0.98), rgba(6,7,15,0.99));
+        box-shadow: inset 0 1px 1px rgba(255,255,255,0.04);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-end;
+        padding: 14px 12px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .pull-card-portrait {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center 20%;
+        border-radius: 11px;
+        mask-image: linear-gradient(to bottom, black 58%, transparent 100%);
+        -webkit-mask-image: linear-gradient(to bottom, black 58%, transparent 100%);
+        opacity: 0.85;
+      }
+
+      .pull-card-name {
+        font-family: 'Cinzel', Georgia, serif;
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-align: center;
+        position: relative;
+        z-index: 1;
+        text-shadow: 0 1px 4px rgba(0,0,0,0.9);
+      }
+
+      .pull-card-rarity {
+        font-size: 11px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        opacity: 0.85;
+        margin-top: 4px;
+        position: relative;
+        z-index: 1;
+      }
+
+      .r-comum    { background: linear-gradient(145deg, rgba(180,180,210,0.1), rgba(180,180,210,0.04)); border: 1px solid rgba(180,180,210,0.2); }
+      .r-incomum  { background: linear-gradient(145deg, rgba(80,200,100,0.1),  rgba(80,200,100,0.04));  border: 1px solid rgba(80,200,100,0.25); }
+      .r-raro     { background: linear-gradient(145deg, rgba(60,120,220,0.12), rgba(60,120,220,0.05));  border: 1px solid rgba(60,120,220,0.3); }
+      .r-epico    { background: linear-gradient(145deg, rgba(160,80,220,0.14), rgba(160,80,220,0.06)); border: 1px solid rgba(160,80,220,0.35); }
+      .r-lendario { background: linear-gradient(145deg, rgba(200,155,60,0.2),  rgba(200,155,60,0.08)); border: 1px solid rgba(200,155,60,0.55); }
+
+      .r-comum    .pull-card-name { color: rgb(200,200,225); }
+      .r-incomum  .pull-card-name { color: rgb(100,220,130); }
+      .r-raro     .pull-card-name { color: rgb(90,150,255); }
+      .r-epico    .pull-card-name { color: rgb(180,110,255); }
+      .r-lendario .pull-card-name { color: rgb(232,200,100); }
+
+      .r-comum    .pull-card-rarity { color: rgb(180,180,210); }
+      .r-incomum  .pull-card-rarity { color: rgb(80,200,100); }
+      .r-raro     .pull-card-rarity { color: rgb(60,120,220); }
+      .r-epico    .pull-card-rarity { color: rgb(160,80,220); }
+      .r-lendario .pull-card-rarity { color: rgb(200,155,60); }
+
+      #lendario-flash {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(ellipse at center, rgba(200,155,60,0.35) 0%, transparent 70%);
+        pointer-events: none;
+        will-change: opacity;
+        opacity: 0;
+      }
+
+      /* ── Scene 3: Hero Collection ─────────────────────────────── */
+      #s3-cards { flex-direction: column; gap: 40px; }
+
+      /* 2×2 grid — bigger cards, more impacto */
+      #hero-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 460px);
+        grid-template-rows: repeat(2, 520px);
+        gap: 20px;
+        width: 940px;
+      }
+
+      .hero-card {
+        border-radius: 18px;
+        padding: 3px;
+        will-change: transform, opacity;
+      }
+
+      .hero-card-inner {
+        width: 100%;
+        height: 100%;
+        border-radius: 15px;
+        background: linear-gradient(160deg, rgba(13,12,26,0.98), rgba(6,7,15,0.99));
+        box-shadow: inset 0 1px 1px rgba(255,255,255,0.04);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-end;
+        padding: 20px 16px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .hero-card-inner::before, .hero-card-inner::after {
+        content: '';
+        position: absolute;
+        width: 16px; height: 16px;
+        pointer-events: none;
+      }
+      .hero-card-inner::before { top: 10px; left: 10px; border-top: 2px solid currentColor; border-left: 2px solid currentColor; opacity: 0.6; }
+      .hero-card-inner::after  { bottom: 10px; right: 10px; border-bottom: 2px solid currentColor; border-right: 2px solid currentColor; opacity: 0.6; }
+
+      .hero-card-portrait-bg {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center 20%;
+        border-radius: 15px;
+        mask-image: linear-gradient(to bottom, black 62%, transparent 100%);
+        -webkit-mask-image: linear-gradient(to bottom, black 62%, transparent 100%);
+        opacity: 0.88;
+      }
+
+      .hero-name {
+        font-family: 'Cinzel', Georgia, serif;
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-align: center;
+        position: relative;
+        z-index: 1;
+        text-shadow: 0 1px 6px rgba(0,0,0,0.95);
+        text-transform: uppercase;
+      }
+
+      .hero-rarity-stars {
+        font-size: 11px;
+        margin-top: 5px;
+        opacity: 0.85;
+        position: relative;
+        z-index: 1;
+      }
+
+      .hc-lendario { background: linear-gradient(145deg, rgba(200,155,60,0.18), rgba(200,155,60,0.06)); border: 1px solid rgba(200,155,60,0.5); color: rgb(200,155,60); }
+      .hc-lendario .hero-name { color: rgb(232,200,100); }
+      .hc-lendario .hero-rarity-stars { color: rgb(200,155,60); }
+
+      .hc-epico { background: linear-gradient(145deg, rgba(160,80,220,0.14), rgba(160,80,220,0.05)); border: 1px solid rgba(160,80,220,0.4); color: rgb(160,80,220); }
+      .hc-epico .hero-name { color: rgb(190,140,255); }
+      .hc-epico .hero-rarity-stars { color: rgb(160,80,220); }
+
+      .hc-raro { background: linear-gradient(145deg, rgba(60,120,220,0.12), rgba(60,120,220,0.04)); border: 1px solid rgba(60,120,220,0.35); color: rgb(60,120,220); }
+      .hc-raro .hero-name { color: rgb(100,160,255); }
+      .hc-raro .hero-rarity-stars { color: rgb(60,120,220); }
+
+      .hc-mitico { background: linear-gradient(145deg, rgba(255,60,60,0.18), rgba(255,60,60,0.06)); border: 1px solid rgba(255,60,60,0.5); color: rgb(255,80,80); }
+      .hc-mitico .hero-name { color: rgb(255,140,140); }
+      .hc-mitico .hero-rarity-stars { color: rgb(255,60,60); }
+
+      #cards-caption {
+        font-family: 'Cinzel', Georgia, serif;
+        font-size: 44px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        color: rgb(232, 217, 160);
+        text-align: center;
+        will-change: transform, opacity;
+      }
+
+      /* ── Scene 4: Systems ─────────────────────────────────────── */
+      #s4-systems { flex-direction: column; gap: 32px; align-items: center; }
+
+      #sys-list {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        align-items: stretch;
+        width: 860px;
+      }
+
+      .sys-item {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding: 18px 32px;
+        border-radius: 12px;
+        background: rgba(122, 111, 160, 0.08);
+        border: 1px solid rgba(122, 111, 160, 0.18);
+        will-change: transform, opacity;
+      }
+
+      .sys-icon { font-size: 28px; line-height: 1; }
+
+      .sys-label {
+        font-family: 'Cinzel', Georgia, serif;
+        font-size: 20px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        color: rgb(232, 217, 160);
+        text-transform: uppercase;
+      }
+
+      #sys-count {
+        font-family: 'Cinzel', Georgia, serif;
+        font-size: 88px;
+        font-weight: 900;
+        letter-spacing: 0.08em;
+        color: rgb(200, 155, 60);
+        text-shadow: 0 0 60px rgba(200,155,60,0.4), 0 0 120px rgba(200,155,60,0.15);
+        will-change: transform, opacity;
+      }
+
+      /* ── Scene 5: Outro ───────────────────────────────────────── */
+      #s5-outro { flex-direction: column; gap: 24px; text-align: center; padding: 0 60px; }
+
+      #outro-glow {
+        position: absolute;
+        top: 50%; left: 50%;
+        width: 900px; height: 900px;
+        margin-top: -450px; margin-left: -450px;
+        border-radius: 50%;
+        background: radial-gradient(ellipse at center, rgba(200,155,60,0.18) 0%, transparent 70%);
+        pointer-events: none;
+        will-change: opacity;
+      }
+
+      #outro-logo {
+        font-family: 'Cinzel', Georgia, serif;
+        font-size: 84px;
+        font-weight: 900;
+        letter-spacing: 0.14em;
+        color: rgb(200, 155, 60);
+        text-shadow: 0 0 40px rgba(200,155,60,0.6), 0 0 100px rgba(200,155,60,0.25);
+        line-height: 1.1;
+        position: relative;
+        z-index: 1;
+        will-change: transform, opacity;
+      }
+
+      #outro-tagline {
+        font-family: 'Cinzel', Georgia, serif;
+        font-size: 26px;
+        font-weight: 400;
+        letter-spacing: 0.18em;
+        color: rgb(232, 217, 160);
+        position: relative;
+        z-index: 1;
+        will-change: opacity;
+      }
+
+      #outro-url {
+        font-family: 'Inter', sans-serif;
+        font-size: 20px;
+        letter-spacing: 0.1em;
+        color: rgba(122, 111, 160, 0.8);
+        position: relative;
+        z-index: 1;
+        margin-top: 8px;
+        will-change: opacity;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="ti-story" data-start="0" data-width="1080" data-height="1920" data-duration="20">
+
+      <!-- ── Scene 1: Hook (0–3s) ──────────────────────────── -->
+      <section id="s1-hook" class="clip" data-start="0" data-duration="3" data-track-index="1">
+        <div id="s1-inner">
+          <div id="hook-line1">Um RPG gacha.</div>
+          <div id="hook-line2">No browser.</div>
+        </div>
+      </section>
+
+      <!-- ── Scene 2: Gacha Pull (3–9s) — 2×5 grid ────────── -->
+      <section id="s2-pull" class="clip" data-start="3" data-duration="6" data-track-index="1">
+        <div id="pull-header">
+          <span id="pull-banner-name">☆ &nbsp; INVOCAR — BANNER LENDÁRIO &nbsp; ☆</span>
+          <span id="pull-pity">Pity: 74 / 90</span>
+        </div>
+        <div id="pull-grid">
+          <div class="pull-card r-incomum" id="pc0">
+            <div class="pull-card-inner">
+              <img class="pull-card-portrait" src="assets/heroes/theron_guardiao.png" alt="" />
+              <div class="pull-card-name">Theron</div>
+              <div class="pull-card-rarity">Incomum</div>
+            </div>
+          </div>
+          <div class="pull-card r-raro" id="pc1">
+            <div class="pull-card-inner">
+              <img class="pull-card-portrait" src="assets/heroes/selene_maga.png" alt="" />
+              <div class="pull-card-name">Selene</div>
+              <div class="pull-card-rarity">Raro</div>
+            </div>
+          </div>
+          <div class="pull-card r-comum" id="pc2">
+            <div class="pull-card-inner">
+              <img class="pull-card-portrait" src="assets/heroes/tilda_curadora.png" alt="" />
+              <div class="pull-card-name">Brynn</div>
+              <div class="pull-card-rarity">Comum</div>
+            </div>
+          </div>
+          <div class="pull-card r-raro" id="pc3">
+            <div class="pull-card-inner">
+              <img class="pull-card-portrait" src="assets/heroes/aldric_cavaleiro_negro.png" alt="" />
+              <div class="pull-card-name">Vael</div>
+              <div class="pull-card-rarity">Raro</div>
+            </div>
+          </div>
+          <div class="pull-card r-epico" id="pc4">
+            <div class="pull-card-inner">
+              <img class="pull-card-portrait" src="assets/heroes/ossirus_necromante.png" alt="" />
+              <div class="pull-card-name">Ossirus</div>
+              <div class="pull-card-rarity">Épico</div>
+            </div>
+          </div>
+          <div class="pull-card r-raro" id="pc5">
+            <div class="pull-card-inner">
+              <img class="pull-card-portrait" src="assets/heroes/zephyr_vento.png" alt="" />
+              <div class="pull-card-name">Zephyr</div>
+              <div class="pull-card-rarity">Raro</div>
+            </div>
+          </div>
+          <div class="pull-card r-incomum" id="pc6">
+            <div class="pull-card-inner">
+              <img class="pull-card-portrait" src="assets/heroes/nyx_elfa.png" alt="" />
+              <div class="pull-card-name">Daro</div>
+              <div class="pull-card-rarity">Incomum</div>
+            </div>
+          </div>
+          <div class="pull-card r-epico" id="pc7">
+            <div class="pull-card-inner">
+              <img class="pull-card-portrait" src="assets/heroes/morghul_titan.png" alt="" />
+              <div class="pull-card-name">Morghul</div>
+              <div class="pull-card-rarity">Épico</div>
+            </div>
+          </div>
+          <div class="pull-card r-raro" id="pc8">
+            <div class="pull-card-inner">
+              <img class="pull-card-portrait" src="assets/heroes/bren_flecha.png" alt="" />
+              <div class="pull-card-name">Lyrane</div>
+              <div class="pull-card-rarity">Raro</div>
+            </div>
+          </div>
+          <div class="pull-card r-lendario" id="pc9">
+            <div class="pull-card-inner">
+              <img class="pull-card-portrait" src="assets/heroes/kaelith_eterno.png" alt="" />
+              <div class="pull-card-name">Kaelith Eterno</div>
+              <div class="pull-card-rarity">✦ Lendário ✦</div>
+            </div>
+          </div>
+        </div>
+        <div id="lendario-flash"></div>
+      </section>
+
+      <!-- ── Scene 3: Hero Collection (9–13s) — 2×2 ────────── -->
+      <section id="s3-cards" class="clip" data-start="9" data-duration="4" data-track-index="1">
+        <div id="hero-grid">
+          <div class="hero-card hc-lendario" id="hc0">
+            <div class="hero-card-inner">
+              <img class="hero-card-portrait-bg" src="assets/heroes/kaelith_eterno.png" alt="" />
+              <div class="hero-name">Kaelith Eterno</div>
+              <div class="hero-rarity-stars">★★★★★</div>
+            </div>
+          </div>
+          <div class="hero-card hc-mitico" id="hc1">
+            <div class="hero-card-inner">
+              <img class="hero-card-portrait-bg" src="assets/heroes/azara_serafim.png" alt="" />
+              <div class="hero-name">Azara Serafim</div>
+              <div class="hero-rarity-stars">★★★★★★</div>
+            </div>
+          </div>
+          <div class="hero-card hc-epico" id="hc2">
+            <div class="hero-card-inner">
+              <img class="hero-card-portrait-bg" src="assets/heroes/ossirus_necromante.png" alt="" />
+              <div class="hero-name">Ossirus</div>
+              <div class="hero-rarity-stars">★★★★</div>
+            </div>
+          </div>
+          <div class="hero-card hc-raro" id="hc3">
+            <div class="hero-card-inner">
+              <img class="hero-card-portrait-bg" src="assets/heroes/selene_maga.png" alt="" />
+              <div class="hero-name">Selene</div>
+              <div class="hero-rarity-stars">★★★</div>
+            </div>
+          </div>
+        </div>
+        <div id="cards-caption">200 heróis. 7 raridades.</div>
+      </section>
+
+      <!-- ── Scene 4: Scale (13–16s) ───────────────────────── -->
+      <section id="s4-systems" class="clip" data-start="13" data-duration="3" data-track-index="1">
+        <div id="sys-list">
+          <div class="sys-item" id="sys0"><span class="sys-icon">⚔</span><span class="sys-label">Arena PvP</span></div>
+          <div class="sys-item" id="sys1"><span class="sys-icon">◈</span><span class="sys-label">Dungeon</span></div>
+          <div class="sys-item" id="sys2"><span class="sys-icon">◉</span><span class="sys-label">Boss Hunt</span></div>
+          <div class="sys-item" id="sys3"><span class="sys-icon">⚗</span><span class="sys-label">Alquimia</span></div>
+          <div class="sys-item" id="sys4"><span class="sys-icon">▲</span><span class="sys-label">Torre Infinita</span></div>
+          <div class="sys-item" id="sys5"><span class="sys-icon">▸</span><span class="sys-label">Battle Pass</span></div>
+        </div>
+        <div id="sys-count">21 sistemas.</div>
+      </section>
+
+      <!-- ── Scene 5: Outro (16–20s) ───────────────────────── -->
+      <section id="s5-outro" class="clip" data-start="16" data-duration="4" data-track-index="1">
+        <div id="outro-glow"></div>
+        <div id="outro-logo">TRANSCEND<br>INFINITY</div>
+        <div id="outro-tagline">Transcend os limites do browser.</div>
+        <div id="outro-url">transcendinfinity.com.br</div>
+      </section>
+
+      <!-- ── Audio ─────────────────────────────────────────── -->
+      <audio id="bg-music" data-start="0" data-track-index="0" data-volume="0.75" src="assets/music/happy-beats-business-moves-vol-12-by-ende-dot-app.mp3"></audio>
+      <audio id="sfx-legendary" data-start="8.74" data-track-index="2" data-volume="0.7" src="assets/sfx/impactBell_heavy_000.ogg"></audio>
+      <audio id="sfx-logo" data-start="17.47" data-track-index="3" data-volume="0.6" src="assets/sfx/bong_001.ogg"></audio>
+    </div>
+
+    <script>
+      var root = document.querySelector('[data-composition-id]');
+      var compositionId = root.dataset.compositionId;
+      var tl = gsap.timeline({ paused: true });
+
+      // ── Scene 1: Hook ──────────────────────────────────────
+      tl.fromTo('#hook-line1',
+        { opacity: 0, y: 50 },
+        { opacity: 1, y: 0, duration: 0.35, ease: 'power3.out' },
+        1.09
+      );
+      tl.fromTo('#hook-line2',
+        { opacity: 0, y: 60, scale: 0.88 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: 'back.out(1.4)' },
+        2.19
+      );
+
+      // ── Scene 2: Pull ──────────────────────────────────────
+      // 10 cards, beat grid — same timing as landscape
+      var cardBeats = [3.27, 3.82, 4.39, 4.91, 5.34, 6.00, 6.56, 7.09, 7.64, 8.19];
+      for (var i = 0; i < 10; i++) {
+        tl.fromTo('#pc' + i,
+          { opacity: 0, scale: 0.72, y: 30 },
+          { opacity: 1, scale: 1, y: 0, duration: 0.28, ease: 'back.out(1.6)', immediateRender: false },
+          cardBeats[i]
+        );
+      }
+
+      // Lendário flash // beat-locked: 8.74s
+      tl.fromTo('#lendario-flash',
+        { opacity: 0 },
+        { opacity: 1, duration: 0.18, ease: 'power2.in', immediateRender: false },
+        8.74
+      );
+      tl.to('#lendario-flash',
+        { opacity: 0, duration: 0.55, ease: 'power2.out' },
+        8.92
+      );
+
+      // ── Scene 3: Hero Cards (4 cards, 2×2) ─────────────────
+      var heroIds = ['#hc0', '#hc1', '#hc2', '#hc3'];
+      for (var j = 0; j < 4; j++) {
+        tl.fromTo(heroIds[j],
+          { opacity: 0, scale: 0.78, y: 24 },
+          { opacity: 1, scale: 1, y: 0, duration: 0.4, ease: 'back.out(1.4)', immediateRender: false },
+          9.29 + j * 0.42
+        );
+      }
+      tl.fromTo('#cards-caption',
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, duration: 0.45, ease: 'power3.out', immediateRender: false },
+        11.6
+      );
+
+      // ── Scene 4: Systems ───────────────────────────────────
+      var sysBeats = [13.11, 13.64, 14.20, 14.73, 15.29, 15.84];
+      for (var k = 0; k < 6; k++) {
+        tl.fromTo('#sys' + k,
+          { opacity: 0, x: -40, scale: 0.92 },
+          { opacity: 1, x: 0, scale: 1, duration: 0.3, ease: 'back.out(1.5)', immediateRender: false },
+          sysBeats[k]
+        );
+      }
+      tl.fromTo('#sys-count',
+        { opacity: 0, scale: 0.8 },
+        { opacity: 1, scale: 1, duration: 0.42, ease: 'back.out(1.4)', immediateRender: false },
+        15.84
+      );
+
+      // ── Scene 5: Outro ─────────────────────────────────────
+      tl.fromTo('#outro-glow',
+        { opacity: 0 },
+        { opacity: 1, duration: 0.8, ease: 'power2.out', immediateRender: false },
+        16.2
+      );
+      // Logo slam // beat-locked: 17.47s
+      tl.fromTo('#outro-logo',
+        { opacity: 0, scale: 0.88 },
+        { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(1.2)', immediateRender: false },
+        17.47
+      );
+      tl.fromTo('#outro-tagline',
+        { opacity: 0, y: 18 },
+        { opacity: 1, y: 0, duration: 0.45, ease: 'power3.out', immediateRender: false },
+        18.56
+      );
+      tl.fromTo('#outro-url',
+        { opacity: 0 },
+        { opacity: 1, duration: 0.5, ease: 'power2.out', immediateRender: false },
+        19.1
+      );
+
+      window.__timelines = window.__timelines || {};
+      window.__timelines[compositionId] = tl;
+    </script>
+  </body>
+</html>

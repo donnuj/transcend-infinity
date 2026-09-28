@@ -1,0 +1,58 @@
+## Share Copy — Transcend Infinity
+
+---
+
+### Twitter / X (short)
+
+Um RPG gacha. No browser. 200 heróis, 7 raridades, 21 sistemas.
+
+Sem instalação. Sem mobile. Só uma aba do Chrome.
+
+transcend-infinity.pages.dev
+
+---
+
+### Twitter / X (longo)
+
+Construí um RPG gacha completo rodando no browser.
+
+200 heróis com raridades. Sistema de invocação 10x. Arena PvP. Masmorra. Mercado. Guilda. 21 sistemas no total.
+
+Você abre uma aba, cria uma conta e já pode jogar.
+
+transcend-infinity.pages.dev
+
+---
+
+### LinkedIn / texto longo
+
+Lancei o Transcend Infinity — um RPG gacha completo rodando direto no browser.
+
+Stack: Next.js + NestJS + Prisma + Neon PostgreSQL. Frontend no Cloudflare Pages, backend no Render.
+
+O jogo tem:
+• 200 heróis com 7 níveis de raridade (Comum → Lendário)
+• Sistema de invocação gacha 10x com pity system
+• 21 sistemas: Arena PvP, Masmorra, Guilda, Mercado, Forja e mais
+• Auth completo (login social Google, forgot/reset password)
+• Design system próprio (Doppelrand) com cartas art déco
+
+A premissa é simples: tudo que você esperaria num RPG gacha mobile, mas abrindo uma aba do Chrome.
+
+→ transcend-infinity.pages.dev
+
+---
+
+### Legenda para vídeo (Instagram / TikTok)
+
+Um RPG gacha. No browser. 🎮
+
+200 heróis, 7 raridades, 21 sistemas — e tudo que você precisa é de uma aba aberta.
+
+transcend-infinity.pages.dev
+
+---
+
+### Hashtags sugeridas
+
+#gamedev #webdev #gacha #rpg #nextjs #indie #browserGame #webgame
