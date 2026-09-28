@@ -1,5 +1,5 @@
 const BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "https://transcend-infinity-api.onrender.com/api/v1";
+  process.env.NEXT_PUBLIC_API_URL || "https://gacha-infinite-backend.onrender.com/api/v1";
 
 type RequestOptions = Omit<RequestInit, "body"> & { body?: unknown };
 
