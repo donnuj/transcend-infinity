@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
 datasource db {
@@ -8,53 +9,69 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  username     String   @unique
-  passwordHash String
-  level        Int      @default(1)
-  xp           Int      @default(0)
-  gold         Int      @default(100)
-  selos        Int      @default(0)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
 
-  cards        UserCard[]
+model Account {
+  id            Int            @id @default(autoincrement())
+  email         String         @unique
+  username      String         @unique
+  passwordHash  String
+  createdAt     DateTime       @default(now())
+  lastLogin     DateTime       @default(now())
+  status        String         @default("active")
+  isBanned      Boolean        @default(false)
+  banReason     String?
+  player        Player?
+  refreshTokens RefreshToken[]
 }
 
-model Card {
-  id          String   @id @default(cuid())
-  name        String
-  description String   @default("")
-  rarity      Rarity   @default(COMUM)
-  attack      Int      @default(10)
-  defense     Int      @default(10)
-  imageUrl    String   @default("")
-  createdAt   DateTime @default(now())
-
-  userCards   UserCard[]
+model Player {
+  id              Int       @id @default(autoincrement())
+  accountId       Int       @unique
+  account         Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  level           Int       @default(1)
+  experience      Int       @default(0)
+  gold            Int       @default(1000)
+  premiumCurrency Int       @default(100)
+  characterName   String
+  saveData        SaveData?
+  saveAudits      SaveAudit[]
 }
 
-model UserCard {
-  id        String   @id @default(cuid())
-  userId    String
-  cardId    String
-  level     Int      @default(1)
-  obtainedAt DateTime @default(now())
+model RefreshToken {
+  id        Int       @id @default(autoincrement())
+  tokenHash String    @unique
+  familyId  String
+  accountId Int
+  account   Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
 
-  user  User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  card  Card @relation(fields: [cardId], references: [id])
-
-  @@index([userId])
+  @@index([accountId])
+  @@index([familyId])
 }
 
-enum Rarity {
-  COMUM
-  INCOMUM
-  RARO
-  EPICO
-  LENDARIO
-  MITICO
-  ANCESTRAL
+model SaveData {
+  id            Int      @id @default(autoincrement())
+  playerId      Int      @unique
+  player        Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  schemaVersion Int      @default(1)
+  revision      Int      @default(1)
+  checksum      String
+  data          String
+  updatedAt     DateTime @updatedAt
+}
+
+model SaveAudit {
+  id        Int      @id @default(autoincrement())
+  playerId  Int
+  player    Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  revision  Int
+  checksum  String
+  createdAt DateTime @default(now())
+
+  @@unique([playerId, revision])
+  @@index([playerId])
+  @@index([createdAt])
 }

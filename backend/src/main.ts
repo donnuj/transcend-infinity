@@ -1,20 +1,42 @@
+import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
-import { AppModule } from './app.module.js';
+import { Logger } from '@nestjs/common';
+import { AppModule } from './app.module';
+import { ConfigService } from '@nestjs/config';
+import type { NestExpressApplication } from '@nestjs/platform-express';
+import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
+
+const logger = new Logger('Bootstrap');
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    bufferLogs: true,
+  });
+  const config = app.get(ConfigService);
+
+  app.useGlobalFilters(new AllExceptionsFilter());
+
+  app.use(cookieParser());
+
+  app.use(
+    helmet({
+      crossOriginOpenerPolicy: false,
+      hsts: { maxAge: 31_536_000, includeSubDomains: true, preload: true },
+    }),
+  );
+
+  app.setGlobalPrefix('api/v1');
+  app.useBodyParser('json', { limit: '256kb' });
 
   app.enableCors({
-    origin: (process.env.CORS_ORIGINS ?? 'http://localhost:3001')
-      .split(',')
-      .map((o) => o.trim()),
+    origin: config.getOrThrow<string[]>('CORS_ORIGINS'),
     credentials: true,
   });
 
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
-  app.setGlobalPrefix('api');
-
-  await app.listen(process.env.PORT ?? 3000);
+  const port = config.getOrThrow<number>('PORT');
+  await app.listen(port);
+  logger.log(`Transcend Infinity API rodando em http://localhost:${port}/api/v1`);
 }
-await bootstrap();
+void bootstrap();

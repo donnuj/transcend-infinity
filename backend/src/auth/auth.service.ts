@@ -1,46 +1,239 @@
-import { Injectable, ConflictException, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcryptjs';
-import { PrismaService } from '../prisma/prisma.service.js';
-import { RegisterDto } from './dto/register.dto.js';
-import { LoginDto } from './dto/login.dto.js';
+import { ConfigService } from '@nestjs/config';
+import * as bcrypt from 'bcrypt';
+import { randomUUID } from 'node:crypto';
+import type { Prisma } from '@prisma/client';
+import { PrismaService } from '../prisma/prisma.service';
+import {
+  authResponseSchema,
+  authActionResponseSchema,
+  type LoginInput,
+  type RegisterInput,
+} from './auth.schemas';
+import { AuthAttemptLimiter } from './auth-attempt-limiter';
+import {
+  createRefreshToken,
+  hashRefreshToken,
+  parseDuration,
+} from './token-lifecycle';
+
+const DUMMY_PASSWORD_HASH =
+  '$2b$10$UvdVyIh7GmAp1VHGPA5JX.ftgUfSmgC4OzU0CwCkWkwye/3mkhhM.';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
+    private readonly attemptLimiter: AuthAttemptLimiter,
+    private readonly config: ConfigService,
   ) {}
 
-  async register(dto: RegisterDto) {
-    const exists = await this.prisma.user.findFirst({
+  async register(dto: RegisterInput) {
+    const exists = await this.prisma.account.findFirst({
       where: { OR: [{ email: dto.email }, { username: dto.username }] },
     });
-    if (exists) throw new ConflictException('E-mail ou nome já em uso');
+    if (exists)
+      throw new ConflictException('Não foi possível concluir o cadastro.');
 
     const passwordHash = await bcrypt.hash(dto.password, 10);
-    const user = await this.prisma.user.create({
-      data: { email: dto.email, username: dto.username, passwordHash },
+
+    const account = await this.prisma.account.create({
+      data: {
+        email: dto.email,
+        username: dto.username,
+        passwordHash,
+        player: {
+          create: { characterName: dto.username },
+        },
+      },
+      include: { player: true },
     });
 
-    return this.buildResponse(user);
+    return this.buildAuthResponse(account);
   }
 
-  async login(dto: LoginDto) {
-    const user = await this.prisma.user.findUnique({ where: { email: dto.email } });
-    if (!user) throw new UnauthorizedException('Credenciais inválidas');
+  async login(dto: LoginInput) {
+    this.attemptLimiter.assertAllowed(dto.email);
 
-    const valid = await bcrypt.compare(dto.password, user.passwordHash);
-    if (!valid) throw new UnauthorizedException('Credenciais inválidas');
+    const account = await this.prisma.account.findUnique({
+      where: { email: dto.email },
+      include: { player: true },
+    });
 
-    return this.buildResponse(user);
+    if (account?.passwordHash === '!oauth') {
+      this.attemptLimiter.recordFailure(dto.email);
+      throw new UnauthorizedException('Esta conta usa login com Google.');
+    }
+
+    const valid = await bcrypt.compare(
+      dto.password,
+      account?.passwordHash ?? DUMMY_PASSWORD_HASH,
+    );
+    if (!account || !valid || account.isBanned) {
+      this.attemptLimiter.recordFailure(dto.email);
+      throw new UnauthorizedException('Credenciais inválidas.');
+    }
+
+    this.attemptLimiter.clear(dto.email);
+
+    await this.prisma.account.update({
+      where: { id: account.id },
+      data: { lastLogin: new Date() },
+    });
+
+    return this.buildAuthResponse(account);
   }
 
-  private buildResponse(user: { id: string; username: string; email: string; level: number }) {
-    const payload = { sub: user.id, username: user.username };
-    return {
-      access_token: this.jwt.sign(payload),
-      user: { id: user.id, username: user.username, email: user.email, level: user.level },
+  async refresh(refreshToken: string) {
+    const tokenHash = hashRefreshToken(refreshToken);
+    const stored = await this.prisma.refreshToken.findUnique({
+      where: { tokenHash },
+      include: { account: { include: { player: true } } },
+    });
+
+    if (!stored) {
+      throw new UnauthorizedException('Refresh token inválido ou expirado.');
+    }
+
+    const now = new Date();
+    if (stored.usedAt || stored.revokedAt) {
+      await this.revokeFamily(stored.familyId, now);
+      throw new UnauthorizedException('Refresh token inválido ou expirado.');
+    }
+
+    if (
+      stored.expiresAt <= now ||
+      stored.account.isBanned ||
+      stored.account.status !== 'active'
+    ) {
+      await this.revokeFamily(stored.familyId, now);
+      throw new UnauthorizedException('Refresh token inválido ou expirado.');
+    }
+
+    const nextToken = createRefreshToken();
+    const nextHash = hashRefreshToken(nextToken);
+    const expiresAt = this.getRefreshExpiration(now);
+
+    const rotated = await this.prisma.$transaction(async (transaction) => {
+      const consumed = await transaction.refreshToken.updateMany({
+        where: { id: stored.id, usedAt: null, revokedAt: null },
+        data: { usedAt: now },
+      });
+      if (consumed.count !== 1) {
+        await transaction.refreshToken.updateMany({
+          where: { familyId: stored.familyId, revokedAt: null },
+          data: { revokedAt: now },
+        });
+        return false;
+      }
+
+      await transaction.refreshToken.create({
+        data: {
+          tokenHash: nextHash,
+          familyId: stored.familyId,
+          accountId: stored.accountId,
+          expiresAt,
+        },
+      });
+      return true;
+    });
+
+    if (!rotated)
+      throw new UnauthorizedException('Refresh token inválido ou expirado.');
+
+    return this.buildAuthResponse(stored.account, nextToken);
+  }
+
+  async logout(refreshToken: string) {
+    const stored = await this.prisma.refreshToken.findUnique({
+      where: { tokenHash: hashRefreshToken(refreshToken) },
+    });
+    if (stored) await this.revokeFamily(stored.familyId, new Date());
+    return authActionResponseSchema.parse({ success: true });
+  }
+
+  async logoutAll(refreshToken: string) {
+    const stored = await this.prisma.refreshToken.findUnique({
+      where: { tokenHash: hashRefreshToken(refreshToken) },
+    });
+    if (stored) {
+      await this.prisma.refreshToken.updateMany({
+        where: { accountId: stored.accountId, revokedAt: null },
+        data: { revokedAt: new Date() },
+      });
+    }
+    return authActionResponseSchema.parse({ success: true });
+  }
+
+  async buildGoogleAuthResponse(account: any) {
+    const full = await this.prisma.account.findUnique({
+      where: { id: account.id },
+      include: { player: true },
+    });
+    return this.buildAuthResponse(full!);
+  }
+
+  private async buildAuthResponse(
+    account: Prisma.AccountGetPayload<{ include: { player: true } }>,
+    existingRefreshToken?: string,
+  ): Promise<{ body: { accessToken: string; profile: unknown }; refreshToken: string }> {
+    const payload = {
+      sub: account.id,
+      email: account.email,
+      jti: randomUUID(),
     };
+    const accessToken = this.jwt.sign(payload);
+
+    const refreshToken = existingRefreshToken ?? createRefreshToken();
+    if (!existingRefreshToken) {
+      await this.prisma.refreshToken.create({
+        data: {
+          tokenHash: hashRefreshToken(refreshToken),
+          familyId: randomUUID(),
+          accountId: account.id,
+          expiresAt: this.getRefreshExpiration(new Date()),
+        },
+      });
+    }
+
+    const p = account.player;
+
+    const body = authResponseSchema.parse({
+      accessToken,
+      profile: {
+        id: p?.id ?? 0,
+        username: account.username,
+        email: account.email,
+        level: p?.level ?? 1,
+        experience: p?.experience ?? 0,
+        gold: p?.gold ?? 1000,
+        premiumCurrency: p?.premiumCurrency ?? 100,
+        characterName: p?.characterName ?? account.username,
+        registeredAt: account.createdAt.toISOString(),
+        lastLogin: account.lastLogin.toISOString(),
+      },
+    });
+
+    return { body, refreshToken };
+  }
+
+  private getRefreshExpiration(now: Date): Date {
+    return new Date(
+      now.getTime() +
+        parseDuration(this.config.getOrThrow<string>('JWT_REFRESH_EXPIRES_IN')),
+    );
+  }
+
+  private async revokeFamily(familyId: string, revokedAt: Date): Promise<void> {
+    await this.prisma.refreshToken.updateMany({
+      where: { familyId, revokedAt: null },
+      data: { revokedAt },
+    });
   }
 }
