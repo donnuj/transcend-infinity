@@ -23,7 +23,7 @@ jobs:
 
       - name: Build
         env:
-          NEXT_PUBLIC_API_URL: https://gacha-infinite-backend.onrender.com/api/v1
+          NEXT_PUBLIC_API_URL: https://api.transcendinfinity.com.br/api/v1
         run: npx @cloudflare/next-on-pages
 
       - name: Deploy

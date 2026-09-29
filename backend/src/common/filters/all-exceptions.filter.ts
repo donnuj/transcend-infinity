@@ -7,6 +7,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
+import * as Sentry from '@sentry/node';
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
@@ -30,6 +31,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const isProd = process.env.NODE_ENV === 'production';
 
     if (status >= 500) {
+      Sentry.captureException(exception);
       this.logger.error(
         `${req.method} ${req.url} → ${status}`,
         isProd ? undefined : (exception instanceof Error ? exception.stack : String(exception)),

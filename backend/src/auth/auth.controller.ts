@@ -79,6 +79,7 @@ export class AuthController {
     return body;
   }
 
+  @Throttle({ default: { ttl: 60_000, limit: 20 } })
   @Post('refresh')
   async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const token = getRefreshFromCookie(req);
