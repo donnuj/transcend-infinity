@@ -61,7 +61,13 @@ async function request<T>(path: string, options: RequestOptions = {}, isRetry = 
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({ message: res.statusText }));
-    const error = new Error((err as { message?: string }).message ?? "Erro desconhecido") as Error & { status: number };
+    const raw = (err as { message?: unknown }).message;
+    const msg = typeof raw === "string"
+      ? raw
+      : typeof raw === "object" && raw !== null
+        ? String((raw as { message?: unknown }).message ?? res.statusText)
+        : res.statusText;
+    const error = new Error(msg) as Error & { status: number };
     error.status = res.status;
     throw error;
   }
