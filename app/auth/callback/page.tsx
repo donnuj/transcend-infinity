@@ -21,7 +21,9 @@ export default function AuthCallbackPage() {
 
     let payload: AuthPayload;
     try {
-      payload = JSON.parse(atob(data)) as AuthPayload;
+      // backend emits base64url (no +/=) — convert to standard base64 for atob
+      const b64 = data.replace(/-/g, "+").replace(/_/g, "/");
+      payload = JSON.parse(atob(b64)) as AuthPayload;
     } catch {
       router.replace("/login");
       return;
@@ -29,9 +31,10 @@ export default function AuthCallbackPage() {
 
     if (window.opener && !window.opener.closed) {
       try {
+        // use '*' — opener may be on a different Cloudflare domain (custom vs .pages.dev)
         window.opener.postMessage(
           { type: "GOOGLE_AUTH", payload },
-          window.location.origin,
+          "*",
         );
         window.close();
       } catch {

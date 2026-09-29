@@ -47,7 +47,6 @@ export default function LoginPage() {
 
   useEffect(() => {
     function onMessage(event: MessageEvent) {
-      if (event.origin !== window.location.origin) return;
       if (event.data?.type !== "GOOGLE_AUTH") return;
       const res = event.data.payload as AuthResponse;
       saveSession(res.accessToken, { ...res.profile, id: String(res.profile.id) });

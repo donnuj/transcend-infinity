@@ -142,7 +142,7 @@ export class AuthController {
     const { body, refreshToken } = await this.authService.buildGoogleAuthResponse(req.user as { id: number });
     res.cookie(REFRESH_COOKIE, refreshToken, COOKIE_OPTS);
 
-    const b64 = Buffer.from(JSON.stringify(body)).toString('base64');
+    const b64 = Buffer.from(JSON.stringify(body)).toString('base64url');
     const frontendOrigin = this.allowedOrigins[0];
     return res.redirect(302, `${frontendOrigin}/auth/callback#data=${b64}`);
   }
