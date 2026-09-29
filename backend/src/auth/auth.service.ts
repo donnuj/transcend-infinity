@@ -225,7 +225,7 @@ export class AuthService {
     await this.prisma.account.delete({ where: { id: accountId } });
   }
 
-  async buildGoogleAuthResponse(account: any) {
+  async buildGoogleAuthResponse(account: { id: number }) {
     const full = await this.prisma.account.findUnique({
       where: { id: account.id },
       include: { player: true },

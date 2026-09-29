@@ -139,7 +139,7 @@ export class AuthController {
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   async googleCallback(@Req() req: Request, @Res() res: Response) {
-    const { body, refreshToken } = await this.authService.buildGoogleAuthResponse(req.user as any);
+    const { body, refreshToken } = await this.authService.buildGoogleAuthResponse(req.user as { id: number });
     res.cookie(REFRESH_COOKIE, refreshToken, COOKIE_OPTS);
 
     const b64 = Buffer.from(JSON.stringify(body)).toString('base64');

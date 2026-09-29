@@ -48,6 +48,7 @@ export default function LoginPage() {
   useEffect(() => {
     if (!isPending) {
       if (slowTimer.current) clearTimeout(slowTimer.current);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSlowServer(false);
     }
   }, [isPending]);

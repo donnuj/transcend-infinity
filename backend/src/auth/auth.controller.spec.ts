@@ -26,7 +26,7 @@ describe('AuthController', () => {
   const authService = { register, login, refresh, logout, logoutAll } as unknown as AuthService;
   const configService = {
     get: () => ['http://localhost:3001'],
-  } as unknown as ConfigService<any, true>;
+  } as unknown as ConfigService<Record<string, unknown>, true>;
 
   const controller = new AuthController(authService, configService);
 
