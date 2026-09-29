@@ -21,30 +21,37 @@ export default function AuthCallbackPage() {
 
     let payload: AuthPayload;
     try {
-      // backend emits base64url (no +/=) — convert to standard base64 for atob
+      // backend emits base64url — convert to padded standard base64 for atob
       const b64 = data.replace(/-/g, "+").replace(/_/g, "/");
-      payload = JSON.parse(atob(b64)) as AuthPayload;
+      const padded = b64 + "=".repeat((4 - (b64.length % 4)) % 4);
+      payload = JSON.parse(atob(padded)) as AuthPayload;
     } catch {
       router.replace("/login");
       return;
     }
 
+    const msg = { type: "GOOGLE_AUTH", payload };
+
     if (window.opener && !window.opener.closed) {
+      // opener is reachable — postMessage and close popup
       try {
-        // use '*' — opener may be on a different Cloudflare domain (custom vs .pages.dev)
-        window.opener.postMessage(
-          { type: "GOOGLE_AUTH", payload },
-          "*",
-        );
+        window.opener.postMessage(msg, "*");
         window.close();
+        return;
       } catch {
-        saveSession(payload.accessToken, {
-          ...payload.profile,
-          id: String(payload.profile.id),
-        });
-        router.replace("/game");
+        // fall through to BroadcastChannel
       }
-    } else {
+    }
+
+    // opener was severed by cross-origin navigation (COOP) — use BroadcastChannel
+    // so the login page (same-origin, different window) receives the token
+    try {
+      const bc = new BroadcastChannel("google_auth");
+      bc.postMessage(msg);
+      bc.close();
+      window.close();
+    } catch {
+      // BroadcastChannel not available (very old browser) — save and navigate this tab
       saveSession(payload.accessToken, {
         ...payload.profile,
         id: String(payload.profile.id),

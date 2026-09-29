@@ -46,14 +46,29 @@ export default function LoginPage() {
   }, [isPending]);
 
   useEffect(() => {
-    function onMessage(event: MessageEvent) {
-      if (event.data?.type !== "GOOGLE_AUTH") return;
-      const res = event.data.payload as AuthResponse;
-      saveSession(res.accessToken, { ...res.profile, id: String(res.profile.id) });
+    function handleAuth(payload: AuthResponse) {
+      saveSession(payload.accessToken, { ...payload.profile, id: String(payload.profile.id) });
       router.replace("/game");
     }
+
+    // postMessage path: opener is still reachable
+    function onMessage(event: MessageEvent) {
+      if (event.data?.type !== "GOOGLE_AUTH") return;
+      handleAuth(event.data.payload as AuthResponse);
+    }
     window.addEventListener("message", onMessage);
-    return () => window.removeEventListener("message", onMessage);
+
+    // BroadcastChannel path: opener was severed by cross-origin navigation
+    const bc = new BroadcastChannel("google_auth");
+    bc.onmessage = (event: MessageEvent) => {
+      if (event.data?.type !== "GOOGLE_AUTH") return;
+      handleAuth(event.data.payload as AuthResponse);
+    };
+
+    return () => {
+      window.removeEventListener("message", onMessage);
+      bc.close();
+    };
   }, [router]);
 
   function switchMode(next: Mode) {
