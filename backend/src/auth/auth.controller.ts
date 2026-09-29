@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Post,
+  Query,
   Req,
   Res,
   UnauthorizedException,
@@ -132,6 +133,27 @@ export class AuthController {
     return { success: true };
   }
 
+  // Step 1: store the caller's origin in a short-lived cookie, then start OAuth.
+  // Needed because @UseGuards(AuthGuard('google')) redirects before the handler body runs.
+  @Get('google/init')
+  googleInit(
+    @Query('return_origin') returnOrigin: string | undefined,
+    @Res() res: Response,
+  ) {
+    const origin =
+      returnOrigin && this.allowedOrigins.includes(returnOrigin)
+        ? returnOrigin
+        : this.allowedOrigins[0];
+    res.cookie('oauth_return_origin', origin, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'lax',   // must be lax so the cookie survives the Google cross-site redirect
+      path: '/api/v1/auth',
+      maxAge: 5 * 60 * 1000,
+    });
+    return res.redirect(302, '/api/v1/auth/google');
+  }
+
   @Get('google')
   @UseGuards(AuthGuard('google'))
   googleLogin() {}
@@ -142,8 +164,12 @@ export class AuthController {
     const { body, refreshToken } = await this.authService.buildGoogleAuthResponse(req.user as { id: number });
     res.cookie(REFRESH_COOKIE, refreshToken, COOKIE_OPTS);
 
+    const returnOrigin =
+      (req.cookies as Record<string, string> | undefined)?.['oauth_return_origin'] ??
+      this.allowedOrigins[0];
+    res.clearCookie('oauth_return_origin', { path: '/api/v1/auth' });
+
     const b64 = Buffer.from(JSON.stringify(body)).toString('base64url');
-    const frontendOrigin = this.allowedOrigins[0];
-    return res.redirect(302, `${frontendOrigin}/auth/callback#data=${b64}`);
+    return res.redirect(302, `${returnOrigin}/auth/callback#data=${b64}`);
   }
 }
