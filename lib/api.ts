@@ -46,8 +46,9 @@ async function request<T>(path: string, options: RequestOptions = {}, isRetry = 
     body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
   });
 
-  // Token expirado: tenta refresh e repete uma vez
-  if (res.status === 401 && !isRetry && typeof window !== "undefined") {
+  // Token expirado: tenta refresh e repete uma vez (não aplica para endpoints de login/registro)
+  const isAuthMutation = path === "/auth/login" || path === "/auth/register";
+  if (res.status === 401 && !isRetry && !isAuthMutation && typeof window !== "undefined") {
     const newToken = await refreshAccessToken();
     if (newToken) return request<T>(path, options, true);
 
