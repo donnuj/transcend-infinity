@@ -1,8 +1,11 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
 
 const API_ORIGIN = process.env.NEXT_PUBLIC_API_URL
   ? new URL(process.env.NEXT_PUBLIC_API_URL).origin
-  : "https://gacha-infinite-backend.onrender.com";
+  : "https://api.transcendinfinity.com.br";
+
+const SENTRY_INGEST = "https://o4512166791217152.ingest.us.sentry.io";
 
 const securityHeaders = [
   { key: "X-Content-Type-Options", value: "nosniff" },
@@ -15,10 +18,11 @@ const securityHeaders = [
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline'",
       "style-src 'self' 'unsafe-inline'",
-      `connect-src 'self' ${API_ORIGIN}`,
+      `connect-src 'self' ${API_ORIGIN} ${SENTRY_INGEST}`,
       "img-src 'self' data: blob:",
       "font-src 'self' data:",
       "frame-ancestors 'none'",
+      "worker-src 'self' blob:",
     ].join("; "),
   },
 ];
@@ -29,4 +33,11 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  org: "transcend-infinity",
+  project: "transcend-infinity-web",
+  silent: true,
+  disableLogger: true,
+  widenClientFileUpload: true,
+  hideSourceMaps: true,
+});
