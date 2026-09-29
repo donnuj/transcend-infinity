@@ -16,14 +16,6 @@ type AuthResponse = {
 
 const ease = [0.23, 1, 0.32, 1] as const;
 
-const API_ORIGIN = (() => {
-  try {
-    return new URL(process.env.NEXT_PUBLIC_API_URL || "https://api.transcendinfinity.com.br/api/v1").origin;
-  } catch {
-    return "https://api.transcendinfinity.com.br";
-  }
-})();
-
 function validatePassword(pwd: string): string | null {
   if (pwd.length < 14) return "Mínimo 14 caracteres";
   if (!/[A-Z]/.test(pwd)) return "Inclua uma letra maiúscula";
@@ -55,7 +47,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     function onMessage(event: MessageEvent) {
-      if (event.origin !== API_ORIGIN) return;
+      if (event.origin !== window.location.origin) return;
       if (event.data?.type !== "GOOGLE_AUTH") return;
       const res = event.data.payload as AuthResponse;
       saveSession(res.accessToken, { ...res.profile, id: String(res.profile.id) });

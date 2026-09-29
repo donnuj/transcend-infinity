@@ -143,19 +143,7 @@ export class AuthController {
     res.cookie(REFRESH_COOKIE, refreshToken, COOKIE_OPTS);
 
     const b64 = Buffer.from(JSON.stringify(body)).toString('base64');
-    const allowedStr = JSON.stringify(this.allowedOrigins);
-    res.setHeader('Cross-Origin-Opener-Policy', 'unsafe-none');
-    res.send(
-      '<!DOCTYPE html><html><body><script>' +
-      '(function(){' +
-      'var payload=JSON.parse(atob("' + b64 + '"));' +
-      'var allowed=' + allowedStr + ';' +
-      'if(window.opener){' +
-      'allowed.forEach(function(o){window.opener.postMessage({type:"GOOGLE_AUTH",payload:payload},o);});' +
-      'setTimeout(function(){window.close();},500);' +
-      '}else{document.body.innerHTML="<p>Autenticado! Pode fechar esta janela.</p>";}' +
-      '})();' +
-      '</script><p>Autenticando...</p></body></html>',
-    );
+    const frontendOrigin = this.allowedOrigins[0];
+    return res.redirect(302, `${frontendOrigin}/auth/callback#data=${b64}`);
   }
 }
