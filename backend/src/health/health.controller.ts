@@ -1,14 +1,24 @@
 import { Controller, Get } from '@nestjs/common';
-import { z } from 'zod';
+import { HealthCheck, HealthCheckService, HealthCheckResult } from '@nestjs/terminus';
+import { PrismaService } from '../prisma/prisma.service';
+import { SkipThrottle } from '@nestjs/throttler';
 
-const healthResponseSchema = z.object({
-  status: z.literal('ok'),
-});
-
+@SkipThrottle()
 @Controller('health')
 export class HealthController {
+  constructor(
+    private readonly health: HealthCheckService,
+    private readonly prisma: PrismaService,
+  ) {}
+
   @Get()
-  check() {
-    return healthResponseSchema.parse({ status: 'ok' });
+  @HealthCheck()
+  check(): Promise<HealthCheckResult> {
+    return this.health.check([
+      async () => {
+        await this.prisma.$executeRaw`SELECT 1`;
+        return { database: { status: 'up' as const } };
+      },
+    ]);
   }
 }

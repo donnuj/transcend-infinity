@@ -9,6 +9,7 @@ import {
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { AuthGuard } from '@nestjs/passport';
 import { ConfigService } from '@nestjs/config';
 import type { Request, Response } from 'express';
@@ -56,6 +57,7 @@ export class AuthController {
     this.allowedOrigins = config.get('CORS_ORIGINS', { infer: true });
   }
 
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   @Post('register')
   async register(
     @Body(new ZodValidationPipe(registerSchema)) input: RegisterInput,
@@ -66,6 +68,7 @@ export class AuthController {
     return body;
   }
 
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   @Post('login')
   async login(
     @Body(new ZodValidationPipe(loginSchema)) input: LoginInput,
@@ -98,6 +101,7 @@ export class AuthController {
     return this.authService.logoutAll(token);
   }
 
+  @Throttle({ default: { ttl: 60_000, limit: 5 } })
   @Post('forgot-password')
   async forgotPassword(
     @Body(new ZodValidationPipe(forgotPasswordSchema)) input: ForgotPasswordInput,
@@ -106,6 +110,7 @@ export class AuthController {
     return { success: true };
   }
 
+  @Throttle({ default: { ttl: 60_000, limit: 5 } })
   @Post('reset-password')
   async resetPassword(
     @Body(new ZodValidationPipe(resetPasswordSchema)) input: ResetPasswordInput,

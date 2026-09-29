@@ -140,7 +140,10 @@ export default function GamePage() {
 
   useEffect(() => {
     const offline = localStorage.getItem("ti_offline") === "1";
-    if (offline) localStorage.removeItem("ti_offline");
+    if (offline) {
+      localStorage.removeItem("ti_offline");
+      document.cookie = "ti_offline=; path=/; max-age=0";
+    }
 
     if (!offline && !isAuthenticated()) { router.replace("/login"); return; }
     if (offline) {
@@ -324,6 +327,8 @@ export default function GamePage() {
             <motion.button
               key={id}
               onClick={() => setTab(id)}
+              aria-label={label}
+              aria-current={active ? "page" : undefined}
               whileTap={{ scale: 0.88 }}
               transition={{ type: "spring", stiffness: 500, damping: 28 }}
               className="relative flex flex-1 flex-col items-center justify-center gap-1 py-3.5"

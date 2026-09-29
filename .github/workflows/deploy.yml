@@ -18,6 +18,9 @@ jobs:
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
 
+      - name: Lint
+        run: npm run lint
+
       - name: Build
         env:
           NEXT_PUBLIC_API_URL: https://gacha-infinite-backend.onrender.com/api/v1

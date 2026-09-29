@@ -217,6 +217,11 @@ export class AuthService {
   }
 
   async deleteAccount(accountId: number): Promise<void> {
+    const account = await this.prisma.account.findUnique({ where: { id: accountId }, select: { email: true } });
+    if (account) {
+      const emailHash = createHash('sha256').update(account.email.toLowerCase()).digest('hex');
+      console.error(`[LGPD] account_deletion email_hash=${emailHash} ts=${new Date().toISOString()}`);
+    }
     await this.prisma.account.delete({ where: { id: accountId } });
   }
 

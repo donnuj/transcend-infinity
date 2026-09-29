@@ -30,6 +30,8 @@ services:
         sync: false
       - key: GOOGLE_CALLBACK_URL
         value: https://gacha-infinite-backend.onrender.com/api/v1/auth/google/callback
+      - key: SENTRY_DSN
+        sync: false
       - key: RESEND_API_KEY
         sync: false
       - key: EMAIL_FROM

@@ -16,14 +16,16 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Transcend Infinity",
   description: "Um jogo de cartas gacha de fantasia épica.",
-  icons: { icon: "/icon.png" },
+  icons: {
+    icon: "/logo/logo-transcend.PNG",
+    shortcut: "/logo/logo-transcend.PNG",
+    apple: "/logo/logo-transcend.PNG",
+  },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

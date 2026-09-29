@@ -72,6 +72,7 @@ export const environmentSchema = z.object({
   GOOGLE_CLIENT_ID: z.string().min(1),
   GOOGLE_CLIENT_SECRET: z.string().min(1),
   GOOGLE_CALLBACK_URL: z.string().url(),
+  SENTRY_DSN: z.string().url().optional(),
   RESEND_API_KEY: z.string().min(1).optional(),
   EMAIL_FROM: z.string().min(1).default('noreply@transcend-infinity.games'),
   FRONTEND_URL: z.string().url().default('https://transcend-infinity.pages.dev'),

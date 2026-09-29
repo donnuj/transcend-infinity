@@ -3,6 +3,7 @@
 import { useState, useTransition, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import { api } from "@/lib/api";
 import { saveSession } from "@/lib/auth";
 
@@ -132,19 +133,14 @@ export default function LoginPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease }}
       >
-        <h1
-          className="text-4xl font-black tracking-[0.25em] text-cream"
-          style={{
-            fontFamily: "var(--font-cinzel)",
-            textShadow: "0 0 40px rgba(200,155,60,0.55)",
-          }}
-        >
-          TRANSCEND
-        </h1>
-        <div className="my-3 h-px w-16 bg-amber/50" />
-        <p className="text-[11px] tracking-[0.3em] text-violet uppercase">
-          Infinity
-        </p>
+        <Image
+          src="/logo/logo-transcend.PNG"
+          alt="Transcend Infinity"
+          width={200}
+          height={200}
+          priority
+          style={{ filter: "drop-shadow(0 0 40px rgba(200,155,60,0.45))" }}
+        />
       </motion.div>
 
       {/* Card */}
@@ -293,6 +289,7 @@ export default function LoginPage() {
             type="button"
             onClick={() => {
               localStorage.setItem("ti_offline", "1");
+              document.cookie = "ti_offline=1; path=/; max-age=3600; SameSite=Lax";
               router.push("/game");
             }}
             whileTap={{ scale: 0.97 }}
