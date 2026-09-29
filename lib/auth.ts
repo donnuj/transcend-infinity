@@ -10,14 +10,19 @@ export type StoredUser = {
   level: number;
 };
 
+const SESSION_COOKIE = "ti_session";
+const SESSION_MAX_AGE = 30 * 24 * 60 * 60; // 30 dias
+
 export function saveSession(token: string, user: StoredUser) {
   localStorage.setItem(TOKEN_KEY, token);
   localStorage.setItem(USER_KEY, JSON.stringify(user));
+  document.cookie = `${SESSION_COOKIE}=1; path=/; max-age=${SESSION_MAX_AGE}; secure; samesite=strict`;
 }
 
 export function clearSession() {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(USER_KEY);
+  document.cookie = `${SESSION_COOKIE}=; path=/; max-age=0`;
   // refresh_token é httpOnly — não acessível aqui; o backend limpa via /auth/logout
 }
 
