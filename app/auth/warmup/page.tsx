@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
-export default function AuthWarmupPage() {
+function WarmupContent() {
   const params = useSearchParams();
   const next = params.get("next") ?? "";
   const [dots, setDots] = useState(".");
@@ -65,5 +65,13 @@ export default function AuthWarmupPage() {
         </p>
       )}
     </div>
+  );
+}
+
+export default function AuthWarmupPage() {
+  return (
+    <Suspense>
+      <WarmupContent />
+    </Suspense>
   );
 }
