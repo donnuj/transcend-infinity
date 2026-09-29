@@ -23,7 +23,7 @@ services:
       - key: JWT_AUDIENCE
         value: transcend-infinity-web
       - key: CORS_ORIGINS
-        value: https://transcend-infinity.pages.dev
+        value: https://transcend-infinity.pages.dev,https://transcendinfinity.com.br
       - key: GOOGLE_CLIENT_ID
         sync: false
       - key: GOOGLE_CLIENT_SECRET

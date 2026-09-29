@@ -28,6 +28,17 @@ async function bootstrap() {
     helmet({
       crossOriginOpenerPolicy: false,
       hsts: { maxAge: 31_536_000, includeSubDomains: true, preload: true },
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          scriptSrc: ["'self'", "'unsafe-inline'"],
+          styleSrc: ["'self'", "'unsafe-inline'"],
+          imgSrc: ["'self'", 'data:'],
+          connectSrc: ["'self'"],
+          frameSrc: ["'none'"],
+          frameAncestors: ["'none'"],
+        },
+      },
     }),
   );
 
