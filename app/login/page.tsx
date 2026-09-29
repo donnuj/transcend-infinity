@@ -267,7 +267,12 @@ export default function LoginPage() {
             type="button"
             onClick={() => {
               const base = process.env.NEXT_PUBLIC_API_URL || "https://api.transcendinfinity.com.br/api/v1";
-              window.open(`${base}/auth/google`, "google_auth", "width=500,height=620,left=200,top=100");
+              const oauthUrl = `${base}/auth/google`;
+              window.open(
+                `/auth/warmup?next=${encodeURIComponent(oauthUrl)}`,
+                "google_auth",
+                "width=500,height=620,left=200,top=100",
+              );
             }}
             whileTap={{ scale: 0.97 }}
             transition={{ duration: 0.08, ease }}
