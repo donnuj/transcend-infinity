@@ -18,9 +18,9 @@ const ease = [0.23, 1, 0.32, 1] as const;
 
 const API_ORIGIN = (() => {
   try {
-    return new URL(process.env.NEXT_PUBLIC_API_URL || "https://gacha-infinite-backend.onrender.com/api/v1").origin;
+    return new URL(process.env.NEXT_PUBLIC_API_URL || "https://api.transcendinfinity.com.br/api/v1").origin;
   } catch {
-    return "https://gacha-infinite-backend.onrender.com";
+    return "https://api.transcendinfinity.com.br";
   }
 })();
 
@@ -274,7 +274,7 @@ export default function LoginPage() {
           <motion.button
             type="button"
             onClick={() => {
-              const base = process.env.NEXT_PUBLIC_API_URL || "https://gacha-infinite-backend.onrender.com/api/v1";
+              const base = process.env.NEXT_PUBLIC_API_URL || "https://api.transcendinfinity.com.br/api/v1";
               window.open(`${base}/auth/google`, "google_auth", "width=500,height=620,left=200,top=100");
             }}
             whileTap={{ scale: 0.97 }}
