@@ -298,7 +298,6 @@ function DungeonList({ pendingDungeons, now, onSelect, onCollect, onCancel }: {
               }}
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              // @ts-expect-error framer-motion transition on motion.button
               transition={{ duration: 0.2, delay: i * 0.04, ease }}
             >
               <div>

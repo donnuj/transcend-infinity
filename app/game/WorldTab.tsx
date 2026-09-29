@@ -378,7 +378,6 @@ export default function WorldTab({
                 }}
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
-                // @ts-expect-error motion custom prop
                 transition={{ duration: 0.25, ease, delay: i * 0.04 }}
               >
                 <div

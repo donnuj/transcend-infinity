@@ -37,7 +37,5 @@ export default withSentryConfig(nextConfig, {
   org: "transcend-infinity",
   project: "transcend-infinity-web",
   silent: true,
-  disableLogger: true,
   widenClientFileUpload: true,
-  hideSourceMaps: true,
 });
