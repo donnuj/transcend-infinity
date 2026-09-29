@@ -621,7 +621,7 @@ function ProgressionTab({ hero, progression, levelData, s }: {
             label={`Usar Cristal de Evolução (${xpItems})`}
             enabled={xpItems > 0}
             color={s.color} glow={s.glow} border={s.border}
-            onPress={() => { useXpItem(hero.heroId); }}
+            onPress={() => { useGameStore.getState().useXpItem(hero.heroId); }}
           />
           <UpgradeButton
             label={`Ascender (${pedras} pedra${pedras !== 1 ? "s" : ""})`}

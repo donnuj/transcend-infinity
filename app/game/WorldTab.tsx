@@ -369,7 +369,6 @@ export default function WorldTab({
                 key={d.dungeonId}
                 onClick={onDungeon}
                 whileTap={{ scale: 0.97 }}
-                transition={spring}
                 className="flex items-center gap-3 rounded-xl px-4 py-3 text-left"
                 style={{
                   background: rank !== "–" ? "rgba(122,111,160,0.06)" : "rgba(122,111,160,0.03)",

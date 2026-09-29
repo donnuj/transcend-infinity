@@ -291,7 +291,6 @@ function DungeonList({ pendingDungeons, now, onSelect, onCollect, onCancel }: {
               key={d.dungeonId}
               onClick={() => onSelect(d)}
               whileTap={{ scale: 0.97 }}
-              transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
               className="flex items-center justify-between rounded-xl border px-4 py-4 text-left"
               style={{
                 borderColor: cleared ? "rgba(200,155,60,0.3)" : "rgba(122,111,160,0.15)",
