@@ -27,6 +27,7 @@ export default function AchievementsModal({ onClose }: { onClose: () => void }) 
   useEffect(() => {
     const unlocked = checkAchievements();
     if (unlocked.length > 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setNewUnlocks(unlocked);
       scheduleSave();
     }

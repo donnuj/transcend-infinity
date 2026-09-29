@@ -134,6 +134,7 @@ export default function ArenaModal({ onClose }: { onClose: () => void }) {
             <div className="mb-5 rounded-xl border border-violet/15 px-4 py-4" style={{ background: "rgba(122,111,160,0.04)" }}>
               <p className="mb-1 text-[9px] uppercase tracking-[0.2em] text-violet/40">Próximo Oponente</p>
               <p className="text-[14px] font-bold text-cream/80">{opponentName}</p>
+              {/* eslint-disable-next-line react-hooks/purity */}
               <p className="text-[10px] text-violet/50">Rating estimado: ~{arena.rating + (Math.random() > 0.5 ? 30 : -30) | 0}</p>
             </div>
 

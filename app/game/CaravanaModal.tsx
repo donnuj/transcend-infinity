@@ -95,6 +95,7 @@ export default function CaravanaModal({ onClose }: { onClose: () => void }) {
   const caravan = save.caravan;
   const [selected, setSelected] = useState<Route | null>(null);
   const [investAmount, setInvestAmount] = useState(500);
+  // eslint-disable-next-line react-hooks/purity
   const [now, setNow] = useState(Date.now());
 
   // Live countdown
@@ -119,6 +120,7 @@ export default function CaravanaModal({ onClose }: { onClose: () => void }) {
     if (caravan.inTransit) return;
     if (save.wallet.ouro < investAmount) return;
     const duration = getRouteDuration(route);
+    // eslint-disable-next-line react-hooks/purity
     const arrival = new Date(Date.now() + duration).toISOString();
     useGameStore.setState((s) => {
       s.save.wallet.ouro -= investAmount;

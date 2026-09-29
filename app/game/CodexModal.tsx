@@ -289,7 +289,7 @@ export default function CodexModal({ onClose }: { onClose: () => void }) {
             {selectedHero.lore && (
               <div className="rounded-xl border border-violet/12 px-4 py-3" style={{ background: "rgba(122,111,160,0.04)" }}>
                 <p className="mb-2 text-[9px] font-bold uppercase tracking-[0.2em] text-violet/40">Lore</p>
-                <p className="text-[10px] leading-relaxed text-violet/60 italic">"{selectedHero.lore}"</p>
+                <p className="text-[10px] leading-relaxed text-violet/60 italic">&ldquo;{selectedHero.lore}&rdquo;</p>
               </div>
             )}
           </motion.div>

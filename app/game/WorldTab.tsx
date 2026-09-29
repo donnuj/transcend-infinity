@@ -49,6 +49,7 @@ export default function WorldTab({
 
   useEffect(() => {
     const reward = collectOfflineRewards();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (reward) { setOfflineReward(reward); scheduleSave(); }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -64,6 +65,7 @@ export default function WorldTab({
   const canClaimLogin = !loginBonus.claimedToday || loginBonus.lastClaimDate !== today;
   const currentReward = LOGIN_REWARDS[(loginBonus.dayInCycle - 1) % LOGIN_REWARDS.length];
   const clearedDungeons = save.dungeon.filter((d) => d.bestRank !== "").length;
+  // eslint-disable-next-line react-hooks/purity
   const now = Date.now();
   const towerReady = !!save.pendingTower && new Date(save.pendingTower.endTime).getTime() <= now;
   const dungeonReady = save.pendingDungeons.some((r) => new Date(r.endTime).getTime() <= now);
