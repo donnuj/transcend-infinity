@@ -21,9 +21,13 @@ describe('PlayerService save integrity', () => {
     },
   };
   const playerFindUnique = jest.fn();
+  const saveDataFindUnique = jest.fn();
   const prisma = {
     player: {
       findUnique: playerFindUnique,
+    },
+    saveData: {
+      findUnique: saveDataFindUnique,
     },
     $transaction: jest.fn(
       async (
@@ -36,6 +40,8 @@ describe('PlayerService save integrity', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     playerFindUnique.mockResolvedValue({ id: 10, accountId: 1 });
+    // Por padrão, nenhum save existente (novo jogador)
+    saveDataFindUnique.mockResolvedValue(null);
   });
 
   it('cria a primeira revisão com checksum e auditoria', async () => {
@@ -101,10 +107,12 @@ describe('PlayerService save integrity', () => {
         revision: 2,
         checksum,
         data,
+        updatedAt: new Date(Date.now() - 5000),
       },
     });
 
-    await expect(service.downloadSave(1)).resolves.toEqual({
+    const result = await service.downloadSave(1);
+    expect(result).toMatchObject({
       schemaVersion: 1,
       revision: 2,
       checksum,
@@ -121,6 +129,7 @@ describe('PlayerService save integrity', () => {
         revision: 2,
         checksum: 'a'.repeat(64),
         data: JSON.stringify({ Audio: { MasterVolume: 0.8 } }),
+        updatedAt: new Date(),
       },
     });
 
@@ -142,6 +151,17 @@ describe('PlayerService save integrity', () => {
     expect(playerFindUnique).toHaveBeenCalledWith({
       where: { accountId: 77 },
     });
+  });
+
+  it('retorna conflito quando revision=0 mas save já existe no DB', async () => {
+    saveDataFindUnique.mockResolvedValue({
+      id: 1, playerId: 10, data: '{}', checksum: 'x'.repeat(64),
+      schemaVersion: 1, revision: 3,
+    });
+
+    await expect(
+      service.uploadSave(1, { schemaVersion: 1, revision: 0, data: { Audio: {} } }),
+    ).rejects.toBeInstanceOf(ConflictException);
   });
 
   it('rejeita upload quando o jogador não existe', async () => {

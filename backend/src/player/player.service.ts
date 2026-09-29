@@ -1,12 +1,11 @@
 import {
-  BadRequestException,
   ConflictException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { createHash } from 'node:crypto';
-import { Prisma } from '@prisma/client';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   MONOTONIC_PATHS,
@@ -61,6 +60,12 @@ export class PlayerService {
     // Validate monotonic progression against the stored save
     const existing = await this.prisma.saveData.findUnique({ where: { playerId: player.id } });
     if (existing) {
+      // Client sent revision 0 (first-ever upload) but a save already exists →
+      // force them to download first so they don't overwrite with stale defaults.
+      if (saveJson.revision === 0) {
+        throw new ConflictException('Save já existe. Baixe o save atual antes de sobrescrever.');
+      }
+
       let storedData: Record<string, unknown>;
       try { storedData = JSON.parse(existing.data) as Record<string, unknown>; }
       catch { storedData = {}; }
@@ -70,7 +75,7 @@ export class PlayerService {
         const oldVal = this.getNestedValue(storedData, path);
         const newVal = this.getNestedValue(newData, path);
         if (typeof oldVal === 'number' && typeof newVal === 'number' && newVal < oldVal) {
-          throw new BadRequestException(
+          throw new ConflictException(
             `${path.join('.')} não pode retrocedar (${oldVal} → ${newVal}).`,
           );
         }
@@ -122,7 +127,7 @@ export class PlayerService {
       if (!saved) throw new ConflictException('Versão do save desatualizada.');
     } catch (error: unknown) {
       if (
-        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error instanceof PrismaClientKnownRequestError &&
         error.code === 'P2002'
       ) {
         throw new ConflictException('Versão do save desatualizada.');
