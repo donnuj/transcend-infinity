@@ -1,0 +1,16 @@
+name: Keep Render Alive
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping backend health
+        run: |
+          status=$(curl -s -o /dev/null -w "%{http_code}" https://api.transcendinfinity.com.br/api/v1/health)
+          echo "Health: $status"
+          [ "$status" = "200" ] || exit 1
