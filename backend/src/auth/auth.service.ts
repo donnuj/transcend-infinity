@@ -123,7 +123,7 @@ export class AuthService {
     const nextHash = hashRefreshToken(nextToken);
     const expiresAt = this.getRefreshExpiration(now);
 
-    const rotated = await this.prisma.$transaction(async (transaction) => {
+    const rotated = await this.prisma.$transaction(async (transaction: Prisma.TransactionClient) => {
       const consumed = await transaction.refreshToken.updateMany({
         where: { id: stored.id, usedAt: null, revokedAt: null },
         data: { usedAt: now },
@@ -234,7 +234,10 @@ export class AuthService {
   }
 
   private async buildAuthResponse(
-    account: Prisma.AccountGetPayload<{ include: { player: true } }>,
+    account: {
+      id: number; email: string; username: string; createdAt: Date; lastLogin: Date;
+      player: { id: number; level: number; experience: number; gold: number; premiumCurrency: number; characterName: string | null } | null;
+    },
     existingRefreshToken?: string,
   ): Promise<{ body: { accessToken: string; profile: unknown }; refreshToken: string }> {
     const payload = {

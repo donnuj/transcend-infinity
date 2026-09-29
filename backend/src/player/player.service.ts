@@ -87,7 +87,7 @@ export class PlayerService {
     const nextRevision = saveJson.revision + 1;
 
     try {
-      const saved = await this.prisma.$transaction(async (transaction) => {
+      const saved = await this.prisma.$transaction(async (transaction: import('@prisma/client').Prisma.TransactionClient) => {
         if (saveJson.revision === 0) {
           await transaction.saveData.create({
             data: {
