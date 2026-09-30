@@ -19,7 +19,8 @@ export const MONOTONIC_PATHS: Array<{ path: string[]; max: number }> = [
   { path: ['tower', 'bestFloor'],    max: 200 },
   { path: ['tower', 'weeklyBest'],   max: 200 },
   { path: ['playerLevel', 'level'],  max: 500 },
-  { path: ['playerLevel', 'xp'], max: 1_000_000_000 },
+  // playerLevel.xp is intentionally excluded: it resets on each level-up,
+  // so newXp < oldXp is valid and must not trigger a conflict.
 ];
 
 const PROTECTED_SAVE_FIELDS = new Set<string>([]);

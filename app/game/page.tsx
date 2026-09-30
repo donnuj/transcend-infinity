@@ -156,10 +156,10 @@ export default function GamePage() {
     localStorage.removeItem("ti_game_save");
     useGameStore.getState().resetSave();
     loadCloudSave().then((serverOfflineMs) => {
-      if (serverOfflineMs === null) { uploadCloudSave(); return; }
+      if (serverOfflineMs === null) { return uploadCloudSave(); }
       // Use server-provided elapsed time — not manipulable by the client
       const reward = useGameStore.getState().collectOfflineRewards(serverOfflineMs);
-      if (reward) { setOfflineReward(reward); uploadCloudSave(); }
+      if (reward) { setOfflineReward(reward); return uploadCloudSave(); }
     }).finally(() => setUser(u));
   }, [router]);
 
@@ -170,7 +170,15 @@ export default function GamePage() {
     return () => clearInterval(id);
   }, []);
 
+  // Flush save when the user closes the tab or navigates away
+  useEffect(() => {
+    const flush = () => { uploadCloudSave(); };
+    window.addEventListener("beforeunload", flush);
+    return () => window.removeEventListener("beforeunload", flush);
+  }, []);
+
   async function handleLogout() {
+    await uploadCloudSave();
     try {
       await api.post("/auth/logout");
     } catch {
