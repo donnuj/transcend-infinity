@@ -12,4 +12,12 @@ export class AdminController {
   ) {
     return this.playerService.adminPatchSave(secret ?? '', body.email, body.patches);
   }
+
+  @Post('revoke-premium-all')
+  revokePremiumAll(
+    @Headers('x-admin-secret') secret: string,
+    @Body() body: { exceptEmail: string },
+  ) {
+    return this.playerService.adminRevokePremiumAll(secret ?? '', body.exceptEmail);
+  }
 }

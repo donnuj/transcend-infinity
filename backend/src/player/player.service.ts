@@ -185,6 +185,43 @@ export class PlayerService {
     return { success: true, revision: nextRevision };
   }
 
+  async adminRevokePremiumAll(secret: string, exceptEmail: string) {
+    if (!process.env.ADMIN_SECRET || secret !== process.env.ADMIN_SECRET) {
+      throw new UnauthorizedException('Acesso negado.');
+    }
+
+    const players = await this.prisma.player.findMany({
+      include: { saveData: true, account: true },
+    });
+
+    let patched = 0;
+    for (const p of players) {
+      if (!p.saveData || p.account?.email === exceptEmail) continue;
+
+      let saveData: Record<string, unknown>;
+      try { saveData = JSON.parse(p.saveData.data) as Record<string, unknown>; }
+      catch { continue; }
+
+      const bp = saveData['battlePass'] as Record<string, unknown> | undefined;
+      if (!bp || !bp['isPremium']) continue;
+
+      bp['isPremium'] = false;
+      bp['premiumType'] = '';
+      bp['premiumExpiresAt'] = '';
+
+      const data = JSON.stringify(saveData);
+      const checksum = createHash('sha256').update(data, 'utf8').digest('hex');
+
+      await this.prisma.saveData.update({
+        where: { playerId: p.id },
+        data: { data, checksum, revision: p.saveData.revision + 1 },
+      });
+      patched++;
+    }
+
+    return { success: true, patched };
+  }
+
   async getArenaOpponents(
     accountId: number,
     rating: number,
