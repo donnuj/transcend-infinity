@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Post,
+  Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -40,5 +41,16 @@ export class PlayerController {
   @Get('save')
   downloadSave(@Request() req: AuthenticatedRequest) {
     return this.playerService.downloadSave(req.user.accountId);
+  }
+
+  @Get('arena-opponents')
+  getArenaOpponents(
+    @Request() req: AuthenticatedRequest,
+    @Query('rating') rating: string,
+  ) {
+    return this.playerService.getArenaOpponents(
+      req.user.accountId,
+      parseInt(rating) || 1000,
+    );
   }
 }

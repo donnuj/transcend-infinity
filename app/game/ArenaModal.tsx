@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGameStore } from "@/lib/game/store";
 import { HERO_MAP } from "@/lib/game/data/heroes";
 import { scheduleSave } from "@/lib/game/save";
-import { buildHeroCombatant, simulateBattle, type CombatantSnapshot } from "@/lib/game/combat";
+import { buildHeroCombatant, simulateBattle } from "@/lib/game/combat";
+import { api } from "@/lib/api";
 
 const ease = [0.23, 1, 0.32, 1] as const;
 const MAX_DAILY_FIGHTS = 10;
@@ -24,42 +25,21 @@ function getRankTier(rating: number) {
   return RANK_TIERS.find((t) => rating >= t.min && rating <= t.max) ?? RANK_TIERS[0];
 }
 
-// Simulated hosted opponents — same level ± 2 as the player's defender
-const OPPONENT_NAMES = [
-  "Kael das Sombras", "Lunaris Divina", "Mestre Pyreth", "Arqueira Selene",
-  "Guardião Valdris", "Feiticeiro Ossirus", "Caçadora Zephyr", "Paladino Marco",
-  "Irina Voidwalker", "Templar Astros",
-];
-
-type SimulatedOpponent = {
-  name: string;
+type RealOpponent = {
+  username: string;
+  characterName: string;
   heroId: string;
-  level: number;
   rating: number;
 };
-
-function getSimulatedOpponents(defenderLevel: number, rating: number): SimulatedOpponent[] {
-  const heroIds = ["kaelith_eterno", "serah_celestial", "morghul_sombrio", "azara_serafim", "gornak_martelo", "lyra_arcana"];
-  const opponents: SimulatedOpponent[] = [];
-  for (let i = 0; i < 3; i++) {
-    const levelVariance = Math.floor(Math.random() * 5) - 2;
-    const ratingVariance = Math.floor(Math.random() * 100) - 50;
-    opponents.push({
-      name: OPPONENT_NAMES[(Math.floor(rating / 100) + i * 3) % OPPONENT_NAMES.length],
-      heroId: heroIds[(Math.floor(rating / 150) + i) % heroIds.length],
-      level: Math.max(1, defenderLevel + levelVariance),
-      rating: Math.max(0, rating + ratingVariance),
-    });
-  }
-  return opponents;
-}
 
 type Screen = "overview" | "choose-defender" | "challengers" | "result";
 
 export default function ArenaModal({ onClose }: { onClose: () => void }) {
   const [screen, setScreen] = useState<Screen>("overview");
-  const [selectedOpponent, setSelectedOpponent] = useState<SimulatedOpponent | null>(null);
+  const [selectedOpponent, setSelectedOpponent] = useState<RealOpponent | null>(null);
   const [result, setResult] = useState<{ won: boolean; ratingChange: number; opponentName: string } | null>(null);
+  const [realOpponents, setRealOpponents] = useState<RealOpponent[]>([]);
+  const [loadingOpponents, setLoadingOpponents] = useState(false);
 
   const store = useGameStore.getState();
   const { save } = useGameStore();
@@ -73,7 +53,15 @@ export default function ArenaModal({ onClose }: { onClose: () => void }) {
 
   const defenderHeroData = arena.defenderHeroId ? HERO_MAP[arena.defenderHeroId] : null;
   const defenderLevel = arena.defenderHeroId ? store.getHeroLevel(arena.defenderHeroId).level : 1;
-  const opponents = hasDefender ? getSimulatedOpponents(defenderLevel, arena.rating) : [];
+
+  useEffect(() => {
+    if (screen !== "challengers") return;
+    setLoadingOpponents(true);
+    api.get<RealOpponent[]>(`/player/arena-opponents?rating=${arena.rating}`)
+      .then((data) => setRealOpponents(data))
+      .catch(() => setRealOpponents([]))
+      .finally(() => setLoadingOpponents(false));
+  }, [screen, arena.rating]);
 
   const collected = Array.from(new Set(save.collectedHeroIds.map((k) => k.split("|")[1])))
     .map((id) => HERO_MAP[id]).filter(Boolean);
@@ -86,7 +74,7 @@ export default function ArenaModal({ onClose }: { onClose: () => void }) {
     setScreen("overview");
   }
 
-  function fightOpponent(opponent: SimulatedOpponent) {
+  function fightOpponent(opponent: RealOpponent) {
     if (fightsLeft <= 0) return;
     if (!arena.defenderHeroId) return;
 
@@ -107,7 +95,8 @@ export default function ArenaModal({ onClose }: { onClose: () => void }) {
 
     const opponentHeroData = HERO_MAP[opponent.heroId];
     if (!opponentHeroData) return;
-    const opponentSnap = buildHeroCombatant(opponentHeroData, Math.min(6, Math.floor(opponent.rating / 400)) as 0|1|2|3|4|5|6, 1, opponent.level);
+    const opponentLevel = Math.max(1, Math.floor(opponent.rating / 30));
+    const opponentSnap = buildHeroCombatant(opponentHeroData, Math.min(6, Math.floor(opponent.rating / 400)) as 0|1|2|3|4|5|6, 1, opponentLevel);
 
     const r = simulateBattle([myHero], [opponentSnap]);
     const ratingChange = r.won
@@ -136,7 +125,7 @@ export default function ArenaModal({ onClose }: { onClose: () => void }) {
       useGameStore.getState().addCurrency("ouro", 30);
     }
     scheduleSave();
-    setResult({ won: r.won, ratingChange, opponentName: opponent.name });
+    setResult({ won: r.won, ratingChange, opponentName: opponent.characterName || opponent.username });
     setScreen("result");
   }
 
@@ -344,9 +333,17 @@ export default function ArenaModal({ onClose }: { onClose: () => void }) {
               Heróis alocados por outros invocadores — nível próximo ao seu ({defenderLevel})
             </p>
             <div className="flex flex-col gap-3">
-              {opponents.map((opp, i) => {
+              {loadingOpponents ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-amber/20 border-t-amber" />
+                </div>
+              ) : realOpponents.length === 0 ? (
+                <p className="py-8 text-center text-[11px] text-violet/40">Nenhum oponente disponível ainda. Seja o primeiro a desafiar!</p>
+              ) : realOpponents.map((opp, i) => {
                 const oppHero = HERO_MAP[opp.heroId];
                 const oppTier = getRankTier(opp.rating);
+                const oppLevel = Math.max(1, Math.floor(opp.rating / 30));
+                const oppName = opp.characterName || opp.username;
                 return (
                   <div
                     key={i}
@@ -359,9 +356,9 @@ export default function ArenaModal({ onClose }: { onClose: () => void }) {
                         {oppHero?.portrait ?? "⚔"}
                       </div>
                       <div className="flex-1">
-                        <p className="text-[12px] font-bold text-cream/80">{opp.name}</p>
+                        <p className="text-[12px] font-bold text-cream/80">{oppName}</p>
                         <p className="text-[10px] text-violet/50">
-                          {oppHero?.name.split(",")[0] ?? "Desconhecido"} · Nv. {opp.level}
+                          {oppHero?.name.split(",")[0] ?? "Desconhecido"} · Nv. {oppLevel}
                         </p>
                       </div>
                       <div className="text-right">
@@ -379,7 +376,7 @@ export default function ArenaModal({ onClose }: { onClose: () => void }) {
                       <div className="flex items-center text-violet/40 font-bold">VS</div>
                       <div className="flex-1 rounded-lg border border-violet/10 px-2 py-1.5 text-center" style={{ background: "rgba(255,100,60,0.05)" }}>
                         <p className="text-violet/50">Oponente</p>
-                        <p className="font-bold text-cream/70">{oppHero?.portrait ?? "⚔"} Nv.{opp.level}</p>
+                        <p className="font-bold text-cream/70">{oppHero?.portrait ?? "⚔"} Nv.{oppLevel}</p>
                       </div>
                     </div>
 

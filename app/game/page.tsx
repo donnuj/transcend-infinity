@@ -92,6 +92,8 @@ export default function GamePage() {
   const [showForge, setShowForge] = useState(false);
   const [showWiki, setShowWiki] = useState(false);
   const [offlineReward, setOfflineReward] = useState<{ ouro: number; xp: number } | null>(null);
+  const [showNovatos, setShowNovatos] = useState(false);
+  const isPremium = useGameStore((s) => s.save.battlePass.isPremium);
 
   // Modal callbacks — stable references
   const openInvocar      = useCallback(() => setTab("invocar"), []);
@@ -167,7 +169,7 @@ export default function GamePage() {
         console.error("[game] load save failed, showing unsynced state", err);
         useGameStore.getState().setCloudSynced(false);
       })
-      .finally(() => setUser(u));
+      .finally(() => { setUser(u); setShowNovatos(true); });
   }, [router]);
 
   // Keep-alive: mantém o backend no Render acordado enquanto o jogador está na sessão
@@ -239,6 +241,17 @@ export default function GamePage() {
           </span>
         </div>
         <div className="flex items-center gap-1.5">
+          {isPremium ? (
+            <div className="flex items-center gap-1 rounded-lg border border-amber/30 px-2 py-1 text-[10px] font-black tracking-wide"
+              style={{ background: "linear-gradient(135deg,rgba(200,155,60,0.2),rgba(200,155,60,0.08))", color: "rgb(200,155,60)" }}>
+              ★ PREMIUM
+            </div>
+          ) : (
+            <motion.button onClick={openBattlePass} whileTap={{ scale: 0.92 }} transition={{ duration: 0.08 }}
+              className="flex items-center gap-1 rounded-lg border border-violet/20 px-2 py-1 text-[10px] font-bold tracking-wide text-violet/60">
+              ✦ Premium
+            </motion.button>
+          )}
           <Chip icon="✦" value={wallet.cristaisAstra} color="rgb(170,130,255)" />
           <Chip icon="◆" value={wallet.ouro} color="rgb(200,155,60)" />
         </div>
@@ -279,6 +292,44 @@ export default function GamePage() {
         {showProfession && <ProfessionModal     key="profession" onClose={closeProfession} />}
         {showForge      && <ForgeModal          key="forge"      onClose={closeForge} />}
         {showWiki       && <WikiModal           key="wiki"       onClose={closeWiki} />}
+      </AnimatePresence>
+
+      {/* Guia do Novato banner */}
+      <AnimatePresence>
+        {showNovatos && (
+          <motion.div
+            className="absolute inset-x-0 top-0 z-[90] px-4 pt-3"
+            initial={{ opacity: 0, y: -12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
+          >
+            <div className="flex items-center justify-between rounded-xl border border-violet/25 px-4 py-3"
+              style={{ background: "linear-gradient(135deg,rgba(122,111,160,0.18),rgba(10,10,22,0.95))", backdropFilter: "blur(12px)" }}>
+              <div className="flex items-center gap-2.5">
+                <span className="text-base">📖</span>
+                <div>
+                  <p className="text-[11px] font-bold text-cream/80">Guia do Novato</p>
+                  <p className="text-[10px] text-violet/55">Aprenda mecânicas, heróis e estratégias</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <motion.button
+                  onClick={() => { setShowNovatos(false); openWiki(); }}
+                  whileTap={{ scale: 0.94 }}
+                  transition={{ duration: 0.08 }}
+                  className="rounded-lg border border-amber/30 bg-amber/10 px-3 py-1.5 text-[10px] font-bold text-amber-400"
+                >
+                  Ver Guia
+                </motion.button>
+                <motion.button onClick={() => setShowNovatos(false)} whileTap={{ scale: 0.94 }} transition={{ duration: 0.08 }}
+                  className="text-[11px] text-violet/40 px-1">
+                  ✕
+                </motion.button>
+              </div>
+            </div>
+          </motion.div>
+        )}
       </AnimatePresence>
 
       {/* Offline reward popup */}

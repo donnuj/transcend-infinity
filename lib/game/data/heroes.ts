@@ -110,6 +110,22 @@ export const HEROES: HeroDef[] = [
     portrait: "⛰",
   },
 
+  {
+    heroId: "ventricus_paladino",
+    name: "Ventricus, o Paladino Imortal",
+    lore: "Guardião jurado das Muralhas do Éter, Ventricus carregou o escudo da ordem por dois séculos sem jamais cair. Nem a morte ousa tocar quem foi benzido pelos Arcontes.",
+    rarity: "Lendário",
+    heroClass: "Guarda",
+    role: "Tank",
+    element: "Light",
+    baseStats:     { STR: 32, AGI: 10, VIT: 58, INT: 14, WIS: 22, CHA: 30, LUK: 12 },
+    growthPerLevel:{ STR: 2,  AGI: 1,  VIT: 4,  INT: 1,  WIS: 2,  CHA: 2,  LUK: 1  },
+    leadership: 88,
+    affinities: { barracks: 5, library: 2, hospital: 4, workshop: 3, laboratory: 1 },
+    skillIds: ["guarda_escudo", "guarda_muralha", "guarda_ultima", "guarda_passiva"],
+    portrait: "🛡",
+  },
+
   // ════════════════════════════════════════════════════════════════════════════
   // ÉPICO
   // ════════════════════════════════════════════════════════════════════════════
@@ -219,6 +235,52 @@ export const HEROES: HeroDef[] = [
     portrait: "⚗",
   },
 
+  {
+    heroId: "celeste_vidente",
+    name: "Celeste, a Vidente dos Céus",
+    lore: "Nascida durante uma chuva de meteoros, Celeste aprendeu a ler o destino nas constelações. Sua presença cura tanto a alma quanto o corpo.",
+    rarity: "Épico",
+    heroClass: "Curandeiro",
+    role: "Healer",
+    element: "Light",
+    baseStats:     { STR: 8,  AGI: 20, VIT: 18, INT: 30, WIS: 44, CHA: 34, LUK: 18 },
+    growthPerLevel:{ STR: 1,  AGI: 1,  VIT: 1,  INT: 2,  WIS: 3,  CHA: 2,  LUK: 1  },
+    leadership: 60,
+    affinities: { barracks: 1, library: 4, hospital: 5, workshop: 1, laboratory: 3 },
+    skillIds: ["cur_cura", "cur_cura_em_area", "cur_ultima", "cur_passiva"],
+    portrait: "🌟",
+  },
+  {
+    heroId: "seila_tempestade",
+    name: "Seila, Filha da Tempestade",
+    lore: "Criada entre relâmpagos no Pico Fulgor, Seila domina ventos e raios com precisão cirúrgica. Sua fúria é uma tempestade que obedece apenas a ela.",
+    rarity: "Épico",
+    heroClass: "Mago",
+    role: "DPS",
+    element: "Lightning",
+    baseStats:     { STR: 10, AGI: 28, VIT: 14, INT: 46, WIS: 20, CHA: 16, LUK: 22 },
+    growthPerLevel:{ STR: 1,  AGI: 2,  VIT: 1,  INT: 3,  WIS: 1,  CHA: 1,  LUK: 2  },
+    leadership: 48,
+    affinities: { barracks: 2, library: 5, hospital: 1, workshop: 2, laboratory: 4 },
+    skillIds: ["mago_faisca", "mago_bola_de_fogo", "mago_ultima", "mago_passiva"],
+    portrait: "⚡",
+  },
+  {
+    heroId: "thyra_valquiria",
+    name: "Thyra, Lâmina da Manhã",
+    lore: "Última sobrevivente de um clã de guerreiras do norte, Thyra transformou sua dor em velocidade e sua solidão em gelo. Corta antes de ser vista.",
+    rarity: "Épico",
+    heroClass: "Espadachim",
+    role: "DPS",
+    element: "Water",
+    baseStats:     { STR: 36, AGI: 32, VIT: 18, INT: 10, WIS: 12, CHA: 20, LUK: 16 },
+    growthPerLevel:{ STR: 3,  AGI: 2,  VIT: 1,  INT: 1,  WIS: 1,  CHA: 1,  LUK: 1  },
+    leadership: 52,
+    affinities: { barracks: 5, library: 1, hospital: 2, workshop: 3, laboratory: 1 },
+    skillIds: ["espada_golpe", "espada_turbilhao", "espada_ultima", "espada_passiva"],
+    portrait: "🗡",
+  },
+
   // ════════════════════════════════════════════════════════════════════════════
   // RARO
   // ════════════════════════════════════════════════════════════════════════════
@@ -326,6 +388,22 @@ export const HEROES: HeroDef[] = [
     affinities: { barracks: 2, library: 3, hospital: 2, workshop: 1, laboratory: 4 },
     skillIds: ["mago_faisca", "mago_bola_de_fogo", "mago_ultima", "mago_passiva"],
     portrait: "🌋",
+  },
+
+  {
+    heroId: "silvan_caçador",
+    name: "Silvan, o Caçador das Matas",
+    lore: "Guardião das florestas antigas do norte de Transcend, Silvan aprendeu a caçar antes de aprender a falar. Seus instintos são aguçados como as garras de seu lobo companheiro.",
+    rarity: "Raro",
+    heroClass: "Caçador",
+    role: "DPS",
+    element: "Wind",
+    baseStats:     { STR: 18, AGI: 40, VIT: 12, INT: 10, WIS: 12, CHA: 12, LUK: 24 },
+    growthPerLevel:{ STR: 1,  AGI: 3,  VIT: 1,  INT: 1,  WIS: 1,  CHA: 1,  LUK: 2  },
+    leadership: 28,
+    affinities: { barracks: 3, library: 1, hospital: 1, workshop: 2, laboratory: 1 },
+    skillIds: ["cac_armadilha", "cac_veneno", "cac_ultima", "cac_passiva"],
+    portrait: "🐺",
   },
 
   // ════════════════════════════════════════════════════════════════════════════

@@ -185,6 +185,60 @@ export class PlayerService {
     return { success: true, revision: nextRevision };
   }
 
+  async getArenaOpponents(
+    accountId: number,
+    rating: number,
+  ): Promise<{ username: string; characterName: string; rating: number; defenderHeroId: string }[]> {
+    const players = await this.prisma.player.findMany({
+      include: { saveData: true, account: true },
+    });
+
+    const results: { username: string; characterName: string; rating: number; defenderHeroId: string; diff: number }[] = [];
+
+    for (const p of players) {
+      if (p.accountId === accountId) continue;
+      if (!p.saveData) continue;
+
+      let parsed: Record<string, unknown>;
+      try { parsed = JSON.parse(p.saveData.data) as Record<string, unknown>; }
+      catch { continue; }
+
+      const arena = parsed['arena'] as Record<string, unknown> | undefined;
+      if (!arena) continue;
+
+      const opponentRating = typeof arena['rating'] === 'number' ? arena['rating'] : null;
+      const defenderHeroId = typeof arena['defenderHeroId'] === 'string' ? arena['defenderHeroId'] : null;
+      if (opponentRating === null || defenderHeroId === null) continue;
+
+      const diff = Math.abs(opponentRating - rating);
+      if (diff > 2000) continue;
+
+      results.push({
+        username: p.account.username,
+        characterName: p.characterName,
+        rating: opponentRating,
+        defenderHeroId,
+        diff,
+      });
+    }
+
+    results.sort((a, b) => a.diff - b.diff);
+    const pool = results.slice(0, 20);
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const tmp = pool[i]!;
+      pool[i] = pool[j]!;
+      pool[j] = tmp;
+    }
+
+    return pool.slice(0, 5).map(({ username, characterName, rating: r, defenderHeroId }) => ({
+      username,
+      characterName,
+      rating: r,
+      defenderHeroId,
+    }));
+  }
+
   async downloadSave(accountId: number) {
     const player = await this.prisma.player.findUnique({
       where: { accountId },

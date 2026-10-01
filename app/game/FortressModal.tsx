@@ -49,7 +49,7 @@ export default function FortressModal({ onClose }: { onClose: () => void }) {
   const [feedback, setFeedback] = useState<string | null>(null);
   const [fusionSacrifice, setFusionSacrifice] = useState<string | null>(null);
   const [fusionRecipient, setFusionRecipient] = useState<string | null>(null);
-  const { save } = useGameStore();
+  const { save, getHeroLevel, getHeroProgression } = useGameStore();
   const fortress = save.fortress;
 
   const ownedHeroIds = useMemo(() => {
@@ -567,13 +567,17 @@ export default function FortressModal({ onClose }: { onClose: () => void }) {
                     background: fusionSacrifice ? "rgba(255,100,100,0.05)" : "rgba(122,111,160,0.04)",
                   }}
                 >
-                  {fusionSacrifice && HERO_MAP[fusionSacrifice] ? (
-                    <>
-                      <div className="mb-1 text-2xl">{HERO_MAP[fusionSacrifice]!.portrait}</div>
-                      <p className="text-[10px] font-bold text-cream/70">{HERO_MAP[fusionSacrifice]!.name}</p>
-                      <p className="text-[9px] text-violet/50">{HERO_MAP[fusionSacrifice]!.rarity}</p>
-                    </>
-                  ) : (
+                  {fusionSacrifice && HERO_MAP[fusionSacrifice] ? (() => {
+                    const h = HERO_MAP[fusionSacrifice]!;
+                    const lv = getHeroLevel(fusionSacrifice).level;
+                    const rk = getHeroProgression(fusionSacrifice).rank;
+                    return (<>
+                      <div className="mb-1 text-2xl">{h.portrait}</div>
+                      <p className="text-[10px] font-bold text-cream/70 leading-snug">{h.name.split(",")[0]}</p>
+                      <p className="text-[9px] text-violet/50">{h.heroClass}</p>
+                      <p className="text-[9px] text-amber-400/70">Nv.{lv} · Rank {["F","D","C","B","A","S","SS","SSS"][rk] ?? "F"}</p>
+                    </>);
+                  })() : (
                     <p className="text-[10px] text-violet/35">Escolher herói</p>
                   )}
                 </motion.button>
@@ -591,13 +595,19 @@ export default function FortressModal({ onClose }: { onClose: () => void }) {
                     background: fusionRecipient ? "rgba(100,200,255,0.05)" : "rgba(122,111,160,0.04)",
                   }}
                 >
-                  {fusionRecipient && HERO_MAP[fusionRecipient] ? (
-                    <>
-                      <div className="mb-1 text-2xl">{HERO_MAP[fusionRecipient]!.portrait}</div>
-                      <p className="text-[10px] font-bold text-cream/70">{HERO_MAP[fusionRecipient]!.name}</p>
-                      <p className="text-[9px] text-violet/50">{HERO_MAP[fusionRecipient]!.rarity}</p>
-                    </>
-                  ) : (
+                  {fusionRecipient && HERO_MAP[fusionRecipient] ? (() => {
+                    const h = HERO_MAP[fusionRecipient]!;
+                    const lv = getHeroLevel(fusionRecipient).level;
+                    const rk = getHeroProgression(fusionRecipient).rank;
+                    const frags = save.fragmentos.find((f) => f.heroId === fusionRecipient)?.count ?? 0;
+                    return (<>
+                      <div className="mb-1 text-2xl">{h.portrait}</div>
+                      <p className="text-[10px] font-bold text-cream/70 leading-snug">{h.name.split(",")[0]}</p>
+                      <p className="text-[9px] text-violet/50">{h.heroClass}</p>
+                      <p className="text-[9px] text-amber-400/70">Nv.{lv} · Rank {["F","D","C","B","A","S","SS","SSS"][rk] ?? "F"}</p>
+                      <p className="text-[8px] text-violet/40">{frags} frags atuais</p>
+                    </>);
+                  })() : (
                     <p className="text-[10px] text-violet/35">Escolher herói</p>
                   )}
                 </motion.button>
@@ -652,6 +662,24 @@ export default function FortressModal({ onClose }: { onClose: () => void }) {
                   const hero = HERO_MAP[heroId];
                   if (!hero) return null;
                   const isOtherSlot = screen === "fusion-sacrifice" ? heroId === fusionRecipient : heroId === fusionSacrifice;
+                  const lvl = getHeroLevel(heroId);
+                  const prog = getHeroProgression(heroId);
+                  const RANK_LABELS = ["F","D","C","B","A","S","SS","SSS"];
+                  const rankLabel = RANK_LABELS[prog.rank] ?? "F";
+                  const bs = hero.baseStats;
+                  const gpl = hero.growthPerLevel;
+                  const lv = lvl.level;
+                  const topStats = [
+                    { k: "FOR", v: bs.STR + gpl.STR * (lv - 1) },
+                    { k: "AGI", v: bs.AGI + gpl.AGI * (lv - 1) },
+                    { k: "INT", v: bs.INT + gpl.INT * (lv - 1) },
+                    { k: "VIT", v: bs.VIT + gpl.VIT * (lv - 1) },
+                  ].sort((a, b) => b.v - a.v).slice(0, 2);
+                  const RARITY_COLOR: Record<string, string> = {
+                    Divino: "rgb(255,215,80)", Mítico: "rgb(200,100,255)", Lendário: "rgb(255,170,50)",
+                    Épico: "rgb(170,100,255)", Raro: "rgb(90,160,255)", Incomum: "rgb(80,200,120)", Comum: "rgba(180,180,210,0.7)",
+                  };
+                  const rc = RARITY_COLOR[hero.rarity] ?? "rgba(180,180,210,0.7)";
                   return (
                     <motion.button
                       key={heroId}
@@ -666,19 +694,35 @@ export default function FortressModal({ onClose }: { onClose: () => void }) {
                       transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
                       className="flex items-center gap-3 rounded-xl border px-4 py-3 text-left"
                       style={{
-                        borderColor: isOtherSlot ? "rgba(122,111,160,0.08)" : "rgba(122,111,160,0.18)",
-                        background: isOtherSlot ? "rgba(122,111,160,0.02)" : "rgba(122,111,160,0.05)",
+                        borderColor: isOtherSlot ? "rgba(122,111,160,0.08)" : `${rc}30`,
+                        background: isOtherSlot ? "rgba(122,111,160,0.02)" : `${rc}06`,
                         opacity: isOtherSlot ? 0.4 : 1,
                       }}
                     >
-                      <span className="text-xl">{hero.portrait}</span>
-                      <div className="flex-1">
-                        <p className="text-[11px] font-bold text-cream/80">{hero.name}</p>
-                        <p className="text-[10px] text-violet/50">{hero.heroClass} · {hero.rarity}</p>
+                      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg text-xl"
+                        style={{ background: `${rc}12`, border: `1px solid ${rc}30` }}>
+                        {hero.portrait}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[11px] font-bold text-cream/85 truncate">{hero.name.split(",")[0]}</p>
+                        <div className="mt-0.5 flex items-center gap-1.5 flex-wrap">
+                          <span className="text-[9px] font-bold" style={{ color: rc }}>{hero.rarity}</span>
+                          <span className="text-[8px] text-violet/40">·</span>
+                          <span className="text-[9px] text-violet/55">{hero.heroClass}</span>
+                          <span className="text-[8px] text-violet/40">·</span>
+                          <span className="text-[9px] text-cream/50">Nv.{lv}</span>
+                          <span className="text-[8px] text-violet/40">·</span>
+                          <span className="text-[9px] font-bold text-amber-400/80">Rank {rankLabel}</span>
+                        </div>
+                        <div className="mt-1 flex gap-2">
+                          {topStats.map(({ k, v }) => (
+                            <span key={k} className="text-[8px] text-violet/50">{k} <span className="font-bold text-cream/60">{v}</span></span>
+                          ))}
+                        </div>
                       </div>
                       {screen === "fusion-sacrifice" && !isOtherSlot && (
-                        <span className="text-[9px] font-bold text-amber-400/70">
-                          +{FUSION_FRAG_GAIN[hero.rarity] ?? 10} frags
+                        <span className="text-[9px] font-bold text-amber-400/80 flex-shrink-0">
+                          +{FUSION_FRAG_GAIN[hero.rarity] ?? 10}
                         </span>
                       )}
                     </motion.button>
