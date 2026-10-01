@@ -46,17 +46,20 @@ export default function BattlePassModal({ onClose }: { onClose: () => void }) {
   const { save, addCurrency, addItem } = useGameStore();
   const bp = save.battlePass;
   const [buyLoading, setBuyLoading] = useState<"monthly" | "season" | null>(null);
+  const [buyError, setBuyError] = useState<string | null>(null);
 
   async function handleBuy(type: "monthly" | "season") {
     setBuyLoading(type);
+    setBuyError(null);
     try {
       const { init_point } = await api.post<{ init_point: string; preference_id: string }>(
         "/payment/create-preference",
         { type },
       );
       window.location.href = init_point;
-    } catch {
+    } catch (e) {
       setBuyLoading(null);
+      setBuyError(e instanceof Error ? e.message : "Erro ao iniciar pagamento. Tente novamente.");
     }
   }
 
@@ -210,6 +213,12 @@ export default function BattlePassModal({ onClose }: { onClose: () => void }) {
           <div className="mt-5 rounded-xl border border-violet/20 px-4 py-5" style={{ background: "rgba(170,130,255,0.05)" }}>
             <p className="text-[12px] font-black tracking-wide text-cream/80">Upgrade para Premium</p>
             <p className="mt-1 text-[11px] text-violet/50">Desbloqueie todas as recompensas premium e selos adicionais</p>
+
+            {buyError && (
+              <div className="mt-3 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2">
+                <p className="text-[10px] text-red-400">{buyError}</p>
+              </div>
+            )}
 
             <div className="mt-4 flex flex-col gap-2.5">
               {/* Mensal */}
