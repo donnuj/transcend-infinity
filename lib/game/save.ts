@@ -26,32 +26,39 @@ let _revision = 0;
 let _syncTimer: ReturnType<typeof setTimeout> | null = null;
 let _uploading = false;
 
-// Carrega save da nuvem. Retorna serverOfflineMs se encontrou save, null caso contrário.
+// Carrega save da nuvem.
+// Retorna serverOfflineMs (>=0) se encontrou save, null se não existe save ainda.
+// Lança em qualquer outro erro (rede, 5xx, etc.) para que o chamador não confunda
+// com "sem save" e dispare um uploadCloudSave indevido.
 export async function loadCloudSave(): Promise<number | null> {
+  let res: CloudSaveDownload | null;
   try {
-    const res = await api.get<CloudSaveDownload | null>("/player/save");
-    if (!res || !res.data || typeof res.data !== "object") return null;
-
-    _revision = res.revision ?? 0;
-    useGameStore.setState((s) => ({ ...s, save: res.data as typeof s.save, cloudSynced: true, lastSyncAt: new Date().toISOString() }));
-    return res.serverOfflineMs ?? 0;
+    res = await api.get<CloudSaveDownload | null>("/player/save");
   } catch (err) {
+    const status = (err as { status?: number })?.status;
+    if (status === 404) return null; // save não existe — seguro criar
     console.error("[save] load failed", err);
-    return null;
+    throw err; // não retorna null — evita upload acidental sobre save existente
   }
+
+  if (!res || !res.data || typeof res.data !== "object") return null;
+
+  _revision = res.revision ?? 0;
+  useGameStore.setState((s) => ({ ...s, save: res!.data as typeof s.save, cloudSynced: true, lastSyncAt: new Date().toISOString() }));
+  return res.serverOfflineMs ?? 0;
 }
 
 // Sobe save para a nuvem. Em conflito de revisão, re-baixa primeiro e re-tenta uma vez.
 export async function uploadCloudSave(retrying = false): Promise<void> {
   if (_uploading) return;
   _uploading = true;
-  const { save } = useGameStore.getState();
   const now = new Date().toISOString();
+  const { save } = useGameStore.getState();
 
   const envelope: CloudSaveEnvelope = {
     schemaVersion: 1,
     revision: _revision,
-    data: { ...save, savedAt: now },
+    data: save,
   };
 
   try {

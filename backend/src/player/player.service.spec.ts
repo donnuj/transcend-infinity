@@ -176,14 +176,14 @@ describe('PlayerService save integrity', () => {
     ).rejects.toBeInstanceOf(NotFoundException);
   });
 
-  it('retorna null quando o jogador ainda não possui save', async () => {
+  it('lança NotFoundException quando o jogador ainda não possui save', async () => {
     playerFindUnique.mockResolvedValue({
       id: 10,
       accountId: 1,
       saveData: null,
     });
 
-    await expect(service.downloadSave(1)).resolves.toBeNull();
+    await expect(service.downloadSave(1)).rejects.toBeInstanceOf(NotFoundException);
   });
 
   it('rejeita download quando o jogador não existe', async () => {

@@ -149,7 +149,7 @@ export class PlayerService {
     });
     if (!player) throw new NotFoundException('Jogador não encontrado.');
     const save = player.saveData;
-    if (!save) return null;
+    if (!save) throw new NotFoundException('Save não encontrado.');
 
     const calculatedChecksum = createHash('sha256')
       .update(save.data, 'utf8')

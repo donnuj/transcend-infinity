@@ -44,16 +44,47 @@ describe('contrato de save remoto', () => {
     ).toBe(false);
   });
 
-  it.each(['Wallet', 'gold', 'premiumCurrency', 'Inventory', 'BannerPity'])(
-    'rejeita escrita no campo protegido %s',
-    (protectedField) => {
-      expect(
-        saveUploadSchema.safeParse({
-          schemaVersion: 1,
-          revision: 0,
-          data: { [protectedField]: 999999 },
-        }).success,
-      ).toBe(false);
-    },
-  );
+  it('aceita campos de save completos do cliente (wallet, inventory, etc.)', () => {
+    expect(
+      saveUploadSchema.safeParse({
+        schemaVersion: 1,
+        revision: 0,
+        data: {
+          wallet: { ouro: 500, cristaisAstra: 10, selosDeInvocacao: 10, selosLivres: 0, moedasDeEvento: 0, loginStreak: 1, lastLoginDate: '' },
+          inventory: [{ itemId: 'pocao_cura_p', qty: 5 }],
+          heroProgression: [],
+        },
+      }).success,
+    ).toBe(true);
+  });
+
+  it('rejeita wallet.ouro acima do cap', () => {
+    expect(
+      saveUploadSchema.safeParse({
+        schemaVersion: 1,
+        revision: 0,
+        data: { wallet: { ouro: 10_000_001 } },
+      }).success,
+    ).toBe(false);
+  });
+
+  it('rejeita wallet.cristaisAstra acima do cap', () => {
+    expect(
+      saveUploadSchema.safeParse({
+        schemaVersion: 1,
+        revision: 0,
+        data: { wallet: { cristaisAstra: 500_001 } },
+      }).success,
+    ).toBe(false);
+  });
+
+  it('rejeita tower.bestFloor acima do máximo', () => {
+    expect(
+      saveUploadSchema.safeParse({
+        schemaVersion: 1,
+        revision: 0,
+        data: { tower: { bestFloor: 201 } },
+      }).success,
+    ).toBe(false);
+  });
 });

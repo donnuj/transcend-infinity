@@ -28,7 +28,6 @@ const _bonusCache = {
 export function newSave(): SaveData {
   return {
     version: "1.0",
-    savedAt: new Date().toISOString(),
     wallet: {
       cristaisAstra: 0,
       selosDeInvocacao: 10,

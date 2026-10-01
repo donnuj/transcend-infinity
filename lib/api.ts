@@ -59,9 +59,12 @@ async function request<T>(path: string, options: RequestOptions = {}, isRetry = 
     throw new Error("Sessão expirada");
   }
 
+  const text = await res.text();
+
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ message: res.statusText }));
-    const raw = (err as { message?: unknown }).message;
+    let raw: unknown;
+    try { raw = text ? (JSON.parse(text) as { message?: unknown }).message : res.statusText; }
+    catch { raw = res.statusText; }
     const msg = typeof raw === "string"
       ? raw
       : typeof raw === "object" && raw !== null
@@ -76,7 +79,8 @@ async function request<T>(path: string, options: RequestOptions = {}, isRetry = 
     throw error;
   }
 
-  return res.json() as Promise<T>;
+  if (!text) return null as T;
+  return JSON.parse(text) as T;
 }
 
 export const api = {

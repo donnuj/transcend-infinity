@@ -485,7 +485,6 @@ export type OfflineSave = {
 
 export type SaveData = {
   version: string;
-  savedAt: string;
   wallet: WalletSave;
   invocador: InvocadorSave;
   bannerPity: BannerPitySave[];

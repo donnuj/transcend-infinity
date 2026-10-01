@@ -155,12 +155,19 @@ export default function GamePage() {
     api.get<Profile>("/player/profile").then((p) => setProfile(p)).catch(() => null);
     localStorage.removeItem("ti_game_save");
     useGameStore.getState().resetSave();
-    loadCloudSave().then((serverOfflineMs) => {
-      if (serverOfflineMs === null) { return uploadCloudSave(); }
-      // Use server-provided elapsed time — not manipulable by the client
-      const reward = useGameStore.getState().collectOfflineRewards(serverOfflineMs);
-      if (reward) { setOfflineReward(reward); return uploadCloudSave(); }
-    }).finally(() => setUser(u));
+    loadCloudSave()
+      .then((serverOfflineMs) => {
+        if (serverOfflineMs === null) return uploadCloudSave(); // save ainda não existe
+        // Use server-provided elapsed time — not manipulable by the client
+        const reward = useGameStore.getState().collectOfflineRewards(serverOfflineMs);
+        if (reward) { setOfflineReward(reward); return uploadCloudSave(); }
+      })
+      .catch((err) => {
+        // Erro real (rede, 5xx, auth) — não fazer upload para não sobrescrever save existente
+        console.error("[game] load save failed, showing unsynced state", err);
+        useGameStore.getState().setCloudSynced(false);
+      })
+      .finally(() => setUser(u));
   }, [router]);
 
   // Keep-alive: mantém o backend no Render acordado enquanto o jogador está na sessão

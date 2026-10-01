@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useEffect, useRef } from "react";
+import { useState, useTransition, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
@@ -340,22 +340,40 @@ function Field({
   hint?: string;
   error?: string;
 }) {
+  const [showPwd, setShowPwd] = useState(false);
+  const togglePwd = useCallback(() => setShowPwd((v) => !v), []);
+  const isPassword = type === "password";
+  const inputType = isPassword ? (showPwd ? "text" : "password") : type;
+
   return (
     <div className="mt-4 flex flex-col gap-1.5">
       <label className="text-[10px] font-bold tracking-[0.2em] text-violet">
         {label}
       </label>
-      <input
-        type={type}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        autoComplete={autoComplete}
-        required
-        minLength={type === "password" && (hint || error) ? 14 : undefined}
-        className="h-12 rounded border border-violet/30 bg-void px-3.5 text-[14px] text-cream placeholder:text-cream/25 transition-colors duration-200 focus:border-amber/70 focus:bg-void/100"
-        style={{ transitionTimingFunction: "cubic-bezier(0.23,1,0.32,1)" }}
-      />
+      <div className="relative">
+        <input
+          type={inputType}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          autoComplete={autoComplete}
+          required
+          minLength={isPassword && (hint || error) ? 14 : undefined}
+          className="h-12 w-full rounded border border-violet/30 bg-void px-3.5 pr-10 text-[14px] text-cream placeholder:text-cream/25 transition-colors duration-200 focus:border-amber/70 focus:outline-none"
+          style={{ transitionTimingFunction: "cubic-bezier(0.23,1,0.32,1)" }}
+        />
+        {isPassword && (
+          <button
+            type="button"
+            onClick={togglePwd}
+            tabIndex={-1}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-violet/50 transition-colors hover:text-cream/70 select-none"
+            aria-label={showPwd ? "Ocultar senha" : "Mostrar senha"}
+          >
+            {showPwd ? "OCULTAR" : "VER"}
+          </button>
+        )}
+      </div>
       {error && <p className="text-[10px] text-red-400/80">{error}</p>}
       {hint && !error && <p className="text-[10px] text-violet/45">{hint}</p>}
     </div>
