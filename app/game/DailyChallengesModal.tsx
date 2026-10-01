@@ -11,7 +11,8 @@ const ease = [0.23, 1, 0.32, 1] as const;
 export default function DailyChallengesModal({ onClose }: { onClose: () => void }) {
   const { save, claimDailyReward, getDailyProgress, resetDailyChallengesIfNeeded } = useGameStore();
 
-  useEffect(() => { resetDailyChallengesIfNeeded(); }, [resetDailyChallengesIfNeeded]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { resetDailyChallengesIfNeeded(); }, []);
 
   const dc = save.dailyChallenges;
   const completedCount = dc.completed.length;

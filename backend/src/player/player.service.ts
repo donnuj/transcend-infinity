@@ -3,6 +3,7 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { createHash } from 'node:crypto';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
@@ -140,6 +141,48 @@ export class PlayerService {
       revision: nextRevision,
       checksum,
     });
+  }
+
+  async adminPatchSave(secret: string, email: string, patches: Record<string, unknown>) {
+    if (!process.env.ADMIN_SECRET || secret !== process.env.ADMIN_SECRET) {
+      throw new UnauthorizedException('Acesso negado.');
+    }
+
+    const account = await this.prisma.account.findUnique({
+      where: { email },
+      include: { player: { include: { saveData: true } } },
+    });
+    if (!account?.player) throw new NotFoundException('Jogador não encontrado.');
+    if (!account.player.saveData) throw new NotFoundException('Save não encontrado.');
+
+    let saveData: Record<string, unknown>;
+    try { saveData = JSON.parse(account.player.saveData.data) as Record<string, unknown>; }
+    catch { throw new InternalServerErrorException('Save corrompido.'); }
+
+    for (const [dotPath, value] of Object.entries(patches)) {
+      const keys = dotPath.split('.');
+      let cur: Record<string, unknown> = saveData;
+      for (let i = 0; i < keys.length - 1; i++) {
+        const k = keys[i] as string;
+        if (cur[k] === undefined || cur[k] === null || typeof cur[k] !== 'object') {
+          cur[k] = {};
+        }
+        cur = cur[k] as Record<string, unknown>;
+      }
+      const lastKey = keys[keys.length - 1] as string;
+      cur[lastKey] = value;
+    }
+
+    const data = JSON.stringify(saveData);
+    const checksum = createHash('sha256').update(data, 'utf8').digest('hex');
+    const nextRevision = account.player.saveData.revision + 1;
+
+    await this.prisma.saveData.update({
+      where: { playerId: account.player.id },
+      data: { data, checksum, revision: nextRevision },
+    });
+
+    return { success: true, revision: nextRevision };
   }
 
   async downloadSave(accountId: number) {

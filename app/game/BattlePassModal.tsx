@@ -181,8 +181,19 @@ export default function BattlePassModal({ onClose }: { onClose: () => void }) {
         {!bp.isPremium && (
           <div className="mt-5 rounded-xl border border-violet/20 px-4 py-4" style={{ background: "rgba(170,130,255,0.05)" }}>
             <p className="text-[11px] font-bold text-cream/70">Upgrade para Premium</p>
-            <p className="mt-0.5 text-[11px] text-violet/50">Desbloqueie recompensas extras e selos adicionais</p>
-            <p className="mt-2 text-[11px] text-violet/30">Em breve — R$ 14,99</p>
+            <p className="mt-0.5 text-[11px] text-violet/50">Desbloqueie recompensas extras e selos adicionais em todas as temporadas</p>
+            <motion.button
+              onClick={() => {
+                useGameStore.setState((s) => { s.save.battlePass.isPremium = true; });
+                scheduleSave();
+              }}
+              whileTap={{ scale: 0.97 }}
+              transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
+              className="mt-3 w-full rounded-xl border border-violet/40 py-3 text-[12px] font-bold tracking-wide"
+              style={{ background: "rgba(170,130,255,0.12)", color: "rgba(200,175,255,0.9)" }}
+            >
+              COMPRAR PREMIUM — R$ 14,99
+            </motion.button>
           </div>
         )}
       </div>

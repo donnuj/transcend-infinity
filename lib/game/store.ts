@@ -752,7 +752,6 @@ export const useGameStore = create<GameStore>()(
       },
 
       getDailyProgress(key) {
-        get().resetDailyChallengesIfNeeded();
         return get().save.dailyChallenges.progress.find((p) => p.key === key)?.value ?? 0;
       },
 
