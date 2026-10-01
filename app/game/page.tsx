@@ -94,7 +94,7 @@ export default function GamePage() {
   const [showWiki, setShowWiki] = useState(false);
   const [offlineReward, setOfflineReward] = useState<{ ouro: number; xp: number } | null>(null);
   const [showNovatos, setShowNovatos] = useState(false);
-  const [paymentStatus, setPaymentStatus] = useState<"success" | "failure" | "pending" | null>(null);
+  const paymentStatus = searchParams.get("payment") as "success" | "failure" | "pending" | null;
   const isPremium = useGameStore((s) => s.save.battlePass.isPremium);
 
   // Modal callbacks — stable references
@@ -176,14 +176,10 @@ export default function GamePage() {
 
   // Detecta retorno do checkout MP
   useEffect(() => {
-    const status = searchParams.get("payment") as "success" | "failure" | "pending" | null;
-    if (!status) return;
-    setPaymentStatus(status);
-    router.replace("/game");
-    if (status === "success") {
+    if (paymentStatus === "success") {
       setTimeout(() => loadCloudSave().catch(() => null), 3000);
     }
-  }, [searchParams, router]);
+  }, [paymentStatus]);
 
   // Keep-alive: mantém o backend no Render acordado enquanto o jogador está na sessão
   useEffect(() => {
@@ -333,7 +329,7 @@ export default function GamePage() {
                   {paymentStatus === "success" ? "Premium ativado. Recarregando save..." : paymentStatus === "pending" ? "Você será notificado quando confirmar." : "Tente novamente quando quiser."}
                 </p>
               </div>
-              <motion.button onClick={() => setPaymentStatus(null)} whileTap={{ scale: 0.9 }} transition={{ duration: 0.08 }} className="ml-2 text-[11px] text-violet/40">✕</motion.button>
+              <motion.button onClick={() => router.replace("/game")} whileTap={{ scale: 0.9 }} transition={{ duration: 0.08 }} className="ml-2 text-[11px] text-violet/40">✕</motion.button>
             </div>
           </motion.div>
         )}
