@@ -219,6 +219,7 @@ export default function CaravanaModal({ onClose }: { onClose: () => void }) {
       const profit = Math.floor(caravan.investedGold * activeRoute.returnMultiplier);
       useGameStore.getState().addCurrency("ouro", profit);
       incrementDailyProgress("caravan_today");
+      useGameStore.getState().addReputation("fac_mercadores", 10);
     } else {
       // Partial return on failure
       const partial = Math.floor(caravan.investedGold * 0.3);

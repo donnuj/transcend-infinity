@@ -131,6 +131,7 @@ export default function ArenaModal({ onClose }: { onClose: () => void }) {
     if (r.won) {
       useGameStore.getState().addCurrency("ouro", 150 + Math.floor(arena.rating / 50));
       useGameStore.getState().incrementDailyProgress("arena_wins_today");
+      useGameStore.getState().addReputation("fac_ordem_imperial", 5);
     } else {
       useGameStore.getState().addCurrency("ouro", 30);
     }

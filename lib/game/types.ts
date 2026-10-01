@@ -419,6 +419,7 @@ export type FortressSave = {
   population: number;
   resources: ResourceEntry[];
   buildings: BuildingSave[];
+  pendingConstruction: { buildingId: string; targetLevel: number; endTime: string } | null;
 };
 
 export type GuildAdvancedSave = {
@@ -427,6 +428,9 @@ export type GuildAdvancedSave = {
   completedMissions: string[];
   completedResearch: string[];
   buildings: { typeId: string; level: number }[];
+  founded: boolean;
+  guildName: string;
+  factionAffiliation: string;
 };
 
 export type ProfessionSave = {

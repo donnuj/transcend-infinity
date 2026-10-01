@@ -337,7 +337,7 @@ function SectionHerois() {
 
       <WikiH2>Como ganhar Fragmentos</WikiH2>
       <InfoBox type="info">
-        Fragmentos são obtidos apenas por <b>duplicatas no gacha</b>. Cada pull que resulta em um herói já coletado dá +1 fragmento desse herói. Por isso, é melhor focar pulls em um banner específico.
+        Fragmentos vêm de duas fontes: <b>duplicatas no gacha</b> (cada pull em herói já coletado +1 fragmento) e a <b>Forja de Fusão</b> na Fortaleza (sacrifique um herói para dar fragmentos a outro — Comum: 10 frags, Lendário: 400 frags).
       </InfoBox>
 
       <WikiH2>Vantagem Elementar</WikiH2>
@@ -392,9 +392,9 @@ function SectionBatalha() {
         <b>Time de 3 heróis</b> é sempre melhor. Composição ideal para iniciantes: 1 DPS (Espadachim/Arqueiro/Mago) + 1 Tank (Guarda) + 1 Healer (Curandeiro).
       </InfoBox>
 
-      <WikiH2>Arena PvP</WikiH2>
+      <WikiH2>Arena PvP — Sistema de Defensor</WikiH2>
       <p className="text-[10px] leading-relaxed text-violet/82">
-        Vitória: <span style={{ color: "rgb(100,220,140)" }}>+200 ouro + 15–30 rating</span>. Derrota: <span style={{ color: "rgb(255,100,80)" }}>+50 ouro – 5–20 rating</span>. Rating inicial: 1000 (Bronze). Vença 3x por dia para o desafio <b>Campeão</b> (+1 Selo).
+        Você <b>escolhe um herói defensor</b> (seu representante na arena) e depois desafia oponentes gerados com rating similar. Limite: <b>10 lutas/dia</b>. Vitória: <span style={{ color: "rgb(100,220,140)" }}>+12–30 rating + 150+ ouro + 5 rep Imperial</span>. Derrota: <span style={{ color: "rgb(255,100,80)" }}>-8–20 rating + 30 ouro</span>. Configure seu herói defensor antes de lutar!
       </p>
       <WikiTable
         headers={["Liga", "Rating"]}
@@ -426,10 +426,20 @@ function SectionBatalha() {
         Chegue ao <b>andar 10 o mais rápido possível</b> para o Selo garantido. Depois o andar 25 para os 100 Cristais.
       </InfoBox>
 
-      <WikiH2>Boss Hunt (Semanal)</WikiH2>
+      <WikiH2>Boss Hunt — Bosses por Nível</WikiH2>
       <p className="text-[10px] leading-relaxed text-violet/82">
-        3 bosses por semana com limite de tentativas. Reset toda segunda-feira. Recompensas por boss: 2.000–5.000 ouro + 150–350 Cristais + 1–3 Selos.
+        10 bosses desbloqueados conforme seu nível de jogador (lv10, 20, 30... 100). Recompensas e HP escalam com o boss. Cada vitória dá <b>+10–20 pontos de reputação Arcontes</b>.
       </p>
+      <WikiTable
+        headers={["Boss", "Req. Nível", "Recompensa"]}
+        rows={[
+          ["Wyrm do Caos", "10", "500 ouro + 10 cristais"],
+          ["Titã de Pedra", "20", "1.200 ouro + 30 cristais"],
+          ["Espectro", "30", "2.500 ouro + 60 cristais"],
+          ["...", "40–90", "Escalando..."],
+          ["Avatar do Vazio", "100", "40.000 ouro + 1.500 cristais + 5 selos"],
+        ]}
+      />
       <InfoBox type="warn">
         Use vantagem elemental! Wyrm do Caos (Fire) — use herói de Water. Titã de Pedra (Earth) — use Fire. Espectro das Sombras (Dark) — use Light.
       </InfoBox>
@@ -612,15 +622,36 @@ function SectionAvancado() {
         40 níveis, 1.000 XP por nível. O track gratuito dá <b>2.700 ouro + 900 Cristais + 6 Selos + 3 Selos Livres</b> no total. Priorize chegar ao nível 20 (1 Selo Livre) e nível 40 (2 Selos Livres).
       </p>
 
-      <WikiH2>Fortaleza</WikiH2>
+      <WikiH2>Fortaleza — Construção com Tempo Real</WikiH2>
       <p className="text-[10px] leading-relaxed text-violet/82">
-        Sistema de construção com 7 tipos de estruturas. A Fazenda e Serraria geram recursos passivos por hora. A Caserna melhora heróis. Comece construindo a <b>Caserna</b> (bônus de herói) e a <b>Fazenda</b> (comida passiva) primeiro.
+        Upgrades levam tempo real: <b>30min (Nv.1) → 1h → 2h → 4h → 8h (Nv.5)</b>. Apenas uma construção ativa por vez. <b>Aloque heróis</b> nos prédios para bônus: Ferreiro na Oficina = produção bônus, Curandeiro no Hospital = bônus de cura. Use a <b>Forja de Fusão</b> (botão roxo) para sacrificar heróis fracos e transferir fragmentos ao principal.
       </p>
 
-      <WikiH2>Facções</WikiH2>
+      <WikiH2>Caravanas — Rota Comercial</WikiH2>
       <p className="text-[10px] leading-relaxed text-violet/82">
-        4 facções com bônus progressivos. <span style={{ color: "rgb(200,155,60)" }}>Ordem dos Arcontes</span> (✦) é a mais valiosa no longo prazo: desbloqueio de regiões e banner celestial. Para iniciantes, foque em <span style={{ color: "rgb(90,150,255)" }}>Ordem Imperial</span> (desconto no mercado).
+        Envie um grupo de heróis em uma rota comercial (duração: 4h a 48h). Mais heróis = maior chance de sucesso. Cada rota tem multiplicador de retorno diferente. Sucesso = lucro total; falha = 30% de retorno. Cada caravana bem-sucedida dá <b>+10 rep Mercadores</b>.
       </p>
+
+      <WikiH2>Mapa do Mundo — Exploração</WikiH2>
+      <p className="text-[10px] leading-relaxed text-violet/82">
+        Envie um herói para explorar uma região desconhecida (duração: 2h a 24h, conforme nível da região). Risco de ferimento: quanto maior a diferença de nível entre herói e região, maior a chance. Herói ferido fica indisponível por algumas horas. Recompensa: região descoberta + ouro.
+      </p>
+
+      <WikiH2>Guilda — Como Fundar</WikiH2>
+      <p className="text-[10px] leading-relaxed text-violet/82">
+        Requisitos para fundar: <b>nível 10+, 5.000 ouro, 500+ pontos de influência</b> em qualquer facção. Ao fundar, escolha o nome e a afiliação da guilda. Cada facção tem efeitos territoriais diferentes na Guilda.
+      </p>
+
+      <WikiH2>Facções — Como Ganhar Reputação</WikiH2>
+      <WikiTable
+        headers={["Facção", "Fonte Principal"]}
+        rows={[
+          ["Ordem Imperial", "Arena (vitórias +5) · Dungeons (+3 cada)"],
+          ["Ordem dos Arcontes", "Boss Hunt (+10–20 por boss derrotado)"],
+          ["Liga dos Mercadores", "Caravana bem-sucedida (+10)"],
+          ["Círculo dos Druidas", "Exploração do Mapa · NPCs"],
+        ]}
+      />
 
       <WikiH2>Companheiros</WikiH2>
       <p className="text-[10px] leading-relaxed text-violet/82">

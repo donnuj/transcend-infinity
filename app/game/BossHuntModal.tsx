@@ -233,6 +233,7 @@ export default function BossHuntModal({ onClose }: { onClose: () => void }) {
         if (!bh.allTimeKills.includes(boss.id)) bh.allTimeKills.push(boss.id);
       });
       incrementDailyProgress("boss_hunt_today");
+      store.addReputation("fac_arcontes", 10 + Math.floor(boss.requiredLevel / 10));
       scheduleSave();
     }
 

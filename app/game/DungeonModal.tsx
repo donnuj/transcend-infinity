@@ -107,6 +107,7 @@ export default function DungeonModal({ onClose }: { onClose: () => void }) {
     if (loot) addItem(loot.itemId, loot.qty, "dungeon");
     updateDungeonProgress(resolved.dungeonId, "A", DUNGEON_DURATIONS[resolved.difficulty]);
     incrementDailyProgress("dungeons_today");
+    useGameStore.getState().addReputation("fac_ordem_imperial", 3);
     scheduleSave();
     setDroppedItem(loot);
     setResolvedRun(resolved);
