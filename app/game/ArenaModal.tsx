@@ -111,8 +111,8 @@ export default function ArenaModal({ onClose }: { onClose: () => void }) {
 
     const r = simulateBattle([myHero], [opponentSnap]);
     const ratingChange = r.won
-      ? Math.floor(12 + Math.random() * 18)
-      : -Math.floor(8 + Math.random() * 12);
+      ? Math.floor(12 + Math.random() * 18) // eslint-disable-line react-hooks/purity
+      : -Math.floor(8 + Math.random() * 12); // eslint-disable-line react-hooks/purity
     const newRating = Math.max(0, arena.rating + ratingChange);
 
     useGameStore.setState((s) => {

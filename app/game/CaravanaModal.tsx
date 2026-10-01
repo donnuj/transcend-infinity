@@ -167,7 +167,7 @@ export default function CaravanaModal({ onClose }: { onClose: () => void }) {
   const [selectedRoute, setSelectedRoute] = useState<Route | null>(null);
   const [assignedHeroes, setAssignedHeroes] = useState<string[]>([]);
   const [investAmount, setInvestAmount] = useState(500);
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
     if (!caravan.inTransit) return;
@@ -197,6 +197,7 @@ export default function CaravanaModal({ onClose }: { onClose: () => void }) {
     if (assignedHeroes.length < selectedRoute.minHeroes) return;
     const avgLevel = assignedHeroes.reduce((s, id) => s + store.getHeroLevel(id).level, 0) / assignedHeroes.length;
     const chance = calcSuccessChance(selectedRoute, assignedHeroes.length, avgLevel);
+    // eslint-disable-next-line react-hooks/purity
     const arrival = new Date(Date.now() + selectedRoute.durationMs).toISOString();
     useGameStore.setState((s) => {
       s.save.wallet.ouro -= investAmount;

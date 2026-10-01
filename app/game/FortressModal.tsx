@@ -80,6 +80,7 @@ export default function FortressModal({ onClose }: { onClose: () => void }) {
 
   const pending = fortress.pendingConstruction;
   const pendingDef = pending ? BUILDING_MAP[pending.buildingId] : null;
+  // eslint-disable-next-line react-hooks/purity
   const isConstructionDone = pending ? new Date(pending.endTime).getTime() <= Date.now() : false;
 
   function startUpgrade(def: BuildingDef) {

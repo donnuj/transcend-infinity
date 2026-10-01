@@ -79,7 +79,7 @@ export default function WorldMapModal({ onClose }: { onClose: () => void }) {
     save.worldMap.currentRegionId ?? "reg_valdris"
   );
   const [screen, setScreen] = useState<Screen>("map");
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState(() => Date.now());
 
   const exploration = save.worldMap.exploration;
   const injuredHeroes = save.worldMap.injuredHeroes ?? [];
@@ -112,18 +112,19 @@ export default function WorldMapModal({ onClose }: { onClose: () => void }) {
   function isHeroInjured(heroId: string): boolean {
     const entry = injuredHeroes.find((h) => h.heroId === heroId);
     if (!entry) return false;
-    return new Date(entry.healTime).getTime() > Date.now();
+    return new Date(entry.healTime).getTime() > now;
   }
 
   function heroHealTimeLeft(heroId: string): number {
     const entry = injuredHeroes.find((h) => h.heroId === heroId);
     if (!entry) return 0;
-    return Math.max(0, new Date(entry.healTime).getTime() - Date.now());
+    return Math.max(0, new Date(entry.healTime).getTime() - now);
   }
 
   function startExploration(heroId: string) {
     if (!selectedRegion) return;
     const duration = getExplorationDuration(selectedRegion.level);
+    // eslint-disable-next-line react-hooks/purity
     const endTime = new Date(Date.now() + duration).toISOString();
     useGameStore.setState((s) => {
       s.save.worldMap.exploration = { heroId, regionId: selectedRegionId, endTime };
@@ -252,7 +253,7 @@ export default function WorldMapModal({ onClose }: { onClose: () => void }) {
                     <div
                       className="h-full rounded-full bg-amber"
                       style={{
-                        width: `${Math.min(100, ((explorationEndMs - Date.now()) <= 0 ? 100 : (1 - explorationLeft / getExplorationDuration(explorationRegion?.level ?? 1)) * 100))}%`,
+                        width: `${Math.min(100, ((explorationEndMs - now) <= 0 ? 100 : (1 - explorationLeft / getExplorationDuration(explorationRegion?.level ?? 1)) * 100))}%`,
                         transition: "width 1s linear",
                       }}
                     />

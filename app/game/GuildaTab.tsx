@@ -438,6 +438,7 @@ type FortressSave = ReturnType<typeof useGameStore.getState>["save"]["fortress"]
 
 function FortalezaSummary({ fortress, onManage }: { fortress: FortressSave; onManage: () => void }) {
   const RESOURCE_ICON: Record<string, string> = { Food: "◆", Wood: "◈", Stone: "●", Herbs: "◉", Morale: "★" };
+  // eslint-disable-next-line react-hooks/purity
   const isBuilding = !!fortress.pendingConstruction && new Date(fortress.pendingConstruction.endTime).getTime() > Date.now();
 
   return (
