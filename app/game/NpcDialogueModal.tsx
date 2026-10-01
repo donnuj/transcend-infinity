@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -95,7 +95,7 @@ export default function NpcDialogueModal({ onClose }: { onClose: () => void }) {
           <span className="h-4 w-[1px] bg-violet/20" />
           <span className="text-[11px] font-bold tracking-widest text-cream/70">NPCs</span>
         </div>
-        <span className="text-[10px] text-violet/40">
+        <span className="text-[10px] text-violet/60">
           {visibleNpcs.length} disponíveis
         </span>
       </div>
@@ -130,7 +130,7 @@ export default function NpcDialogueModal({ onClose }: { onClose: () => void }) {
                 )}
               </AnimatePresence>
 
-              <p className="mb-3 text-[9px] uppercase tracking-[0.2em] text-violet/40">
+              <p className="mb-3 text-[11px] uppercase tracking-[0.2em] text-violet/60">
                 NPCs na sua região
               </p>
 
@@ -165,12 +165,12 @@ export default function NpcDialogueModal({ onClose }: { onClose: () => void }) {
                         </div>
                         <div className="flex-1">
                           <p className="text-[12px] font-bold text-cream/85">{npc.name}</p>
-                          <p className="text-[9px] text-violet/45">{npc.role}</p>
+                          <p className="text-[11px] text-violet/65">{npc.role}</p>
                         </div>
                         {!hasSeenRoot && (
                           <div className="h-2 w-2 rounded-full bg-amber" style={{ boxShadow: "0 0 6px rgba(200,155,60,0.5)" }} />
                         )}
-                        <span className="text-[9px] text-violet/30">→</span>
+                        <span className="text-[11px] text-violet/30">→</span>
                       </motion.button>
                     );
                   })}
@@ -179,7 +179,7 @@ export default function NpcDialogueModal({ onClose }: { onClose: () => void }) {
 
               {/* Locked NPCs hint */}
               {NPCS.length > visibleNpcs.length && (
-                <p className="mt-4 text-center text-[9px] text-violet/25">
+                <p className="mt-4 text-center text-[11px] text-violet/25">
                   {NPCS.length - visibleNpcs.length} NPC(s) em regiões não descobertas
                 </p>
               )}
@@ -205,7 +205,7 @@ export default function NpcDialogueModal({ onClose }: { onClose: () => void }) {
                   {currentNpc?.portraitEmoji}
                 </div>
                 <div className="flex-1">
-                  <p className="mb-1 text-[9px] font-bold tracking-wider text-amber-400">{currentNpc?.name.toUpperCase()}</p>
+                  <p className="mb-1 text-[11px] font-bold tracking-wider text-amber-400">{currentNpc?.name.toUpperCase()}</p>
                   <div
                     className="rounded-2xl rounded-bl-md border border-amber/15 px-4 py-3"
                     style={{ background: "rgba(200,155,60,0.05)" }}

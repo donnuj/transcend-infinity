@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -71,7 +71,7 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
 
       <div className="flex-1 overflow-y-auto px-4 pb-8">
         {/* Audio */}
-        <p className="mb-3 mt-5 text-[9px] uppercase tracking-[0.2em] text-violet/40">Áudio</p>
+        <p className="mb-3 mt-5 text-[11px] uppercase tracking-[0.2em] text-violet/60">Áudio</p>
         <div className="rounded-xl border border-violet/12 px-5 py-5" style={{ background: "rgba(122,111,160,0.04)" }}>
           <VolumeSlider
             label="Música"
@@ -90,7 +90,7 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
         </div>
 
         {/* Graphics (static info only) */}
-        <p className="mb-3 mt-5 text-[9px] uppercase tracking-[0.2em] text-violet/40">Interface</p>
+        <p className="mb-3 mt-5 text-[11px] uppercase tracking-[0.2em] text-violet/60">Interface</p>
         <div className="rounded-xl border border-violet/12 px-5 py-4" style={{ background: "rgba(122,111,160,0.04)" }}>
           <InfoRow label="Versão" value="0.1.0" />
           <InfoRow label="Motor" value="Next.js 16" />
@@ -98,7 +98,7 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
         </div>
 
         {/* Notifications */}
-        <p className="mb-3 mt-5 text-[9px] uppercase tracking-[0.2em] text-violet/40">Notificações</p>
+        <p className="mb-3 mt-5 text-[11px] uppercase tracking-[0.2em] text-violet/60">Notificações</p>
         <div className="rounded-xl border border-violet/12 px-5 py-4" style={{ background: "rgba(122,111,160,0.04)" }}>
           <ToggleRow label="Caravana chegou" enabled />
           <ToggleRow label="Missões diárias" enabled />
@@ -106,9 +106,9 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
         </div>
 
         {/* Danger zone */}
-        <p className="mb-3 mt-5 text-[9px] uppercase tracking-[0.2em] text-red-400/50">Zona Perigosa</p>
+        <p className="mb-3 mt-5 text-[11px] uppercase tracking-[0.2em] text-red-400/50">Zona Perigosa</p>
         <div className="rounded-xl border border-red-500/12 px-5 py-4" style={{ background: "rgba(255,50,50,0.03)" }}>
-          <p className="mb-3 text-[9px] leading-relaxed text-violet/40">
+          <p className="mb-3 text-[11px] leading-relaxed text-violet/60">
             Redefinir o save apaga todo o progresso permanentemente. Não há como desfazer.
           </p>
           <AnimatePresence mode="wait">
@@ -157,12 +157,12 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
         </div>
 
         {/* Account deletion — LGPD */}
-        <p className="mb-3 mt-5 text-[9px] uppercase tracking-[0.2em] text-red-400/50">Exclusão de Conta (LGPD)</p>
+        <p className="mb-3 mt-5 text-[11px] uppercase tracking-[0.2em] text-red-400/50">Exclusão de Conta (LGPD)</p>
         <div className="rounded-xl border border-red-500/12 px-5 py-4" style={{ background: "rgba(255,50,50,0.03)" }}>
           <AnimatePresence mode="wait">
             {deleteStep === "idle" && (
               <motion.div key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
-                <p className="mb-3 text-[9px] leading-relaxed text-violet/40">
+                <p className="mb-3 text-[11px] leading-relaxed text-violet/60">
                   Exclui permanentemente sua conta, todos os dados e save. Irreversível.
                 </p>
                 <motion.button
@@ -254,7 +254,7 @@ function InfoRow({ label, value, last }: { label: string; value: string; last?: 
       className="flex items-center justify-between py-2.5"
       style={{ borderBottom: last ? "none" : "1px solid rgba(122,111,160,0.1)" }}
     >
-      <span className="text-[9px] font-bold uppercase tracking-wider text-violet/40">{label}</span>
+      <span className="text-[11px] font-bold uppercase tracking-wider text-violet/60">{label}</span>
       <span className="text-[10px] text-cream/55">{value}</span>
     </div>
   );

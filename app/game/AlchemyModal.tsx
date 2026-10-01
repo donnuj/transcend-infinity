@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -218,7 +218,7 @@ export default function AlchemyModal({ onClose }: { onClose: () => void }) {
               <p className="text-[15px] font-black tracking-wide text-cream" style={{ fontFamily: "var(--font-cinzel)" }}>
                 {stationDef.name.toUpperCase()}
               </p>
-              <p className="text-[9px] text-violet/45">{stationDef.description}</p>
+              <p className="text-[11px] text-violet/65">{stationDef.description}</p>
             </div>
           </div>
           <div className="flex gap-1.5">
@@ -236,12 +236,12 @@ export default function AlchemyModal({ onClose }: { onClose: () => void }) {
           </div>
           {nextStation ? (
             <div className="mt-3 flex items-center justify-between">
-              <span className="text-[8px] text-violet/40">Próximo: {nextStation.name}</span>
+              <span className="text-[10px] text-violet/60">Próximo: {nextStation.name}</span>
               <motion.button
                 onClick={save.wallet.ouro >= nextStation.ouroReq ? upgradeStation : undefined}
                 whileTap={save.wallet.ouro >= nextStation.ouroReq ? { scale: 0.94 } : undefined}
                 transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
-                className="rounded-lg border px-3 py-1 text-[9px] font-bold"
+                className="rounded-lg border px-3 py-1 text-[11px] font-bold"
                 style={{
                   borderColor: save.wallet.ouro >= nextStation.ouroReq ? "rgba(200,155,60,0.4)" : "rgba(122,111,160,0.15)",
                   background: save.wallet.ouro >= nextStation.ouroReq ? "rgba(200,155,60,0.1)" : "transparent",
@@ -252,7 +252,7 @@ export default function AlchemyModal({ onClose }: { onClose: () => void }) {
               </motion.button>
             </div>
           ) : (
-            <p className="mt-3 text-[9px] font-bold text-green-400">Estação máxima!</p>
+            <p className="mt-3 text-[11px] font-bold text-green-400">Estação máxima!</p>
           )}
         </div>
 
@@ -285,7 +285,7 @@ export default function AlchemyModal({ onClose }: { onClose: () => void }) {
               onClick={() => setFilter(cat)}
               whileTap={{ scale: 0.93 }}
               transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
-              className="flex-shrink-0 rounded-full border px-3 py-1 text-[9px] font-bold tracking-wider"
+              className="flex-shrink-0 rounded-full border px-3 py-1 text-[11px] font-bold tracking-wider"
               style={{
                 borderColor: filter === cat ? "rgba(200,155,60,0.5)" : "rgba(122,111,160,0.15)",
                 background: filter === cat ? "rgba(200,155,60,0.12)" : "transparent",
@@ -318,7 +318,7 @@ export default function AlchemyModal({ onClose }: { onClose: () => void }) {
                     <span className="text-lg">{recipe.icon}</span>
                     <div>
                       <p className="text-[11px] font-bold text-cream/85">{recipe.name}</p>
-                      <p className="text-[8px] text-violet/40">
+                      <p className="text-[10px] text-violet/60">
                         {locked ? `Requer estação Nv.${recipe.stationLevel}` : recipe.category}
                       </p>
                     </div>
@@ -328,7 +328,7 @@ export default function AlchemyModal({ onClose }: { onClose: () => void }) {
                       onClick={craftable ? () => craft(recipe) : undefined}
                       whileTap={craftable ? { scale: 0.93 } : undefined}
                       transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
-                      className="rounded-lg border px-3 py-1.5 text-[9px] font-bold"
+                      className="rounded-lg border px-3 py-1.5 text-[11px] font-bold"
                       style={{
                         borderColor: craftable ? "rgba(200,155,60,0.5)" : "rgba(122,111,160,0.15)",
                         background: craftable ? "rgba(200,155,60,0.12)" : "transparent",
@@ -355,7 +355,7 @@ export default function AlchemyModal({ onClose }: { onClose: () => void }) {
                           background: enough ? "rgba(100,220,140,0.04)" : "rgba(255,100,100,0.03)",
                         }}
                       >
-                        <span className="text-[8px]" style={{ color: enough ? "rgb(100,220,140)" : "rgb(255,120,120)" }}>
+                        <span className="text-[10px]" style={{ color: enough ? "rgb(100,220,140)" : "rgb(255,120,120)" }}>
                           {def?.name ?? ing.itemId} ×{ing.qty}
                           <span className="ml-1 opacity-60">({have})</span>
                         </span>
@@ -365,7 +365,7 @@ export default function AlchemyModal({ onClose }: { onClose: () => void }) {
                 </div>
 
                 {outputDef && (
-                  <p className="mt-1.5 text-[8px] text-violet/35">
+                  <p className="mt-1.5 text-[10px] text-violet/35">
                     → {outputDef.name} ×{recipe.outputQty} &nbsp;·&nbsp; {outputDef.description}
                   </p>
                 )}
@@ -374,7 +374,7 @@ export default function AlchemyModal({ onClose }: { onClose: () => void }) {
           })}
         </div>
 
-        <p className="mt-4 text-center text-[9px] text-violet/30">
+        <p className="mt-4 text-center text-[11px] text-violet/30">
           Ouro disponível: <span className="font-bold text-amber-400">{save.wallet.ouro.toLocaleString("pt-BR")}</span>
         </p>
       </div>

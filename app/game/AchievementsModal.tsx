@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -68,8 +68,8 @@ export default function AchievementsModal({ onClose }: { onClose: () => void }) 
       {/* Progress bar */}
       <div className="px-4 pt-3 pb-2">
         <div className="mb-1 flex justify-between">
-          <span className="text-[9px] text-violet/40">Progresso total</span>
-          <span className="text-[9px] font-bold text-amber-400">{pct}%</span>
+          <span className="text-[11px] text-violet/60">Progresso total</span>
+          <span className="text-[11px] font-bold text-amber-400">{pct}%</span>
         </div>
         <div className="h-1.5 w-full overflow-hidden rounded-full bg-violet/10">
           <motion.div
@@ -90,7 +90,7 @@ export default function AchievementsModal({ onClose }: { onClose: () => void }) 
             onClick={() => setCategory(cat)}
             whileTap={{ scale: 0.96 }}
             transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
-            className="flex-shrink-0 rounded-lg px-2.5 py-1 text-[8px] font-bold tracking-wider"
+            className="flex-shrink-0 rounded-lg px-2.5 py-1 text-[10px] font-bold tracking-wider"
             style={{
               background: category === cat ? "rgba(200,155,60,0.1)" : "transparent",
               color: category === cat ? "rgb(200,155,60)" : "rgba(122,111,160,0.5)",
@@ -112,7 +112,7 @@ export default function AchievementsModal({ onClose }: { onClose: () => void }) 
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
           >
-            <p className="text-[9px] font-bold text-amber-400">
+            <p className="text-[11px] font-bold text-amber-400">
               {newUnlocks.length} nova{newUnlocks.length > 1 ? "s" : ""} conquista{newUnlocks.length > 1 ? "s" : ""} desbloqueada{newUnlocks.length > 1 ? "s" : ""}!
             </p>
           </motion.div>
@@ -150,9 +150,9 @@ export default function AchievementsModal({ onClose }: { onClose: () => void }) 
                 <div className="flex-1 min-w-0">
                   <p className="text-[11px] font-bold" style={{ color: unlocked ? "rgba(255,255,255,0.85)" : "rgba(122,111,160,0.5)" }}>
                     {ach.title}
-                    {isNew && <span className="ml-1.5 text-[8px] font-black text-amber-400">NOVO</span>}
+                    {isNew && <span className="ml-1.5 text-[10px] font-black text-amber-400">NOVO</span>}
                   </p>
-                  <p className="text-[9px]" style={{ color: unlocked ? "rgba(122,111,160,0.6)" : "rgba(122,111,160,0.3)" }}>
+                  <p className="text-[11px]" style={{ color: unlocked ? "rgba(122,111,160,0.6)" : "rgba(122,111,160,0.3)" }}>
                     {ach.description}
                   </p>
                 </div>

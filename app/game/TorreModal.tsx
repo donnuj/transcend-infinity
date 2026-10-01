@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -168,9 +168,9 @@ export default function TorreModal({ onClose }: { onClose: () => void }) {
                 className="mb-4 rounded-xl border px-4 py-3"
                 style={{ borderColor: "rgba(200,155,60,0.2)", background: "rgba(200,155,60,0.04)" }}
               >
-                <p className="text-[9px] uppercase tracking-[0.2em] text-violet/40">Zona atual</p>
+                <p className="text-[11px] uppercase tracking-[0.2em] text-violet/60">Zona atual</p>
                 <p className="mt-1 text-[11px] font-bold text-cream/80">{currentTier.label}</p>
-                <p className="text-[9px] text-violet/50">
+                <p className="text-[11px] text-violet/50">
                   Pisos {currentTier.fromFloor}–{currentTier.toFloor} · {currentTier.minutesPerFloor}min/piso
                   {nextBossFloor && ` · Próximo boss: ${nextBossFloor}F`}
                 </p>
@@ -185,13 +185,13 @@ export default function TorreModal({ onClose }: { onClose: () => void }) {
               >
                 <div className="mb-3 flex items-start justify-between">
                   <div>
-                    <p className="text-[9px] uppercase tracking-[0.2em]" style={{ color: isReady ? "rgb(100,220,140)" : "rgba(200,155,60,0.7)" }}>
+                    <p className="text-[11px] uppercase tracking-[0.2em]" style={{ color: isReady ? "rgb(100,220,140)" : "rgba(200,155,60,0.7)" }}>
                       {isReady ? "Escalada completa!" : "Escalando..."}
                     </p>
                     <p className="mt-1 text-[11px] font-bold text-cream/80">
                       {pending.fromFloor}F → {pending.targetFloor}F
                     </p>
-                    <p className="text-[9px] text-violet/50">
+                    <p className="text-[11px] text-violet/50">
                       {pending.heroIds.length} herói{pending.heroIds.length > 1 ? "s" : ""} despachado{pending.heroIds.length > 1 ? "s" : ""}
                     </p>
                   </div>
@@ -240,7 +240,7 @@ export default function TorreModal({ onClose }: { onClose: () => void }) {
             ) : null}
 
             {/* Tier list */}
-            <p className="mb-2 text-[9px] uppercase tracking-[0.2em] text-violet/40">Andares da Torre</p>
+            <p className="mb-2 text-[11px] uppercase tracking-[0.2em] text-violet/60">Andares da Torre</p>
             <div className="mb-5 flex flex-col gap-1.5">
               {TOWER_TIERS.map((tier) => {
                 const completed = tower.bestFloor >= tier.toFloor;
@@ -264,11 +264,11 @@ export default function TorreModal({ onClose }: { onClose: () => void }) {
                         {completed ? "✓" : inProgress ? "◎" : "○"} T{tier.tier}
                       </span>
                       <div>
-                        <p className="text-[9px] text-cream/60">{tier.label}</p>
-                        <p className="text-[8px] text-violet/40">{tier.fromFloor}–{tier.toFloor}F · {tier.minutesPerFloor}min/piso</p>
+                        <p className="text-[11px] text-cream/60">{tier.label}</p>
+                        <p className="text-[10px] text-violet/60">{tier.fromFloor}–{tier.toFloor}F · {tier.minutesPerFloor}min/piso</p>
                       </div>
                     </div>
-                    <span className="text-[8px] text-violet/40">
+                    <span className="text-[10px] text-violet/60">
                       {fmtDuration(calcTowerTimeSeconds(Math.max(tower.bestFloor, tier.fromFloor - 1), tier.toFloor))}
                     </span>
                   </div>
@@ -308,7 +308,7 @@ export default function TorreModal({ onClose }: { onClose: () => void }) {
             <div className="flex-1 overflow-y-auto">
               {/* Target floor selector */}
               <div className="px-4 pt-4">
-                <p className="mb-2 text-[9px] uppercase tracking-[0.2em] text-violet/40">Objetivo</p>
+                <p className="mb-2 text-[11px] uppercase tracking-[0.2em] text-violet/60">Objetivo</p>
                 <div className="flex flex-col gap-1.5">
                   {TOWER_TIERS.filter((t) => t.toFloor > tower.bestFloor).map((tier) => {
                     const from = Math.max(tower.bestFloor, tier.fromFloor - 1);
@@ -330,13 +330,13 @@ export default function TorreModal({ onClose }: { onClose: () => void }) {
                           <p className="text-[10px] font-bold" style={{ color: selected ? "rgb(200,155,60)" : "rgba(232,217,160,0.7)" }}>
                             Piso {tier.toFloor} — {tier.label}
                           </p>
-                          <p className="text-[8px] text-violet/40">{tier.fromFloor}–{tier.toFloor}F · boss a cada 10 pisos</p>
+                          <p className="text-[10px] text-violet/60">{tier.fromFloor}–{tier.toFloor}F · boss a cada 10 pisos</p>
                         </div>
                         <div className="text-right">
                           <p className="text-[11px] font-bold" style={{ color: selected ? "rgb(200,155,60)" : "rgba(122,111,160,0.6)" }}>
                             {fmtDuration(secs)}
                           </p>
-                          <p className="text-[8px] text-violet/40">{tier.minutesPerFloor}min/piso</p>
+                          <p className="text-[10px] text-violet/60">{tier.minutesPerFloor}min/piso</p>
                         </div>
                       </motion.button>
                     );
@@ -346,7 +346,7 @@ export default function TorreModal({ onClose }: { onClose: () => void }) {
 
               {/* Hero selection */}
               <div className="px-4 pt-4">
-                <p className="mb-2 text-[9px] uppercase tracking-[0.2em] text-violet/40">
+                <p className="mb-2 text-[11px] uppercase tracking-[0.2em] text-violet/60">
                   Time (máx. 3) — {team.length}/3
                 </p>
                 <div className="grid grid-cols-3 gap-2 pb-4">
@@ -371,7 +371,7 @@ export default function TorreModal({ onClose }: { onClose: () => void }) {
                         }}
                       >
                         <span className="mb-1 text-2xl">{hero.portrait}</span>
-                        <p className="text-[8px] font-bold text-cream/70">{hero.name.split(",")[0]}</p>
+                        <p className="text-[10px] font-bold text-cream/70">{hero.name.split(",")[0]}</p>
                         {busy && <p className="text-[7px] text-red-400/70">ocupado</p>}
                       </motion.button>
                     );
@@ -383,7 +383,7 @@ export default function TorreModal({ onClose }: { onClose: () => void }) {
             {/* Dispatch bar */}
             <div className="border-t border-violet/10 px-4 py-3">
               {targetFloor && team.length > 0 && (
-                <p className="mb-2 text-center text-[9px] text-violet/50">
+                <p className="mb-2 text-center text-[11px] text-violet/50">
                   Tempo estimado: <span className="font-bold text-amber-400">
                     {fmtDuration(calcTowerTimeSeconds(tower.bestFloor, targetFloor))}
                   </span>
@@ -430,7 +430,7 @@ export default function TorreModal({ onClose }: { onClose: () => void }) {
               className="w-full rounded-xl border px-4 py-4"
               style={{ borderColor: "rgba(200,155,60,0.2)", background: "rgba(200,155,60,0.05)" }}
             >
-              <p className="mb-3 text-[9px] uppercase tracking-[0.2em] text-violet/40">Recompensas</p>
+              <p className="mb-3 text-[11px] uppercase tracking-[0.2em] text-violet/60">Recompensas</p>
               <div className="flex flex-col gap-1.5">
                 <RewardRow label="Ouro" value={`+${reward.gold.toLocaleString("pt-BR")}`} color="rgb(200,155,60)" />
                 <RewardRow label="Cristais Astra" value={`+${reward.crystals}`} color="rgb(170,130,255)" />
@@ -475,7 +475,7 @@ function StatCard({ label, value, color }: { label: string; value: string; color
       className="flex flex-col items-center rounded-xl border py-4"
       style={{ borderColor: `${color}30`, background: `${color}08` }}
     >
-      <p className="text-[8px] uppercase tracking-[0.2em] text-violet/40">{label}</p>
+      <p className="text-[10px] uppercase tracking-[0.2em] text-violet/60">{label}</p>
       <p className="mt-1 text-2xl font-black" style={{ color, fontFamily: "var(--font-cinzel)" }}>{value}</p>
     </div>
   );

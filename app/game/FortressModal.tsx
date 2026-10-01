@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -141,10 +141,10 @@ export default function FortressModal({ onClose }: { onClose: () => void }) {
                   <p className="text-lg font-black tracking-wider text-cream" style={{ fontFamily: "var(--font-cinzel)" }}>
                     {fortress.fortressName.toUpperCase()}
                   </p>
-                  <p className="text-[9px] text-violet/40">Pop.: {fortress.population} · Rep.: {fortress.reputation}</p>
+                  <p className="text-[11px] text-violet/60">Pop.: {fortress.population} · Rep.: {fortress.reputation}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-[9px] text-violet/40">Construções</p>
+                  <p className="text-[11px] text-violet/60">Construções</p>
                   <p className="text-[14px] font-black text-amber-400">{totalBuilt}/{totalBuildings}</p>
                 </div>
               </div>
@@ -161,7 +161,7 @@ export default function FortressModal({ onClose }: { onClose: () => void }) {
                     <span className="text-[10px]" style={{ color: RESOURCE_COLORS[res.key] ?? "rgba(200,200,200,0.6)" }}>
                       {RESOURCE_ICONS[res.key] ?? "◈"}
                     </span>
-                    <span className="text-[9px] font-bold text-cream/70">{res.value}</span>
+                    <span className="text-[11px] font-bold text-cream/70">{res.value}</span>
                     <span className="text-[6px] text-violet/35">{res.key}</span>
                   </div>
                 ))}
@@ -169,7 +169,7 @@ export default function FortressModal({ onClose }: { onClose: () => void }) {
             </div>
 
             {/* Buildings */}
-            <p className="mb-3 text-[9px] uppercase tracking-[0.2em] text-violet/40">Construções</p>
+            <p className="mb-3 text-[11px] uppercase tracking-[0.2em] text-violet/60">Construções</p>
             <div className="flex flex-col gap-2 mb-4">
               {BUILDINGS.map((bld) => {
                 const level = getBuiltLevel(bld.buildingId);
@@ -187,7 +187,7 @@ export default function FortressModal({ onClose }: { onClose: () => void }) {
                       <span className="text-lg">{CATEGORY_ICONS[bld.category] ?? "◈"}</span>
                       <div>
                         <p className="text-[11px] font-bold text-cream/80">{bld.name}</p>
-                        <p className="text-[8px] text-violet/40">{bld.description.slice(0, 40)}…</p>
+                        <p className="text-[10px] text-violet/60">{bld.description.slice(0, 40)}…</p>
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-1">
@@ -199,7 +199,7 @@ export default function FortressModal({ onClose }: { onClose: () => void }) {
                           onClick={() => { setSelected(bld); setScreen("build"); }}
                           whileTap={{ scale: 0.94 }}
                           transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
-                          className="rounded-lg border border-amber/30 bg-amber/8 px-2 py-0.5 text-[8px] font-bold text-amber-400"
+                          className="rounded-lg border border-amber/30 bg-amber/8 px-2 py-0.5 text-[10px] font-bold text-amber-400"
                         >
                           {level === 0 ? "Construir" : "Melhorar"}
                         </motion.button>
@@ -211,7 +211,7 @@ export default function FortressModal({ onClose }: { onClose: () => void }) {
             </div>
 
             {/* Ouro display */}
-            <p className="text-center text-[9px] text-violet/35">
+            <p className="text-center text-[11px] text-violet/35">
               Ouro disponível: <span className="font-bold text-amber-400">{save.wallet.ouro.toLocaleString("pt-BR")}</span>
             </p>
           </motion.div>
@@ -263,7 +263,7 @@ export default function FortressModal({ onClose }: { onClose: () => void }) {
                       />
                     ))}
                   </div>
-                  <p className="mb-4 text-center text-[9px] text-violet/40">Nível {currentLevel} / {selected.maxLevel}</p>
+                  <p className="mb-4 text-center text-[11px] text-violet/60">Nível {currentLevel} / {selected.maxLevel}</p>
 
                   {maxed ? (
                     <div className="rounded-xl border border-green-400/20 px-4 py-4 text-center" style={{ background: "rgba(100,220,140,0.05)" }}>
@@ -271,7 +271,7 @@ export default function FortressModal({ onClose }: { onClose: () => void }) {
                     </div>
                   ) : costEntry ? (
                     <>
-                      <p className="mb-3 text-[9px] uppercase tracking-[0.2em] text-violet/40">Custo para Nível {nextLevel}</p>
+                      <p className="mb-3 text-[11px] uppercase tracking-[0.2em] text-violet/60">Custo para Nível {nextLevel}</p>
                       <div className="mb-4 rounded-xl border border-violet/12 px-4 py-3" style={{ background: "rgba(122,111,160,0.04)" }}>
                         <div className="flex flex-col gap-2">
                           {Object.entries(costEntry.costs).map(([res, amount]) => {
@@ -299,7 +299,7 @@ export default function FortressModal({ onClose }: { onClose: () => void }) {
 
                       {selected.production && selected.production[nextLevel - 1] && (
                         <div className="mb-4 rounded-xl border border-violet/10 px-4 py-3" style={{ background: "rgba(122,111,160,0.03)" }}>
-                          <p className="text-[9px] text-violet/40">
+                          <p className="text-[11px] text-violet/60">
                             Produção: <span className="font-bold text-cream/60">+{selected.production[nextLevel - 1].perHour} {selected.production[nextLevel - 1].resource}/h</span>
                           </p>
                         </div>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { motion } from "framer-motion";
 import { useGameStore } from "@/lib/game/store";
@@ -74,11 +74,11 @@ export default function PerfilTab({
           {(profile?.characterName ?? "Invocador").toUpperCase()}
         </h2>
         {joined && (
-          <p className="mt-1 text-[10px] tracking-wider text-violet/45">Membro desde {joined}</p>
+          <p className="mt-1 text-[10px] tracking-wider text-violet/65">Membro desde {joined}</p>
         )}
         <div className="mt-1.5 flex items-center gap-1.5">
           <div className="h-1.5 w-1.5 rounded-full" style={{ background: cloudSynced ? "rgb(100,220,140)" : "rgb(255,100,100)" }} />
-          <span className="text-[9px] text-violet/40">
+          <span className="text-[11px] text-violet/60">
             {cloudSynced
               ? `Sync ${lastSyncAt ? new Date(lastSyncAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) : "ok"}`
               : "Não sincronizado"}
@@ -87,7 +87,7 @@ export default function PerfilTab({
             onClick={() => manualSave()}
             whileTap={{ scale: 0.94 }}
             transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
-            className="rounded px-1.5 py-0.5 text-[8px] text-violet/40 border border-violet/15"
+            className="rounded px-1.5 py-0.5 text-[10px] text-violet/60 border border-violet/15"
           >
             Salvar
           </motion.button>
@@ -121,7 +121,7 @@ export default function PerfilTab({
 
       {/* Invocador stats */}
       <div className="mb-4 rounded-xl border border-violet/12 px-4 py-3" style={{ background: "rgba(122,111,160,0.04)" }}>
-        <p className="mb-2.5 text-[9px] font-bold uppercase tracking-[0.2em] text-violet/40">Invocador</p>
+        <p className="mb-2.5 text-[11px] font-bold uppercase tracking-[0.2em] text-violet/60">Invocador</p>
         <div className="grid grid-cols-2 gap-x-4">
           <InfoRow label="Nível" value={String(invocador.level)} />
           <InfoRow label="Total Invocações" value={String(invocador.totalPulls)} />
@@ -133,7 +133,7 @@ export default function PerfilTab({
       {/* Inventory */}
       {save.inventory.length > 0 && (
         <div className="mb-4 rounded-xl border border-violet/12 px-4 py-3" style={{ background: "rgba(122,111,160,0.04)" }}>
-          <p className="mb-2.5 text-[9px] font-bold uppercase tracking-[0.2em] text-violet/40">Inventário</p>
+          <p className="mb-2.5 text-[11px] font-bold uppercase tracking-[0.2em] text-violet/60">Inventário</p>
           <div className="flex flex-col gap-0.5">
             {save.inventory.map((item) => {
               const def = ITEM_MAP[item.itemId];
@@ -152,7 +152,7 @@ export default function PerfilTab({
       {/* Equipment inventory */}
       {save.equipmentInventory.length > 0 && (
         <div className="mb-4 rounded-xl border border-violet/12 px-4 py-3" style={{ background: "rgba(122,111,160,0.04)" }}>
-          <p className="mb-2.5 text-[9px] font-bold uppercase tracking-[0.2em] text-violet/40">Equipamentos ({save.equipmentInventory.length})</p>
+          <p className="mb-2.5 text-[11px] font-bold uppercase tracking-[0.2em] text-violet/60">Equipamentos ({save.equipmentInventory.length})</p>
           <div className="flex flex-wrap gap-1.5">
             {Array.from(new Set(save.equipmentInventory)).map((id) => {
               const eq = EQUIP_MAP[id];
@@ -160,8 +160,8 @@ export default function PerfilTab({
               const count = save.equipmentInventory.filter((e) => e === id).length;
               return (
                 <div key={id} className="rounded-lg border border-violet/10 px-2 py-1" style={{ background: "rgba(122,111,160,0.06)" }}>
-                  <span className="text-[9px] text-cream/70">{eq.name}</span>
-                  {count > 1 && <span className="ml-1 text-[8px] text-violet/40">×{count}</span>}
+                  <span className="text-[11px] text-cream/70">{eq.name}</span>
+                  {count > 1 && <span className="ml-1 text-[10px] text-violet/60">×{count}</span>}
                 </div>
               );
             })}
@@ -172,7 +172,7 @@ export default function PerfilTab({
       {/* Rune inventory */}
       {save.runeInventory.length > 0 && (
         <div className="mb-5 rounded-xl border border-violet/12 px-4 py-3" style={{ background: "rgba(122,111,160,0.04)" }}>
-          <p className="mb-2.5 text-[9px] font-bold uppercase tracking-[0.2em] text-violet/40">Runas ({save.runeInventory.length})</p>
+          <p className="mb-2.5 text-[11px] font-bold uppercase tracking-[0.2em] text-violet/60">Runas ({save.runeInventory.length})</p>
           <div className="flex flex-wrap gap-1.5">
             {Array.from(new Set(save.runeInventory)).map((id) => {
               const rune = RUNE_MAP[id];
@@ -180,8 +180,8 @@ export default function PerfilTab({
               const count = save.runeInventory.filter((r) => r === id).length;
               return (
                 <div key={id} className="rounded-lg border border-violet/10 px-2 py-1" style={{ background: "rgba(122,111,160,0.06)" }}>
-                  <span className="text-[9px] text-cream/70">{rune.name}</span>
-                  {count > 1 && <span className="ml-1 text-[8px] text-violet/40">×{count}</span>}
+                  <span className="text-[11px] text-cream/70">{rune.name}</span>
+                  {count > 1 && <span className="ml-1 text-[10px] text-violet/60">×{count}</span>}
                 </div>
               );
             })}
@@ -191,7 +191,7 @@ export default function PerfilTab({
 
       {/* Account */}
       <div className="mb-5 rounded-xl border border-violet/12 px-4 py-4" style={{ background: "rgba(122,111,160,0.04)" }}>
-        <p className="mb-3 text-[9px] font-bold uppercase tracking-[0.2em] text-violet/40">Conta</p>
+        <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em] text-violet/60">Conta</p>
         <InfoRow label="Usuário" value={profile?.username ?? "—"} />
         <InfoRow label="E-mail" value={profile?.email ?? "—"} />
         <InfoRow label="ID" value={profile ? `#${profile.id}` : "—"} last />
@@ -206,7 +206,7 @@ export default function PerfilTab({
         style={{ background: "rgba(122,111,160,0.04)" }}
       >
         <span className="text-[12px] font-bold tracking-[0.15em] text-cream/70">ALQUIMIA</span>
-        <span className="text-[10px] text-violet/40">Nv.{save.alchemy.stationLevel} →</span>
+        <span className="text-[10px] text-violet/60">Nv.{save.alchemy.stationLevel} →</span>
       </motion.button>
 
       {/* Companions button */}
@@ -218,7 +218,7 @@ export default function PerfilTab({
         style={{ background: "rgba(122,111,160,0.04)" }}
       >
         <span className="text-[12px] font-bold tracking-[0.15em] text-cream/70">COMPANHEIROS</span>
-        <span className="text-[10px] text-violet/40">{save.companions.length} coletados →</span>
+        <span className="text-[10px] text-violet/60">{save.companions.length} coletados →</span>
       </motion.button>
 
       {/* Housing button */}
@@ -230,7 +230,7 @@ export default function PerfilTab({
         style={{ background: "rgba(122,111,160,0.04)" }}
       >
         <span className="text-[12px] font-bold tracking-[0.15em] text-cream/70">MORADIA</span>
-        <span className="text-[10px] text-violet/40">{save.housing.unlockedRooms.length} cômodos →</span>
+        <span className="text-[10px] text-violet/60">{save.housing.unlockedRooms.length} cômodos →</span>
       </motion.button>
 
       {/* Season button */}
@@ -254,7 +254,7 @@ export default function PerfilTab({
         style={{ background: "rgba(122,111,160,0.04)" }}
       >
         <span className="text-[12px] font-bold tracking-[0.15em] text-cream/70">CODEX</span>
-        <span className="text-[10px] text-violet/40">Heróis & Itens →</span>
+        <span className="text-[10px] text-violet/60">Heróis & Itens →</span>
       </motion.button>
 
       {/* Achievements button */}
@@ -278,7 +278,7 @@ export default function PerfilTab({
         style={{ background: "rgba(122,111,160,0.04)" }}
       >
         <span className="text-[12px] font-bold tracking-[0.15em] text-cream/70">PROFISSÃO</span>
-        <span className="text-[10px] text-violet/40">
+        <span className="text-[10px] text-violet/60">
           {save.profession.chosenProfession ? `Nv.${Math.min(10, Math.floor(Math.sqrt(save.profession.xp / 50)) + 1)} →` : "Escolher →"}
         </span>
       </motion.button>
@@ -292,7 +292,7 @@ export default function PerfilTab({
         style={{ background: "rgba(122,111,160,0.04)" }}
       >
         <span className="text-[12px] font-bold tracking-[0.15em] text-cream/70">FORJA</span>
-        <span className="text-[10px] text-violet/40">{save.forge?.length ?? 0} itens aprimorados →</span>
+        <span className="text-[10px] text-violet/60">{save.forge?.length ?? 0} itens aprimorados →</span>
       </motion.button>
 
       {/* Settings button */}
@@ -304,7 +304,7 @@ export default function PerfilTab({
         style={{ background: "rgba(122,111,160,0.04)" }}
       >
         <span className="text-[12px] font-bold tracking-[0.15em] text-cream/70">CONFIGURAÇÕES</span>
-        <span className="text-[10px] text-violet/40">Áudio & Sistema →</span>
+        <span className="text-[10px] text-violet/60">Áudio & Sistema →</span>
       </motion.button>
 
       {/* Wiki / Guia */}
@@ -320,7 +320,7 @@ export default function PerfilTab({
       >
         <div className="flex flex-col items-start gap-0.5">
           <span className="text-[12px] font-bold tracking-[0.15em]" style={{ color: "rgb(90,160,255)" }}>GUIA DO NOVATO</span>
-          <span className="text-[9px] text-violet/40">Sistemas, economia, rotas de evolução</span>
+          <span className="text-[11px] text-violet/60">Sistemas, economia, rotas de evolução</span>
         </div>
         <span className="text-[10px]" style={{ color: "rgba(90,160,255,0.6)" }}>Ler →</span>
       </motion.button>
@@ -343,7 +343,7 @@ function CurrencyCard({ icon, label, value, color }: { icon: string; label: stri
     <div className="flex flex-col items-center rounded-xl border py-3" style={{ borderColor: `${color}28`, background: `${color}08` }}>
       <span className="mb-0.5 text-lg" style={{ color }}>{icon}</span>
       <span className="text-base font-black text-cream">{value.toLocaleString("pt-BR")}</span>
-      <span className="text-[8px] font-bold uppercase tracking-wider" style={{ color, opacity: 0.6 }}>{label}</span>
+      <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color, opacity: 0.6 }}>{label}</span>
     </div>
   );
 }
@@ -354,7 +354,7 @@ function InfoRow({ label, value, last }: { label: string; value: string; last?: 
       className="flex items-center justify-between py-2.5"
       style={{ borderBottom: last ? "none" : "1px solid rgba(122,111,160,0.1)" }}
     >
-      <span className="text-[10px] font-bold tracking-wider text-violet/45">{label.toUpperCase()}</span>
+      <span className="text-[10px] font-bold tracking-wider text-violet/65">{label.toUpperCase()}</span>
       <span className="text-[11px] text-cream/60">{value}</span>
     </div>
   );

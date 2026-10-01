@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { motion } from "framer-motion";
 import { useGameStore } from "@/lib/game/store";
@@ -57,7 +57,7 @@ export default function DailyChallengesModal({ onClose }: { onClose: () => void 
             style={{ boxShadow: "0 0 8px rgba(200,155,60,0.5)" }}
           />
         </div>
-        <p className="mt-1.5 text-[9px] text-violet/40">Reset diário à meia-noite</p>
+        <p className="mt-1.5 text-[11px] text-violet/60">Reset diário à meia-noite</p>
       </div>
 
       {/* Challenges list */}
@@ -93,7 +93,7 @@ export default function DailyChallengesModal({ onClose }: { onClose: () => void 
                       <p className="text-[11px] font-bold" style={{ color: completed ? "rgba(100,220,140,0.8)" : "rgba(255,255,255,0.8)" }}>
                         {ch.title}
                       </p>
-                      <p className="text-[9px] text-violet/45">{ch.description}</p>
+                      <p className="text-[11px] text-violet/65">{ch.description}</p>
                     </div>
                   </div>
 
@@ -101,7 +101,7 @@ export default function DailyChallengesModal({ onClose }: { onClose: () => void 
                     onClick={canClaim ? () => handleClaim(ch.id) : undefined}
                     whileTap={canClaim ? { scale: 0.94 } : undefined}
                     transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
-                    className="flex-shrink-0 rounded-lg border px-2.5 py-1.5 text-[9px] font-bold"
+                    className="flex-shrink-0 rounded-lg border px-2.5 py-1.5 text-[11px] font-bold"
                     style={{
                       borderColor: completed ? "rgba(100,220,140,0.2)" : canClaim ? "rgba(200,155,60,0.4)" : "rgba(122,111,160,0.1)",
                       background: completed ? "rgba(100,220,140,0.06)" : canClaim ? "rgba(200,155,60,0.1)" : "transparent",
@@ -117,8 +117,8 @@ export default function DailyChallengesModal({ onClose }: { onClose: () => void 
                 {!completed && (
                   <div className="mt-2.5">
                     <div className="mb-1 flex justify-between">
-                      <span className="text-[8px] text-violet/35">Progresso</span>
-                      <span className="text-[8px] font-bold text-violet/50">{Math.min(progress, ch.target)}/{ch.target}</span>
+                      <span className="text-[10px] text-violet/35">Progresso</span>
+                      <span className="text-[10px] font-bold text-violet/50">{Math.min(progress, ch.target)}/{ch.target}</span>
                     </div>
                     <div className="h-1 w-full overflow-hidden rounded-full bg-violet/10">
                       <div

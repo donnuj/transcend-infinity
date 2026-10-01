@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -73,7 +73,7 @@ export default function WikiModal({ onClose }: { onClose: () => void }) {
               >
                 GUIA DO NOVATO
               </h2>
-              <p className="text-[8px] text-violet/70 tracking-[0.15em]">TRANSCEND INFINITY</p>
+              <p className="text-[10px] text-violet/70 tracking-[0.15em]">TRANSCEND INFINITY</p>
             </div>
           </div>
           <motion.button
@@ -106,7 +106,7 @@ export default function WikiModal({ onClose }: { onClose: () => void }) {
                 }}
               >
                 <Icon weight="light" size={11} color={active ? "rgb(200,155,60)" : "rgba(180,170,210,0.75)"} />
-                <span className="text-[9px] font-bold tracking-[0.1em]">{label.toUpperCase()}</span>
+                <span className="text-[11px] font-bold tracking-[0.1em]">{label.toUpperCase()}</span>
               </motion.button>
             );
           })}
@@ -295,8 +295,8 @@ function SectionHerois() {
             style={{ background: `${r.color}0a`, border: `1px solid ${r.color}25` }}
           >
             <span className="text-[10px] font-black w-20 flex-shrink-0" style={{ color: r.color }}>{r.rarity}</span>
-            <span className="text-[9px] text-amber" style={{ color: "rgb(250,190,50)" }}>{"★".repeat(r.stars)}</span>
-            <span className="text-[8px] text-violet/70 ml-auto text-right">{r.comment}</span>
+            <span className="text-[11px] text-amber" style={{ color: "rgb(250,190,50)" }}>{"★".repeat(r.stars)}</span>
+            <span className="text-[10px] text-violet/70 ml-auto text-right">{r.comment}</span>
           </div>
         ))}
       </div>
@@ -533,16 +533,16 @@ function SectionDiario() {
             style={{ background: `${item.color}08`, border: `1px solid ${item.color}18` }}
           >
             <div
-              className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-[9px] font-black"
+              className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-[11px] font-black"
               style={{ background: `${item.color}20`, color: item.color, border: `1px solid ${item.color}35` }}
             >
               {item.priority}
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-[11px] font-bold text-cream/88">{item.label}</p>
-              <p className="text-[9px] mt-0.5" style={{ color: `${item.color}90` }}>{item.reward}</p>
+              <p className="text-[11px] mt-0.5" style={{ color: `${item.color}90` }}>{item.reward}</p>
             </div>
-            <span className="text-[8px] text-violet/62 flex-shrink-0">{item.time}</span>
+            <span className="text-[10px] text-violet/62 flex-shrink-0">{item.time}</span>
           </div>
         ))}
       </div>
@@ -605,7 +605,7 @@ function SectionAvancado() {
           ["+10", "18.000 ouro", "TODOS +10%"],
         ]}
       />
-      <p className="text-[9px] text-violet/70">Custo total para +10: 55.400 ouro. Forje apenas o equipamento do herói principal.</p>
+      <p className="text-[11px] text-violet/70">Custo total para +10: 55.400 ouro. Forje apenas o equipamento do herói principal.</p>
 
       <WikiH2>Battle Pass Gratuito</WikiH2>
       <p className="text-[10px] leading-relaxed text-violet/82">
@@ -656,7 +656,7 @@ function WikiHeader({ icon: Icon, title, subtitle }: { icon: PhosphorIcon; title
         >
           {title.toUpperCase()}
         </h3>
-        <p className="text-[9px] text-violet/70 mt-0.5">{subtitle}</p>
+        <p className="text-[11px] text-violet/70 mt-0.5">{subtitle}</p>
       </div>
     </div>
   );
@@ -702,7 +702,7 @@ function StepList({ steps }: { steps: { n: string; title: string; desc: string; 
           </div>
           <div className="flex-1">
             <p className="text-[11px] font-bold text-cream/88">{s.title}</p>
-            <p className="mt-0.5 text-[9px] leading-relaxed text-violet/75">{s.desc}</p>
+            <p className="mt-0.5 text-[11px] leading-relaxed text-violet/75">{s.desc}</p>
           </div>
         </div>
       ))}
@@ -732,7 +732,7 @@ function WikiTable({ headers, rows }: { headers: string[]; rows: string[][] }) {
       >
         {headers.map((h) => (
           <div key={h} className="px-3 py-2" style={{ background: "rgba(122,111,160,0.08)" }}>
-            <span className="text-[8px] font-black uppercase tracking-[0.15em] text-violet/75">{h}</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.15em] text-violet/75">{h}</span>
           </div>
         ))}
         {rows.map((row, i) =>
@@ -745,7 +745,7 @@ function WikiTable({ headers, rows }: { headers: string[]; rows: string[][] }) {
                 borderTop: "1px solid rgba(122,111,160,0.07)",
               }}
             >
-              <span className="text-[9px]" style={{ color: j === 0 ? "rgba(232,217,160,0.92)" : "rgba(200,155,60,0.85)" }}>{cell}</span>
+              <span className="text-[11px]" style={{ color: j === 0 ? "rgba(232,217,160,0.92)" : "rgba(200,155,60,0.85)" }}>{cell}</span>
             </div>
           ))
         )}
@@ -774,7 +774,7 @@ function CurrencyCard({ symbol, name, color, desc, sources, priority }: {
           {priority.toUpperCase()}
         </span>
       </div>
-      <p className="mb-2 text-[9px] leading-relaxed text-violet/82">{desc}</p>
+      <p className="mb-2 text-[11px] leading-relaxed text-violet/82">{desc}</p>
       <div className="flex flex-col gap-1">
         {sources.map((s, i) => (
           <div key={i} className="flex items-center gap-1.5">
@@ -814,10 +814,10 @@ function ProfCard({ icon, name, color, bonus, playstyle, milestone10, forWho, re
           </span>
         )}
       </div>
-      <p className="text-[9px] font-bold mb-1" style={{ color: `${color}cc` }}>{bonus}</p>
+      <p className="text-[11px] font-bold mb-1" style={{ color: `${color}cc` }}>{bonus}</p>
       <p className="text-[8.5px] leading-relaxed text-violet/75 mb-1">{playstyle}</p>
-      <p className="text-[8px] text-violet/62">Nível 10: {milestone10}</p>
-      <p className="mt-1.5 text-[8px] font-bold" style={{ color: `${color}90` }}>→ {forWho}</p>
+      <p className="text-[10px] text-violet/62">Nível 10: {milestone10}</p>
+      <p className="mt-1.5 text-[10px] font-bold" style={{ color: `${color}90` }}>→ {forWho}</p>
     </div>
   );
 }

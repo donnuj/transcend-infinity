@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
@@ -193,7 +193,7 @@ export default function GamePage() {
       <div className="flex h-full items-center justify-center bg-atmosphere">
         <div className="flex flex-col items-center gap-3">
           <div className="h-6 w-6 animate-spin rounded-full border-2 border-amber/20 border-t-amber" />
-          <span className="text-[9px] tracking-[0.3em] text-violet/40">CARREGANDO</span>
+          <span className="text-[11px] tracking-[0.3em] text-violet/60">CARREGANDO</span>
         </div>
       </div>
     );
@@ -293,17 +293,17 @@ export default function GamePage() {
               exit={{ scale: 0.95, opacity: 0 }}
               transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
             >
-              <p className="mb-1 text-[9px] uppercase tracking-[0.25em] text-violet/40">Recompensas Offline</p>
+              <p className="mb-1 text-[11px] uppercase tracking-[0.25em] text-violet/60">Recompensas Offline</p>
               <p className="mb-4 text-[13px] font-bold text-cream/80">Bem-vindo de volta!</p>
               <div className="mb-5 flex gap-4">
                 <div className="flex flex-col items-center">
                   <span className="text-2xl font-black text-amber-400">+{offlineReward.ouro.toLocaleString("pt-BR")}</span>
-                  <span className="text-[8px] text-violet/40">Ouro</span>
+                  <span className="text-[10px] text-violet/60">Ouro</span>
                 </div>
                 <div className="w-[1px] bg-violet/10" />
                 <div className="flex flex-col items-center">
                   <span className="text-2xl font-black text-cream/70">+{offlineReward.xp.toLocaleString("pt-BR")}</span>
-                  <span className="text-[8px] text-violet/40">XP</span>
+                  <span className="text-[10px] text-violet/60">XP</span>
                 </div>
               </div>
               <motion.button
@@ -371,7 +371,7 @@ export default function GamePage() {
                 />
               </motion.div>
               <span
-                className="relative z-10 text-[7.5px] font-bold tracking-[0.14em]"
+                className="relative z-10 text-[11px] font-bold tracking-[0.14em]"
                 style={{
                   color: active ? color : "rgba(180,170,210,0.55)",
                   transition: "color 220ms cubic-bezier(0.23,1,0.32,1)",

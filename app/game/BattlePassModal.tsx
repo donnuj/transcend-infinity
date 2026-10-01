@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useGameStore } from "@/lib/game/store";
@@ -98,7 +98,7 @@ export default function BattlePassModal({ onClose }: { onClose: () => void }) {
           <span className="h-4 w-[1px] bg-violet/20" />
           <span className="text-[11px] font-bold tracking-widest text-cream/70">BATTLE PASS</span>
         </div>
-        <span className={`rounded-full border px-2 py-0.5 text-[8px] font-bold ${bp.isPremium ? "border-amber/40 text-amber-400" : "border-violet/20 text-violet/40"}`}>
+        <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${bp.isPremium ? "border-amber/40 text-amber-400" : "border-violet/20 text-violet/60"}`}>
           {bp.isPremium ? "PREMIUM" : "GRATUITO"}
         </span>
       </div>
@@ -123,14 +123,14 @@ export default function BattlePassModal({ onClose }: { onClose: () => void }) {
             onClick={() => addBpXp(500)}
             whileTap={{ scale: 0.94 }}
             transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
-            className="mt-2 rounded-lg border border-violet/10 px-3 py-1.5 text-[8px] text-violet/40"
+            className="mt-2 rounded-lg border border-violet/10 px-3 py-1.5 text-[10px] text-violet/60"
           >
             +500 XP (teste)
           </motion.button>
         </div>
 
         {/* Rewards grid */}
-        <p className="mb-3 text-[9px] uppercase tracking-[0.2em] text-violet/40">Recompensas</p>
+        <p className="mb-3 text-[11px] uppercase tracking-[0.2em] text-violet/60">Recompensas</p>
         <div className="flex flex-col gap-2">
           {displayLevels.map((lvl) => {
             const free = FREE_REWARDS[lvl];
@@ -143,7 +143,7 @@ export default function BattlePassModal({ onClose }: { onClose: () => void }) {
               <div key={lvl} className="flex items-center gap-2">
                 {/* Level badge */}
                 <div
-                  className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg text-[9px] font-black"
+                  className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg text-[11px] font-black"
                   style={{
                     background: locked ? "rgba(122,111,160,0.06)" : "rgba(200,155,60,0.1)",
                     color: locked ? "rgba(122,111,160,0.3)" : "rgb(200,155,60)",
@@ -181,8 +181,8 @@ export default function BattlePassModal({ onClose }: { onClose: () => void }) {
         {!bp.isPremium && (
           <div className="mt-5 rounded-xl border border-violet/20 px-4 py-4" style={{ background: "rgba(170,130,255,0.05)" }}>
             <p className="text-[11px] font-bold text-cream/70">Upgrade para Premium</p>
-            <p className="mt-0.5 text-[9px] text-violet/50">Desbloqueie recompensas extras e selos adicionais</p>
-            <p className="mt-2 text-[9px] text-violet/30">Em breve — R$ 14,99</p>
+            <p className="mt-0.5 text-[11px] text-violet/50">Desbloqueie recompensas extras e selos adicionais</p>
+            <p className="mt-2 text-[11px] text-violet/30">Em breve — R$ 14,99</p>
           </div>
         )}
       </div>
@@ -209,10 +209,10 @@ function RewardCard({ reward, locked, claimed, onClaim, accentColor, isPremium }
       }}
     >
       <span className="text-base">{reward.icon}</span>
-      <span className="text-[9px] font-bold" style={{ color: claimed ? "rgb(100,220,140)" : locked ? "rgba(122,111,160,0.4)" : "rgba(255,255,255,0.8)" }}>
+      <span className="text-[11px] font-bold" style={{ color: claimed ? "rgb(100,220,140)" : locked ? "rgba(122,111,160,0.4)" : "rgba(255,255,255,0.8)" }}>
         {claimed ? "✓ " : locked ? "🔒 " : ""}{reward.label}
       </span>
-      {isPremium && <span className="ml-auto text-[7px] text-violet/40">★</span>}
+      {isPremium && <span className="ml-auto text-[7px] text-violet/60">★</span>}
     </motion.button>
   );
 }

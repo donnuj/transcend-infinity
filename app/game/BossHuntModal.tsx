@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -169,7 +169,7 @@ export default function BossHuntModal({ onClose }: { onClose: () => void }) {
           <span className="h-4 w-[1px] bg-violet/20" />
           <span className="text-[11px] font-bold tracking-widest text-cream/70">BOSS HUNT</span>
         </div>
-        <span className="text-[10px] text-violet/40">Reset semanal</span>
+        <span className="text-[10px] text-violet/60">Reset semanal</span>
       </div>
 
       <AnimatePresence mode="wait">
@@ -183,7 +183,7 @@ export default function BossHuntModal({ onClose }: { onClose: () => void }) {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
           >
-            <p className="mb-3 text-[9px] uppercase tracking-[0.2em] text-violet/40">Chefões desta semana</p>
+            <p className="mb-3 text-[11px] uppercase tracking-[0.2em] text-violet/60">Chefões desta semana</p>
             <div className="flex flex-col gap-3">
               {WEEKLY_BOSSES.map((boss) => {
                 const kills = getKillCount(boss.id);
@@ -207,12 +207,12 @@ export default function BossHuntModal({ onClose }: { onClose: () => void }) {
                       </div>
                       <div className="flex-1">
                         <p className="text-[12px] font-bold text-cream/85">{boss.name}</p>
-                        <p className="text-[9px] text-violet/45">{boss.description}</p>
-                        <p className="mt-0.5 text-[8px] text-violet/35">Nível {boss.level} · {boss.element}</p>
+                        <p className="text-[11px] text-violet/65">{boss.description}</p>
+                        <p className="mt-0.5 text-[10px] text-violet/35">Nível {boss.level} · {boss.element}</p>
                       </div>
                     </div>
 
-                    <div className="mb-3 flex gap-3 text-[9px] text-violet/50">
+                    <div className="mb-3 flex gap-3 text-[11px] text-violet/50">
                       <span className="font-bold text-amber-400">◆ {boss.ouroReward.toLocaleString("pt-BR")}</span>
                       <span style={{ color: "rgb(170,130,255)" }}>✦ {boss.cristaisReward}</span>
                       <span style={{ color: "rgb(90,150,255)" }}>✦ {boss.selosReward} selos</span>
@@ -228,13 +228,13 @@ export default function BossHuntModal({ onClose }: { onClose: () => void }) {
                           }}
                         />
                       </div>
-                      <span className="text-[8px] font-bold" style={{ color: !canFight ? "rgb(100,220,140)" : "rgba(255,255,255,0.5)" }}>
+                      <span className="text-[10px] font-bold" style={{ color: !canFight ? "rgb(100,220,140)" : "rgba(255,255,255,0.5)" }}>
                         {kills}/{boss.weeklyLimit}
                       </span>
                     </div>
 
                     {allTimeKilled && (
-                      <p className="mb-2 text-[8px] font-bold text-green-400">Derrotado ao menos uma vez!</p>
+                      <p className="mb-2 text-[10px] font-bold text-green-400">Derrotado ao menos uma vez!</p>
                     )}
 
                     <motion.button
@@ -271,11 +271,11 @@ export default function BossHuntModal({ onClose }: { onClose: () => void }) {
               <span className="text-2xl">{activeBoss.portrait}</span>
               <div>
                 <p className="text-[12px] font-bold text-cream/80">{activeBoss.name}</p>
-                <p className="text-[9px] text-violet/40">Nível {activeBoss.level}</p>
+                <p className="text-[11px] text-violet/60">Nível {activeBoss.level}</p>
               </div>
             </div>
             <div className="px-4 pt-4">
-              <p className="mb-3 text-[9px] uppercase tracking-[0.2em] text-violet/40">
+              <p className="mb-3 text-[11px] uppercase tracking-[0.2em] text-violet/60">
                 Selecione seu time (máx. 3) — {team.length}/3
               </p>
             </div>
@@ -297,7 +297,7 @@ export default function BossHuntModal({ onClose }: { onClose: () => void }) {
                       }}
                     >
                       <span className="mb-1 text-2xl">{hero.portrait}</span>
-                      <p className="text-[8px] font-bold text-cream/70">{hero.name.split(",")[0]}</p>
+                      <p className="text-[10px] font-bold text-cream/70">{hero.name.split(",")[0]}</p>
                     </motion.button>
                   );
                 })}
@@ -375,15 +375,15 @@ export default function BossHuntModal({ onClose }: { onClose: () => void }) {
                 transition={{ duration: 0.25, ease, delay: 0.15 }}
               >
                 <div className="flex flex-1 flex-col items-center rounded-xl border border-violet/12 py-3" style={{ background: "rgba(122,111,160,0.05)" }}>
-                  <span className="text-[8px] uppercase tracking-widest text-violet/40">Ouro</span>
+                  <span className="text-[10px] uppercase tracking-widest text-violet/60">Ouro</span>
                   <span className="mt-1 text-base font-black text-amber-400">+{activeBoss.ouroReward.toLocaleString("pt-BR")}</span>
                 </div>
                 <div className="flex flex-1 flex-col items-center rounded-xl border border-violet/12 py-3" style={{ background: "rgba(122,111,160,0.05)" }}>
-                  <span className="text-[8px] uppercase tracking-widest text-violet/40">Cristais</span>
+                  <span className="text-[10px] uppercase tracking-widest text-violet/60">Cristais</span>
                   <span className="mt-1 text-base font-black" style={{ color: "rgb(170,130,255)" }}>+{activeBoss.cristaisReward}</span>
                 </div>
                 <div className="flex flex-1 flex-col items-center rounded-xl border border-violet/12 py-3" style={{ background: "rgba(122,111,160,0.05)" }}>
-                  <span className="text-[8px] uppercase tracking-widest text-violet/40">Selos</span>
+                  <span className="text-[10px] uppercase tracking-widest text-violet/60">Selos</span>
                   <span className="mt-1 text-base font-black" style={{ color: "rgb(90,150,255)" }}>+{activeBoss.selosReward}</span>
                 </div>
               </motion.div>

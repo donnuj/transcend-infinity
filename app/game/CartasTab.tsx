@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -111,7 +111,7 @@ export default function CartasTab() {
               onClick={() => setFilter(f)}
               whileTap={{ scale: 0.94 }}
               transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
-              className="flex-shrink-0 rounded-full border px-3 py-1.5 text-[9px] font-bold tracking-[0.15em] transition-colors duration-150"
+              className="flex-shrink-0 rounded-full border px-3 py-1.5 text-[11px] font-bold tracking-[0.15em] transition-colors duration-150"
               style={{
                 borderColor: active ? (s ? s.border : "rgba(200,155,60,0.5)") : "rgba(122,111,160,0.2)",
                 color:       active ? (s ? s.color  : "rgb(200,155,60)")      : "rgba(122,111,160,0.5)",
@@ -125,7 +125,7 @@ export default function CartasTab() {
       </div>
 
       {/* Count */}
-      <p className="mx-auto w-full max-w-5xl px-4 md:px-8 pb-2 text-[9px] text-violet/40">
+      <p className="mx-auto w-full max-w-5xl px-4 md:px-8 pb-2 text-[11px] text-violet/60">
         {visible.length} herói{visible.length !== 1 ? "s" : ""} coletado{visible.length !== 1 ? "s" : ""}
       </p>
 
@@ -283,7 +283,7 @@ function ArtDecoHeroCard({ hero, copies, progression, index, onClick }: {
         <div className="flex w-full items-center justify-center gap-1">
           <span className="flex-shrink-0 text-[10px]" style={{ color: `${frameColor}70` }}>«</span>
           <span
-            className="truncate text-[8px] font-black tracking-[0.07em] text-cream/88"
+            className="truncate text-[10px] font-black tracking-[0.07em] text-cream/88"
             style={{ fontFamily: "var(--font-cinzel)" }}
           >
             {shortName}
@@ -415,15 +415,15 @@ function HeroDetail({ hero, copies, progression, levelData, skillData, equipData
           <div className="flex flex-col items-end gap-0.5">
             <span className="text-[10px] font-bold text-amber-400">Nível {level}</span>
             <span className="text-[10px] text-violet/50">Rank {rank}</span>
-            <span className="text-[9px] text-amber-400">{"★".repeat(stars)}</span>
+            <span className="text-[11px] text-amber-400">{"★".repeat(stars)}</span>
           </div>
         </div>
 
         {/* XP bar */}
         <div className="mb-4">
           <div className="mb-1 flex justify-between">
-            <span className="text-[8px] text-violet/40">XP</span>
-            <span className="text-[8px] text-violet/40">{levelData.xp} / {100 + level * 50}</span>
+            <span className="text-[10px] text-violet/60">XP</span>
+            <span className="text-[10px] text-violet/60">{levelData.xp} / {100 + level * 50}</span>
           </div>
           <div className="h-1 w-full overflow-hidden rounded-full bg-violet/10">
             <motion.div
@@ -444,7 +444,7 @@ function HeroDetail({ hero, copies, progression, levelData, skillData, equipData
               onClick={() => onTabChange(t)}
               whileTap={{ scale: 0.97 }}
               transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
-              className="rounded-lg py-1.5 text-[7.5px] font-bold tracking-wider transition-colors duration-150"
+              className="rounded-lg py-1.5 text-[11px] font-bold tracking-wider transition-colors duration-150"
               style={{
                 background: detailTab === t ? s.glow : "transparent",
                 color:      detailTab === t ? s.color : "rgba(122,111,160,0.5)",
@@ -481,12 +481,12 @@ function HeroDetail({ hero, copies, progression, levelData, skillData, equipData
                   {(Object.entries(currentStats) as [string, number][]).map(([k, v]) => (
                     <div key={k} className="flex flex-col items-center rounded-lg border border-violet/10 py-1.5" style={{ background: "rgba(122,111,160,0.04)" }}>
                       <span className="text-[11px] font-black text-cream/80">{Math.round(v)}</span>
-                      <span className="text-[8px] font-bold tracking-widest text-violet/40">{k}</span>
+                      <span className="text-[10px] font-bold tracking-widest text-violet/60">{k}</span>
                     </div>
                   ))}
                 </div>
                 {copies > 1 && (
-                  <p className="mt-3 text-center text-[9px] text-violet/40">
+                  <p className="mt-3 text-center text-[11px] text-violet/60">
                     {copies - 1} fragmento{copies - 1 !== 1 ? "s" : ""} de memória acumulado{copies - 1 !== 1 ? "s" : ""}
                   </p>
                 )}
@@ -516,17 +516,17 @@ function HeroDetail({ hero, copies, progression, levelData, skillData, equipData
                       <div className="mb-0.5 flex items-center justify-between">
                         <span className="text-[10px] font-bold text-cream/85">{skill.name}</span>
                         <div className="flex items-center gap-2">
-                          <span className="text-[8px] text-violet/40">{skill.type}</span>
+                          <span className="text-[10px] text-violet/60">{skill.type}</span>
                           <span className="rounded bg-violet/10 px-1 py-0.5 text-[7px] font-bold text-violet/60">
                             Nv.{userLevel}/5
                           </span>
                         </div>
                       </div>
-                      <p className="text-[9px] leading-relaxed text-violet/50">{skill.description}</p>
+                      <p className="text-[11px] leading-relaxed text-violet/50">{skill.description}</p>
                       {skill.manaCost > 0 && (
                         <div className="mt-1 flex gap-3">
-                          <span className="text-[8px] text-blue-400/60">Mana: {skill.manaCost}</span>
-                          {skill.cooldown > 0 && <span className="text-[8px] text-violet/40">CD: {skill.cooldown}t</span>}
+                          <span className="text-[10px] text-blue-400/60">Mana: {skill.manaCost}</span>
+                          {skill.cooldown > 0 && <span className="text-[10px] text-violet/60">CD: {skill.cooldown}t</span>}
                         </div>
                       )}
                       {userLevel < 5 && (
@@ -609,8 +609,8 @@ function ProgressionTab({ hero, progression, levelData, s }: {
       <ProgSection title="Nível" current={`Nv. ${levelData.level} (Tier ${levelData.tier})`} next={levelData.tier < 5 ? `Cap: ${TIER_MAX_LEVEL[levelData.tier]}` : "MAX"} s={s}>
         <div className="mb-2">
           <div className="mb-1 flex justify-between">
-            <span className="text-[8px] text-violet/40">XP</span>
-            <span className="text-[8px] text-violet/40">{levelData.xp} / {100 + levelData.level * 50}</span>
+            <span className="text-[10px] text-violet/60">XP</span>
+            <span className="text-[10px] text-violet/60">{levelData.xp} / {100 + levelData.level * 50}</span>
           </div>
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-violet/10">
             <div className="h-full rounded-full" style={{ width: `${Math.min(100, (levelData.xp / (100 + levelData.level * 50)) * 100)}%`, background: s.color }} />
@@ -688,7 +688,7 @@ function ProgressionTab({ hero, progression, levelData, s }: {
           {Array.from({ length: 5 }).map((_, i) => (
             <div
               key={i}
-              className="flex-1 rounded py-1.5 text-center text-[8px] font-bold"
+              className="flex-1 rounded py-1.5 text-center text-[10px] font-bold"
               style={{
                 background: i < awaken ? s.glow : "rgba(122,111,160,0.04)",
                 color:      i < awaken ? s.color : "rgba(122,111,160,0.3)",
@@ -699,7 +699,7 @@ function ProgressionTab({ hero, progression, levelData, s }: {
             </div>
           ))}
         </div>
-        {awaken < 5 && <p className="mb-2 text-center text-[9px] text-violet/40">Próximo: {AWAKEN_BONUS[awaken + 1]}</p>}
+        {awaken < 5 && <p className="mb-2 text-center text-[11px] text-violet/60">Próximo: {AWAKEN_BONUS[awaken + 1]}</p>}
         {awakenCost !== null && (
           <UpgradeButton
             label={`Despertar — ${awakenCost} fragmentos`}
@@ -759,7 +759,7 @@ function EquipTab({ hero, equipData, runeData, equipInventory, runeInventory, s 
       transition={{ duration: 0.15, ease }}
       className="flex flex-col gap-2"
     >
-      <p className="mb-1 text-[9px] font-bold tracking-widest text-violet/40">EQUIPAMENTOS</p>
+      <p className="mb-1 text-[11px] font-bold tracking-widest text-violet/60">EQUIPAMENTOS</p>
       {EQUIP_SLOTS.map((slot) => {
         const currentId = (equipData as Record<string, string | undefined>)[slot];
         const current = currentId ? EQUIP_MAP[currentId] : null;
@@ -775,14 +775,14 @@ function EquipTab({ hero, equipData, runeData, equipInventory, runeInventory, s 
               }}
             >
               <div className="min-w-0 flex-1">
-                <p className="text-[8px] text-violet/40">{EQUIP_SLOT_LABEL[slot]}</p>
+                <p className="text-[10px] text-violet/60">{EQUIP_SLOT_LABEL[slot]}</p>
                 {current ? (
                   <p className="text-[10px] font-bold text-cream/80">{current.name}</p>
                 ) : (
                   <p className="text-[10px] text-violet/30">— Vazio —</p>
                 )}
                 {current && (
-                  <p className="text-[8px] text-violet/50">
+                  <p className="text-[10px] text-violet/50">
                     {Object.entries(current.statBonus).map(([k,v]) => `+${v} ${k}`).join(" · ")}
                   </p>
                 )}
@@ -792,7 +792,7 @@ function EquipTab({ hero, equipData, runeData, equipInventory, runeInventory, s 
                   onClick={() => setPickingSlot(isPicking ? null : slot)}
                   whileTap={{ scale: 0.94 }}
                   transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
-                  className="rounded-lg px-2 py-1.5 text-[8px] font-bold"
+                  className="rounded-lg px-2 py-1.5 text-[10px] font-bold"
                   style={{ color: s.color, border: `1px solid ${s.border}`, background: s.glow }}
                 >
                   {isPicking ? "✕" : "Equipar"}
@@ -819,12 +819,12 @@ function EquipTab({ hero, equipData, runeData, equipInventory, runeInventory, s 
                         style={{ background: "rgba(122,111,160,0.06)" }}
                       >
                         <div>
-                          <p className="text-[9px] font-bold text-cream/80">{eq.name}</p>
-                          <p className="text-[8px] text-violet/40">
+                          <p className="text-[11px] font-bold text-cream/80">{eq.name}</p>
+                          <p className="text-[10px] text-violet/60">
                             {Object.entries(eq.statBonus).map(([k,v]) => `+${v} ${k}`).join(" · ")}
                           </p>
                         </div>
-                        <span className="text-[8px]" style={{ color: s.color }}>+</span>
+                        <span className="text-[10px]" style={{ color: s.color }}>+</span>
                       </motion.button>
                     ))}
                   </div>
@@ -835,7 +835,7 @@ function EquipTab({ hero, equipData, runeData, equipInventory, runeInventory, s 
         );
       })}
 
-      <p className="mt-2 text-[9px] font-bold tracking-widest text-violet/40">RUNAS</p>
+      <p className="mt-2 text-[11px] font-bold tracking-widest text-violet/60">RUNAS</p>
       {RUNE_SLOTS.map((slot, i) => {
         const currentId = (runeData as Record<string, string | undefined>)[slot];
         const current = currentId ? RUNE_MAP[currentId] : null;
@@ -851,20 +851,20 @@ function EquipTab({ hero, equipData, runeData, equipInventory, runeInventory, s 
               }}
             >
               <div className="min-w-0 flex-1">
-                <p className="text-[8px] text-violet/40">Runa {i + 1}</p>
+                <p className="text-[10px] text-violet/60">Runa {i + 1}</p>
                 {current ? (
                   <p className="text-[10px] font-bold text-cream/80">{current.name}</p>
                 ) : (
                   <p className="text-[10px] text-violet/30">— Vazio —</p>
                 )}
-                {current && <p className="text-[8px] text-violet/50">{current.description}</p>}
+                {current && <p className="text-[10px] text-violet/50">{current.description}</p>}
               </div>
               {available.length > 0 && (
                 <motion.button
                   onClick={() => setPickingSlot(isPicking ? null : slot)}
                   whileTap={{ scale: 0.94 }}
                   transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
-                  className="rounded-lg px-2 py-1.5 text-[8px] font-bold"
+                  className="rounded-lg px-2 py-1.5 text-[10px] font-bold"
                   style={{ color: s.color, border: `1px solid ${s.border}`, background: s.glow }}
                 >
                   {isPicking ? "✕" : "Equipar"}
@@ -891,10 +891,10 @@ function EquipTab({ hero, equipData, runeData, equipInventory, runeInventory, s 
                         style={{ background: "rgba(122,111,160,0.06)" }}
                       >
                         <div>
-                          <p className="text-[9px] font-bold text-cream/80">{rune.name}</p>
-                          <p className="text-[8px] text-violet/40">{rune.description}</p>
+                          <p className="text-[11px] font-bold text-cream/80">{rune.name}</p>
+                          <p className="text-[10px] text-violet/60">{rune.description}</p>
                         </div>
-                        <span className="text-[8px]" style={{ color: s.color }}>+</span>
+                        <span className="text-[10px]" style={{ color: s.color }}>+</span>
                       </motion.button>
                     ))}
                   </div>
@@ -916,10 +916,10 @@ function ProgSection({ title, current, next, s, children }: {
   return (
     <div className="rounded-xl border border-violet/10 px-3 py-2.5" style={{ background: "rgba(122,111,160,0.04)" }}>
       <div className="mb-2.5 flex items-center justify-between">
-        <span className="text-[9px] font-bold tracking-widest text-violet/50">{title.toUpperCase()}</span>
+        <span className="text-[11px] font-bold tracking-widest text-violet/50">{title.toUpperCase()}</span>
         <div className="flex items-center gap-2">
-          <span className="text-[9px] font-bold" style={{ color: s.color }}>{current}</span>
-          <span className="text-[8px] text-violet/30">{next}</span>
+          <span className="text-[11px] font-bold" style={{ color: s.color }}>{current}</span>
+          <span className="text-[10px] text-violet/30">{next}</span>
         </div>
       </div>
       {children}
@@ -937,7 +937,7 @@ function UpgradeButton({ label, enabled, color, glow, border, onPress }: {
       onClick={enabled ? onPress : undefined}
       whileTap={enabled ? { scale: 0.97 } : undefined}
       transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
-      className="mt-1 w-full rounded-lg py-2 text-[9px] font-bold tracking-wider transition-all duration-150"
+      className="mt-1 w-full rounded-lg py-2 text-[11px] font-bold tracking-wider transition-all duration-150"
       style={{
         background: enabled ? glow : "transparent",
         color:      enabled ? color : "rgba(122,111,160,0.3)",
@@ -955,7 +955,7 @@ function UpgradeButton({ label, enabled, color, glow, border, onPress }: {
 function StatRow({ label, value, color }: { label: string; value: number | string; color: string }) {
   return (
     <div className="flex items-center justify-between rounded-lg border border-violet/8 px-3 py-2" style={{ background: "rgba(122,111,160,0.04)" }}>
-      <span className="text-[9px] text-violet/50">{label}</span>
+      <span className="text-[11px] text-violet/50">{label}</span>
       <span className="text-[11px] font-black" style={{ color }}>{typeof value === "number" ? value.toLocaleString("pt-BR") : value}</span>
     </div>
   );

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -202,7 +202,7 @@ export default function ProfessionModal({ onClose }: { onClose: () => void }) {
               transition={{ duration: 0.2, ease }}
             >
               <p className="mb-1 text-[11px] font-bold text-cream/70">Escolha sua Profissão</p>
-              <p className="mb-5 text-[9px] leading-relaxed text-violet/40">
+              <p className="mb-5 text-[11px] leading-relaxed text-violet/60">
                 Sua profissão define bônus passivos e tarefas diárias exclusivas. Pode ser trocada com custo de ouro.
               </p>
               <div className="flex flex-col gap-3">
@@ -221,12 +221,12 @@ export default function ProfessionModal({ onClose }: { onClose: () => void }) {
                     <span className="text-2xl">{p.icon}</span>
                     <div className="flex-1">
                       <p className="text-[12px] font-bold" style={{ color: p.color }}>{p.name}</p>
-                      <p className="mt-0.5 text-[9px] text-violet/50">{p.tagline}</p>
+                      <p className="mt-0.5 text-[11px] text-violet/50">{p.tagline}</p>
                       <div className="mt-2 flex flex-wrap gap-1">
                         {p.bonuses.slice(0, 2).map((b, i) => (
                           <span
                             key={i}
-                            className="rounded-full px-2 py-0.5 text-[8px]"
+                            className="rounded-full px-2 py-0.5 text-[10px]"
                             style={{ background: `${p.color}15`, color: p.color }}
                           >
                             {b}
@@ -235,7 +235,7 @@ export default function ProfessionModal({ onClose }: { onClose: () => void }) {
                       </div>
                     </div>
                     {prof.chosenProfession === p.id && (
-                      <span className="text-[9px] font-bold text-amber-400">ATIVA</span>
+                      <span className="text-[11px] font-bold text-amber-400">ATIVA</span>
                     )}
                   </motion.button>
                 ))}
@@ -264,13 +264,13 @@ export default function ProfessionModal({ onClose }: { onClose: () => void }) {
                   <span className="text-3xl">{chosen.icon}</span>
                   <div>
                     <p className="text-[14px] font-black tracking-wide" style={{ color: chosen.color }}>{chosen.name}</p>
-                    <p className="text-[9px] text-violet/50">{chosen.tagline}</p>
+                    <p className="text-[11px] text-violet/50">{chosen.tagline}</p>
                   </div>
                 </div>
                 <div className="mb-1.5 flex items-center justify-between">
-                  <span className="text-[9px] font-bold text-violet/60">NÍVEL {currentLevel} / 10</span>
+                  <span className="text-[11px] font-bold text-violet/60">NÍVEL {currentLevel} / 10</span>
                   {currentLevel < 10 && (
-                    <span className="text-[9px] text-violet/40">{xpToNext} XP para próximo</span>
+                    <span className="text-[11px] text-violet/60">{xpToNext} XP para próximo</span>
                   )}
                 </div>
                 <div className="h-1.5 overflow-hidden rounded-full bg-violet/15">
@@ -285,7 +285,7 @@ export default function ProfessionModal({ onClose }: { onClose: () => void }) {
               </div>
 
               {/* Bônus ativos */}
-              <p className="mb-3 text-[9px] uppercase tracking-[0.2em] text-violet/40">Bônus Passivos</p>
+              <p className="mb-3 text-[11px] uppercase tracking-[0.2em] text-violet/60">Bônus Passivos</p>
               <div className="mb-5 rounded-xl border border-violet/12 px-5 py-4" style={{ background: "rgba(122,111,160,0.04)" }}>
                 {chosen.bonuses.map((b, i) => (
                   <div
@@ -300,7 +300,7 @@ export default function ProfessionModal({ onClose }: { onClose: () => void }) {
               </div>
 
               {/* Tarefas diárias */}
-              <p className="mb-3 text-[9px] uppercase tracking-[0.2em] text-violet/40">Tarefas Diárias</p>
+              <p className="mb-3 text-[11px] uppercase tracking-[0.2em] text-violet/60">Tarefas Diárias</p>
               <div className="mb-5 flex flex-col gap-2">
                 {chosen.tasks.map((t) => {
                   const done = completedToday.includes(t.id);
@@ -315,7 +315,7 @@ export default function ProfessionModal({ onClose }: { onClose: () => void }) {
                     >
                       <div className="flex items-center gap-3">
                         <div
-                          className="flex h-5 w-5 items-center justify-center rounded-full border text-[8px] font-bold"
+                          className="flex h-5 w-5 items-center justify-center rounded-full border text-[10px] font-bold"
                           style={{
                             borderColor: done ? "rgba(100,220,140,0.5)" : "rgba(122,111,160,0.2)",
                             color: done ? "rgb(100,220,140)" : "rgba(122,111,160,0.4)",
@@ -332,13 +332,13 @@ export default function ProfessionModal({ onClose }: { onClose: () => void }) {
                           onClick={() => handleTask(t.id, t.xp)}
                           whileTap={{ scale: 0.94 }}
                           transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
-                          className="rounded-lg border px-3 py-1.5 text-[9px] font-bold"
+                          className="rounded-lg border px-3 py-1.5 text-[11px] font-bold"
                           style={{ borderColor: `${chosen.color}40`, color: chosen.color, background: `${chosen.color}10` }}
                         >
                           +{t.xp} XP
                         </motion.button>
                       ) : (
-                        <span className="text-[9px] text-violet/30">+{t.xp} XP</span>
+                        <span className="text-[11px] text-violet/30">+{t.xp} XP</span>
                       )}
                     </div>
                   );
@@ -346,7 +346,7 @@ export default function ProfessionModal({ onClose }: { onClose: () => void }) {
               </div>
 
               {/* Marcos */}
-              <p className="mb-3 text-[9px] uppercase tracking-[0.2em] text-violet/40">Marcos de Evolução</p>
+              <p className="mb-3 text-[11px] uppercase tracking-[0.2em] text-violet/60">Marcos de Evolução</p>
               <div className="rounded-xl border border-violet/12 px-5 py-3" style={{ background: "rgba(122,111,160,0.04)" }}>
                 {chosen.milestones.map((m, i) => {
                   const unlocked = currentLevel >= m.level;
@@ -357,7 +357,7 @@ export default function ProfessionModal({ onClose }: { onClose: () => void }) {
                       style={{ borderBottom: i < chosen.milestones.length - 1 ? "1px solid rgba(122,111,160,0.1)" : "none" }}
                     >
                       <div
-                        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[9px] font-bold"
+                        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold"
                         style={{
                           background: unlocked ? `${chosen.color}20` : "rgba(122,111,160,0.08)",
                           color: unlocked ? chosen.color : "rgba(122,111,160,0.3)",
@@ -373,7 +373,7 @@ export default function ProfessionModal({ onClose }: { onClose: () => void }) {
                         {m.perk}
                       </span>
                       {unlocked && (
-                        <span className="ml-auto text-[8px] font-bold text-green-400/60">ATIVO</span>
+                        <span className="ml-auto text-[10px] font-bold text-green-400/60">ATIVO</span>
                       )}
                     </div>
                   );

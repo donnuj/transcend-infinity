@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useGameStore } from "@/lib/game/store";
@@ -100,12 +100,12 @@ export default function HousingModal({ onClose }: { onClose: () => void }) {
           </div>
           {nextHouseUpgrade ? (
             <div className="mt-3 flex items-center justify-between">
-              <span className="text-[9px] text-violet/40">Próximo: {nextHouseUpgrade.name}</span>
+              <span className="text-[11px] text-violet/60">Próximo: {nextHouseUpgrade.name}</span>
               <motion.button
                 onClick={save.wallet.ouro >= nextHouseUpgrade.ouroReq ? upgradeHouse : undefined}
                 whileTap={save.wallet.ouro >= nextHouseUpgrade.ouroReq ? { scale: 0.94 } : undefined}
                 transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
-                className="rounded-lg border px-3 py-1 text-[9px] font-bold"
+                className="rounded-lg border px-3 py-1 text-[11px] font-bold"
                 style={{
                   borderColor: save.wallet.ouro >= nextHouseUpgrade.ouroReq ? "rgba(200,155,60,0.4)" : "rgba(122,111,160,0.15)",
                   background: save.wallet.ouro >= nextHouseUpgrade.ouroReq ? "rgba(200,155,60,0.1)" : "transparent",
@@ -116,12 +116,12 @@ export default function HousingModal({ onClose }: { onClose: () => void }) {
               </motion.button>
             </div>
           ) : (
-            <p className="mt-3 text-[9px] font-bold text-green-400">Nível máximo atingido!</p>
+            <p className="mt-3 text-[11px] font-bold text-green-400">Nível máximo atingido!</p>
           )}
         </div>
 
         {/* Rooms */}
-        <p className="mb-3 text-[9px] uppercase tracking-[0.2em] text-violet/40">Cômodos</p>
+        <p className="mb-3 text-[11px] uppercase tracking-[0.2em] text-violet/60">Cômodos</p>
         <div className="flex flex-col gap-2">
           {ROOMS.map((room) => {
             const unlocked = housing.unlockedRooms.includes(room.id);
@@ -141,20 +141,20 @@ export default function HousingModal({ onClose }: { onClose: () => void }) {
                   <span className="text-xl">{room.icon}</span>
                   <div>
                     <p className="text-[11px] font-bold text-cream/80">{room.name}</p>
-                    <p className="text-[8px] text-violet/40">{room.description}</p>
-                    <p className="text-[8px] font-bold" style={{ color: unlocked ? "rgb(100,220,140)" : "rgb(200,155,60)", opacity: unlocked ? 1 : 0.7 }}>{room.bonus}</p>
+                    <p className="text-[10px] text-violet/60">{room.description}</p>
+                    <p className="text-[10px] font-bold" style={{ color: unlocked ? "rgb(100,220,140)" : "rgb(200,155,60)", opacity: unlocked ? 1 : 0.7 }}>{room.bonus}</p>
                   </div>
                 </div>
                 {unlocked ? (
                   <span className="text-[12px] text-green-400">✓</span>
                 ) : needsLevel ? (
-                  <span className="text-[8px] text-violet/35">Casa Nv.{room.unlockLevel}</span>
+                  <span className="text-[10px] text-violet/35">Casa Nv.{room.unlockLevel}</span>
                 ) : (
                   <motion.button
                     onClick={canUnlock ? () => unlockRoom(room) : undefined}
                     whileTap={canUnlock ? { scale: 0.94 } : undefined}
                     transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
-                    className="rounded-lg border px-2.5 py-1 text-[9px] font-bold"
+                    className="rounded-lg border px-2.5 py-1 text-[11px] font-bold"
                     style={{
                       borderColor: canUnlock ? "rgba(200,155,60,0.4)" : "rgba(122,111,160,0.15)",
                       background: canUnlock ? "rgba(200,155,60,0.1)" : "transparent",
@@ -169,7 +169,7 @@ export default function HousingModal({ onClose }: { onClose: () => void }) {
           })}
         </div>
 
-        <p className="mt-4 text-center text-[9px] text-violet/30">
+        <p className="mt-4 text-center text-[11px] text-violet/30">
           Ouro disponível: <span className="font-bold text-amber-400">{save.wallet.ouro.toLocaleString("pt-BR")}</span>
         </p>
       </div>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -122,7 +122,7 @@ export default function ArenaModal({ onClose }: { onClose: () => void }) {
               className="mb-5 flex flex-col items-center rounded-xl border py-6"
               style={{ borderColor: `${tier.color}40`, background: `${tier.color}08` }}
             >
-              <p className="mb-1 text-[9px] uppercase tracking-[0.2em] text-violet/40">Ranking</p>
+              <p className="mb-1 text-[11px] uppercase tracking-[0.2em] text-violet/60">Ranking</p>
               <p className="text-3xl font-black" style={{ color: tier.color, fontFamily: "var(--font-cinzel)" }}>
                 {tier.label.toUpperCase()}
               </p>
@@ -132,7 +132,7 @@ export default function ArenaModal({ onClose }: { onClose: () => void }) {
 
             {/* Opponent preview */}
             <div className="mb-5 rounded-xl border border-violet/15 px-4 py-4" style={{ background: "rgba(122,111,160,0.04)" }}>
-              <p className="mb-1 text-[9px] uppercase tracking-[0.2em] text-violet/40">Próximo Oponente</p>
+              <p className="mb-1 text-[11px] uppercase tracking-[0.2em] text-violet/60">Próximo Oponente</p>
               <p className="text-[14px] font-bold text-cream/80">{opponentName}</p>
               {/* eslint-disable-next-line react-hooks/purity */}
               <p className="text-[10px] text-violet/50">Rating estimado: ~{arena.rating + (Math.random() > 0.5 ? 30 : -30) | 0}</p>
@@ -140,7 +140,7 @@ export default function ArenaModal({ onClose }: { onClose: () => void }) {
 
             {/* Rank tiers */}
             <div className="mb-5 flex flex-col gap-1.5">
-              <p className="mb-1 text-[9px] uppercase tracking-[0.2em] text-violet/40">Ligas</p>
+              <p className="mb-1 text-[11px] uppercase tracking-[0.2em] text-violet/60">Ligas</p>
               {RANK_TIERS.map((t) => (
                 <div
                   key={t.label}
@@ -153,7 +153,7 @@ export default function ArenaModal({ onClose }: { onClose: () => void }) {
                   <span className="text-[10px] font-bold" style={{ color: arena.rating >= t.min ? t.color : "rgba(122,111,160,0.35)" }}>
                     {t.label}
                   </span>
-                  <span className="text-[9px] text-violet/40">{t.min}+</span>
+                  <span className="text-[11px] text-violet/60">{t.min}+</span>
                 </div>
               ))}
             </div>
@@ -180,7 +180,7 @@ export default function ArenaModal({ onClose }: { onClose: () => void }) {
             transition={{ duration: 0.15, ease }}
           >
             <div className="px-4 pt-4">
-              <p className="mb-3 text-[9px] uppercase tracking-[0.2em] text-violet/40">
+              <p className="mb-3 text-[11px] uppercase tracking-[0.2em] text-violet/60">
                 Selecione seu time (máx. 3) — {team.length}/3
               </p>
             </div>
@@ -202,7 +202,7 @@ export default function ArenaModal({ onClose }: { onClose: () => void }) {
                       }}
                     >
                       <span className="mb-1 text-2xl">{hero.portrait}</span>
-                      <p className="text-[8px] font-bold text-cream/70">{hero.name.split(",")[0]}</p>
+                      <p className="text-[10px] font-bold text-cream/70">{hero.name.split(",")[0]}</p>
                     </motion.button>
                   );
                 })}
@@ -275,7 +275,7 @@ export default function ArenaModal({ onClose }: { onClose: () => void }) {
               transition={{ duration: 0.25, ease, delay: 0.15 }}
             >
               <div className="flex flex-1 flex-col items-center rounded-xl border border-violet/12 py-3.5" style={{ background: "rgba(122,111,160,0.05)" }}>
-                <span className="text-[9px] uppercase tracking-widest text-violet/40">Rating</span>
+                <span className="text-[11px] uppercase tracking-widest text-violet/60">Rating</span>
                 <span
                   className="mt-1 text-xl font-black"
                   style={{ color: result.ratingChange > 0 ? "rgb(100,220,140)" : "rgb(255,100,100)" }}
@@ -284,11 +284,11 @@ export default function ArenaModal({ onClose }: { onClose: () => void }) {
                 </span>
               </div>
               <div className="flex flex-1 flex-col items-center rounded-xl border border-violet/12 py-3.5" style={{ background: "rgba(122,111,160,0.05)" }}>
-                <span className="text-[9px] uppercase tracking-widest text-violet/40">Novo Rating</span>
+                <span className="text-[11px] uppercase tracking-widest text-violet/60">Novo Rating</span>
                 <span className="mt-1 text-xl font-black text-cream/80">{save.arena.rating}</span>
               </div>
               <div className="flex flex-1 flex-col items-center rounded-xl border border-violet/12 py-3.5" style={{ background: "rgba(122,111,160,0.05)" }}>
-                <span className="text-[9px] uppercase tracking-widest text-violet/40">Ouro</span>
+                <span className="text-[11px] uppercase tracking-widest text-violet/60">Ouro</span>
                 <span className="mt-1 text-xl font-black text-amber-400">+{result.won ? 200 : 50}</span>
               </div>
             </motion.div>
@@ -306,7 +306,7 @@ export default function ArenaModal({ onClose }: { onClose: () => void }) {
               >
                 {tier.label}
               </div>
-              <span className="text-[10px] text-violet/40">
+              <span className="text-[10px] text-violet/60">
                 {save.arena.wins}V · {save.arena.losses}D
               </span>
             </motion.div>

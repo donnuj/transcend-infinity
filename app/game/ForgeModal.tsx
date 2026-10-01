@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -103,7 +103,7 @@ export default function ForgeModal({ onClose }: { onClose: () => void }) {
                   onClick={() => setSort(s)}
                   whileTap={{ scale: 0.94 }}
                   transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
-                  className="rounded-lg border px-3 py-1.5 text-[9px] font-bold tracking-wider"
+                  className="rounded-lg border px-3 py-1.5 text-[11px] font-bold tracking-wider"
                   style={{
                     borderColor: sort === s ? "rgba(200,155,60,0.4)" : "rgba(122,111,160,0.15)",
                     color: sort === s ? "rgb(200,155,60)" : "rgba(122,111,160,0.5)",
@@ -144,15 +144,15 @@ export default function ForgeModal({ onClose }: { onClose: () => void }) {
                       <div className="flex items-center gap-2">
                         <p className="text-[12px] font-bold text-cream/85">{def.name}</p>
                         {forgeLevel > 0 && (
-                          <span className="rounded px-1.5 py-0.5 text-[8px] font-bold" style={{ background: "rgba(200,155,60,0.15)", color: "rgb(200,155,60)" }}>
+                          <span className="rounded px-1.5 py-0.5 text-[10px] font-bold" style={{ background: "rgba(200,155,60,0.15)", color: "rgb(200,155,60)" }}>
                             +{forgeLevel}
                           </span>
                         )}
                       </div>
-                      <p className="text-[9px]" style={{ color }}>{def.rarity} · {def.slot === "weapon" ? "Arma" : def.slot === "armor" ? "Armadura" : "Acessório"}</p>
+                      <p className="text-[11px]" style={{ color }}>{def.rarity} · {def.slot === "weapon" ? "Arma" : def.slot === "armor" ? "Armadura" : "Acessório"}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-[9px] font-bold text-violet/50">{forgeLevel}/10</p>
+                      <p className="text-[11px] font-bold text-violet/50">{forgeLevel}/10</p>
                       <div className="mt-1 flex gap-0.5">
                         {Array.from({ length: 10 }).map((_, i) => (
                           <div
@@ -204,14 +204,14 @@ export default function ForgeModal({ onClose }: { onClose: () => void }) {
                           </span>
                         )}
                       </div>
-                      <p className="text-[9px]" style={{ color }}>{sel.def.rarity}</p>
+                      <p className="text-[11px]" style={{ color }}>{sel.def.rarity}</p>
                     </div>
                   </div>
 
                   {/* Forge bar */}
                   <div className="mb-1.5 flex items-center justify-between">
-                    <span className="text-[9px] font-bold text-violet/60">NÍVEL FORJA</span>
-                    <span className="text-[9px] font-bold text-amber-400">{sel.forgeLevel} / 10</span>
+                    <span className="text-[11px] font-bold text-violet/60">NÍVEL FORJA</span>
+                    <span className="text-[11px] font-bold text-amber-400">{sel.forgeLevel} / 10</span>
                   </div>
                   <div className="flex gap-1">
                     {Array.from({ length: 10 }).map((_, i) => (
@@ -228,7 +228,7 @@ export default function ForgeModal({ onClose }: { onClose: () => void }) {
 
                   {/* Base stats */}
                   <div className="mt-4">
-                    <p className="mb-2 text-[9px] uppercase tracking-[0.18em] text-violet/40">Stats Base</p>
+                    <p className="mb-2 text-[11px] uppercase tracking-[0.18em] text-violet/60">Stats Base</p>
                     <div className="flex flex-wrap gap-2">
                       {Object.entries(sel.def.statBonus).map(([stat, val]) => (
                         <span
@@ -246,7 +246,7 @@ export default function ForgeModal({ onClose }: { onClose: () => void }) {
             })()}
 
             {/* Enhancement bonuses track */}
-            <p className="mb-3 text-[9px] uppercase tracking-[0.2em] text-violet/40">Bônus por Nível</p>
+            <p className="mb-3 text-[11px] uppercase tracking-[0.2em] text-violet/60">Bônus por Nível</p>
             <div className="mb-5 rounded-xl border border-violet/12 px-5 py-3" style={{ background: "rgba(122,111,160,0.04)" }}>
               {ENHANCE_BONUSES.map((bonus, i) => {
                 const lvl = i + 1;
@@ -259,7 +259,7 @@ export default function ForgeModal({ onClose }: { onClose: () => void }) {
                     style={{ borderBottom: i < 9 ? "1px solid rgba(122,111,160,0.08)" : "none" }}
                   >
                     <div
-                      className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[8px] font-bold"
+                      className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold"
                       style={{
                         background: unlocked ? "rgba(200,155,60,0.2)" : isCurrent ? "rgba(122,111,160,0.12)" : "transparent",
                         border: `1px solid ${unlocked ? "rgba(200,155,60,0.4)" : isCurrent ? "rgba(200,155,60,0.25)" : "rgba(122,111,160,0.12)"}`,
@@ -275,10 +275,10 @@ export default function ForgeModal({ onClose }: { onClose: () => void }) {
                       {bonus}
                     </span>
                     {isCurrent && (
-                      <span className="text-[8px] font-bold text-amber-400/60">PRÓXIMO</span>
+                      <span className="text-[10px] font-bold text-amber-400/60">PRÓXIMO</span>
                     )}
                     {unlocked && (
-                      <span className="text-[8px] font-bold text-green-400/60">ATIVO</span>
+                      <span className="text-[10px] font-bold text-green-400/60">ATIVO</span>
                     )}
                   </div>
                 );
@@ -289,7 +289,7 @@ export default function ForgeModal({ onClose }: { onClose: () => void }) {
             {maxed ? (
               <div className="rounded-xl border border-amber/20 py-4 text-center">
                 <p className="text-[11px] font-bold tracking-wider text-amber-400">FORJA MÁXIMA</p>
-                <p className="mt-1 text-[9px] text-violet/40">Todos os bônus estão ativos</p>
+                <p className="mt-1 text-[11px] text-violet/60">Todos os bônus estão ativos</p>
               </div>
             ) : (
               <motion.button

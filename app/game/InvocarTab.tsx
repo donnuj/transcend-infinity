@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -194,7 +194,7 @@ function BannerScreen({
             onClick={() => onSelectBanner(b.bannerId)}
             whileTap={{ scale: 0.95 }}
             transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
-            className="flex-shrink-0 rounded-lg border px-3 py-1.5 text-[9px] font-bold tracking-wider"
+            className="flex-shrink-0 rounded-lg border px-3 py-1.5 text-[11px] font-bold tracking-wider"
             style={{
               borderColor: b.bannerId === activeBannerId ? "rgba(200,155,60,0.6)" : "rgba(122,111,160,0.2)",
               color: b.bannerId === activeBannerId ? "rgb(200,155,60)" : "rgba(122,111,160,0.5)",
@@ -221,13 +221,13 @@ function BannerScreen({
         {/* Corner shine */}
         <div className="pointer-events-none absolute -left-10 -top-10 h-40 w-40 rounded-full opacity-30" style={{ background: "radial-gradient(circle, rgba(200,155,60,0.2) 0%, transparent 70%)" }} />
         {/* Decorative stars */}
-        <div className="pointer-events-none absolute right-6 top-8 text-[8px] text-amber/20 animate-pulse-glow">✦</div>
+        <div className="pointer-events-none absolute right-6 top-8 text-[10px] text-amber/20 animate-pulse-glow">✦</div>
         <div className="pointer-events-none absolute right-16 top-5 text-[5px] text-amber/15 animate-pulse-glow" style={{ animationDelay: "0.8s" }}>✦</div>
         <div className="pointer-events-none absolute left-6 top-12 text-[6px] text-violet/20 animate-pulse-glow" style={{ animationDelay: "1.3s" }}>✦</div>
 
         {banner.isLimited && (
           <div
-            className="absolute right-3 top-3 rounded-full px-2.5 py-1 text-[7.5px] font-black tracking-wider"
+            className="absolute right-3 top-3 rounded-full px-2.5 py-1 text-[11px] font-black tracking-wider"
             style={{
               background: "linear-gradient(135deg, rgba(200,155,60,0.3) 0%, rgba(200,155,60,0.1) 100%)",
               border: "1px solid rgba(200,155,60,0.4)",
@@ -247,14 +247,14 @@ function BannerScreen({
         </div>
 
         <div className="absolute bottom-0 left-0 right-0 px-5 pb-5">
-          <p className="mb-1 text-[8px] font-black tracking-[0.4em] text-amber/40 uppercase">Invocação</p>
+          <p className="mb-1 text-[10px] font-black tracking-[0.4em] text-amber/40 uppercase">Invocação</p>
           <h3
             className="text-[20px] font-black leading-tight text-cream"
             style={{ fontFamily: "var(--font-cinzel)", textShadow: "0 0 30px rgba(200,155,60,0.6), 0 2px 4px rgba(0,0,0,0.8)" }}
           >
             {banner.name}
           </h3>
-          <p className="mt-1 text-[9px] text-violet/45">{banner.lore}</p>
+          <p className="mt-1 text-[11px] text-violet/65">{banner.lore}</p>
         </div>
       </div>
 
@@ -268,7 +268,7 @@ function BannerScreen({
             return (
               <div key={rarity} className="flex items-center gap-1 rounded-lg border px-2 py-1.5" style={{ borderColor: s.border, background: s.glow }}>
                 <span className="text-[10px] font-black" style={{ color: s.color }}>{rate.toFixed(1)}%</span>
-                <span className="text-[8px] font-bold" style={{ color: s.color, opacity: 0.7 }}>{s.label}</span>
+                <span className="text-[10px] font-bold" style={{ color: s.color, opacity: 0.7 }}>{s.label}</span>
               </div>
             );
           })}
@@ -277,7 +277,7 @@ function BannerScreen({
       {/* Pity tracker */}
       <div className="mb-4 rounded-xl border border-violet/12 px-4 py-3" style={{ background: "rgba(122,111,160,0.04)" }}>
         <div className="flex items-center justify-between mb-1.5">
-          <span className="text-[9px] font-bold tracking-wider text-violet/50">PITY</span>
+          <span className="text-[11px] font-bold tracking-wider text-violet/50">PITY</span>
           <span className="text-[10px] font-bold text-cream/60">{pity} / {banner.pityThreshold}</span>
         </div>
         <div className="h-1.5 w-full overflow-hidden rounded-full bg-violet/12">
@@ -292,18 +292,18 @@ function BannerScreen({
           />
         </div>
         {pity >= banner.softPityStart && (
-          <p className="mt-1 text-[8px] text-amber/60 font-bold">✦ Soft pity ativo — chance aumentada!</p>
+          <p className="mt-1 text-[10px] text-amber/60 font-bold">✦ Soft pity ativo — chance aumentada!</p>
         )}
       </div>
 
       {/* Invocador */}
       <div className="mb-4 flex items-center justify-between rounded-xl border border-violet/12 px-4 py-2.5" style={{ background: "rgba(122,111,160,0.04)" }}>
         <div>
-          <p className="text-[8px] font-bold tracking-[0.2em] text-violet/40 uppercase">Invocador Nível</p>
+          <p className="text-[10px] font-bold tracking-[0.2em] text-violet/60 uppercase">Invocador Nível</p>
           <p className="text-[16px] font-black text-cream">{invocador.level}</p>
         </div>
         <div className="text-right">
-          <p className="text-[8px] font-bold tracking-[0.2em] text-violet/40 uppercase">Total Invocações</p>
+          <p className="text-[10px] font-bold tracking-[0.2em] text-violet/60 uppercase">Total Invocações</p>
           <p className="text-[16px] font-black text-cream">{invocador.totalPulls.toLocaleString("pt-BR")}</p>
         </div>
       </div>
@@ -356,7 +356,7 @@ function PullBtn({ label, cost, selos, loading, onClick, highlight }: {
           {label}
         </p>
         {highlight && canAfford && (
-          <p className="text-[8px] font-bold tracking-wider" style={{ color: "rgba(200,155,60,0.6)" }}>
+          <p className="text-[10px] font-bold tracking-wider" style={{ color: "rgba(200,155,60,0.6)" }}>
             MELHOR VALOR
           </p>
         )}
@@ -365,7 +365,7 @@ function PullBtn({ label, cost, selos, loading, onClick, highlight }: {
         {loading ? (
           <div className="flex items-center gap-2">
             <span className="h-4 w-4 animate-spin rounded-full border-2 border-amber/30 border-t-amber inline-block" />
-            <span className="text-[10px] text-violet/40">Invocando...</span>
+            <span className="text-[10px] text-violet/60">Invocando...</span>
           </div>
         ) : (
           <div
@@ -426,7 +426,7 @@ function ResultScreen({ results, onClose }: { results: PullResult[]; onClose: ()
             return (
               <div key={rarity} className="flex items-center gap-1.5 rounded-lg border px-3 py-1.5" style={{ borderColor: s.border, background: s.glow }}>
                 <span className="text-[11px] font-black" style={{ color: s.color }}>×{count}</span>
-                <span className="text-[9px] font-bold" style={{ color: s.color, opacity: 0.8 }}>{s.label}</span>
+                <span className="text-[11px] font-bold" style={{ color: s.color, opacity: 0.8 }}>{s.label}</span>
               </div>
             );
           })}
@@ -475,12 +475,12 @@ function PullCard({ result, index, single }: { result: PullResult; index: number
         </p>
       )}
       {result.fragmentsAwarded > 0 && (
-        <span className={`mt-1 rounded-full border border-violet/20 px-1.5 font-bold text-violet/60 ${single ? "text-[9px]" : "text-[6px]"}`}>
+        <span className={`mt-1 rounded-full border border-violet/20 px-1.5 font-bold text-violet/60 ${single ? "text-[11px]" : "text-[6px]"}`}>
           +{result.fragmentsAwarded} fragmento
         </span>
       )}
       {result.isNew && (
-        <span className={`mt-0.5 font-bold text-green-400/70 ${single ? "text-[9px]" : "text-[6px]"}`}>
+        <span className={`mt-0.5 font-bold text-green-400/70 ${single ? "text-[11px]" : "text-[6px]"}`}>
           NOVO
         </span>
       )}

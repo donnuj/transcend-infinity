@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -128,7 +128,7 @@ export default function WorldTab({
               </div>
             </div>
             <div
-              className="absolute -bottom-1.5 -right-1.5 flex h-6 w-6 items-center justify-center rounded-lg text-[9px] font-black"
+              className="absolute -bottom-1.5 -right-1.5 flex h-6 w-6 items-center justify-center rounded-lg text-[11px] font-black"
               style={{
                 background: "linear-gradient(135deg, rgb(200,155,60) 0%, rgb(160,120,40) 100%)",
                 color: "rgb(6,7,15)",
@@ -151,10 +151,10 @@ export default function WorldTab({
             {/* XP bar */}
             <div className="mt-2.5">
               <div className="mb-1.5 flex items-center justify-between">
-                <span className="text-[9px] font-bold tracking-wider text-violet/55">
+                <span className="text-[11px] font-bold tracking-wider text-violet/55">
                   {playerLevel.xp.toLocaleString("pt-BR")} / {(200 * playerLevel.level).toLocaleString("pt-BR")} XP
                 </span>
-                <span className="text-[9px] font-bold text-amber/75">{Math.round(xpPct)}%</span>
+                <span className="text-[11px] font-bold text-amber/75">{Math.round(xpPct)}%</span>
               </div>
               <div className="relative h-[5px] overflow-hidden rounded-full" style={{ background: "rgba(122,111,160,0.1)" }}>
                 <motion.div
@@ -208,7 +208,7 @@ export default function WorldTab({
               >
                 <div className="mb-2.5 flex items-center gap-2">
                   <Hourglass weight="light" size={14} color="rgb(200,155,60)" />
-                  <p className="text-[9px] font-black tracking-[0.2em] text-amber/80">RENDA PASSIVA</p>
+                  <p className="text-[11px] font-black tracking-[0.2em] text-amber/80">RENDA PASSIVA</p>
                 </div>
                 <div className="flex gap-2">
                   <div
@@ -252,14 +252,14 @@ export default function WorldTab({
         >
           <div className="px-4 py-3.5">
             <div className="mb-3 flex items-center justify-between">
-              <p className="text-[9px] font-black uppercase tracking-[0.2em] text-violet/45">
+              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-violet/65">
                 Login Diário · Dia {loginBonus.dayInCycle}
               </p>
               <motion.button
                 onClick={claimLoginBonus}
                 whileTap={{ scale: 0.92 }}
                 transition={spring}
-                className="rounded-lg px-3 py-1.5 text-[9px] font-black tracking-wider text-void"
+                className="rounded-lg px-3 py-1.5 text-[11px] font-black tracking-wider text-void"
                 style={{
                   background: "linear-gradient(135deg, rgb(200,155,60) 0%, rgb(175,128,35) 100%)",
                   boxShadow: "0 2px 10px rgba(200,155,60,0.3)",
@@ -391,7 +391,7 @@ export default function WorldTab({
                 </div>
                 <div className="flex-1">
                   <p className="text-[11px] font-bold text-cream/85">{d.name}</p>
-                  <p className="text-[9px] text-violet/38">Nv.{d.recommendedLevel} · {runs > 0 ? `${runs} run${runs > 1 ? "s" : ""}` : "Nunca explorada"}</p>
+                  <p className="text-[11px] text-violet/38">Nv.{d.recommendedLevel} · {runs > 0 ? `${runs} run${runs > 1 ? "s" : ""}` : "Nunca explorada"}</p>
                 </div>
                 {rank !== "–" ? (
                   <div
@@ -420,7 +420,7 @@ export default function WorldTab({
             onClick={onDailyChallenges}
             whileTap={{ scale: 0.93 }}
             transition={spring}
-            className="text-[9px] font-bold tracking-wider text-amber/60"
+            className="text-[11px] font-bold tracking-wider text-amber/60"
           >
             Ver todas ›
           </motion.button>
@@ -451,7 +451,7 @@ export default function WorldTab({
               <span className="flex-1 text-[11px]" style={{ color: m.done ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.78)" }}>
                 {m.label}
               </span>
-              <span className="text-[9px] font-bold" style={{ color: m.done ? "rgba(122,111,160,0.28)" : "rgb(200,155,60)" }}>
+              <span className="text-[11px] font-bold" style={{ color: m.done ? "rgba(122,111,160,0.28)" : "rgb(200,155,60)" }}>
                 +{m.xp} XP
               </span>
             </div>
@@ -478,7 +478,7 @@ function SectionLabel({ Icon, label, inline }: { Icon: PhosphorIcon; label: stri
   return (
     <div className={`flex items-center gap-2 ${inline ? "" : "mb-2.5"}`}>
       <Icon weight="light" size={12} color="rgba(122,111,160,0.5)" />
-      <span className="text-[8.5px] font-black uppercase tracking-[0.22em] text-violet/45">{label}</span>
+      <span className="text-[8.5px] font-black uppercase tracking-[0.22em] text-violet/65">{label}</span>
       {!inline && <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg, rgba(122,111,160,0.12) 0%, transparent 100%)" }} />}
     </div>
   );
@@ -506,7 +506,7 @@ function GameCard({
     >
       {badge && (
         <div
-          className="absolute right-2.5 top-2.5 z-10 flex h-4 w-4 items-center justify-center rounded-full text-[7.5px] font-black"
+          className="absolute right-2.5 top-2.5 z-10 flex h-4 w-4 items-center justify-center rounded-full text-[11px] font-black"
           style={{ background: "rgb(255,80,80)", color: "white", boxShadow: "0 0 8px rgba(255,80,80,0.45)" }}
         >
           {badge}
@@ -532,7 +532,7 @@ function GameCard({
           <Icon weight="light" size={22} color={color} />
         </div>
         <span className="text-[12px] font-bold leading-tight text-cream/88">{title}</span>
-        <span className="mt-0.5 text-[9px] leading-tight font-medium" style={{ color: `${color}88` }}>{sub}</span>
+        <span className="mt-0.5 text-[11px] leading-tight font-medium" style={{ color: `${color}88` }}>{sub}</span>
       </div>
     </motion.button>
   );

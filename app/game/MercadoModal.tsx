@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -98,7 +98,7 @@ export default function MercadoModal({ onClose }: { onClose: () => void }) {
             onClick={() => setSection(s)}
             whileTap={{ scale: 0.96 }}
             transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
-            className="flex-1 rounded-lg py-1.5 text-[9px] font-bold tracking-wider"
+            className="flex-1 rounded-lg py-1.5 text-[11px] font-bold tracking-wider"
             style={{
               background: section === s ? "rgba(200,155,60,0.1)" : "transparent",
               color:      section === s ? "rgb(200,155,60)" : "rgba(122,111,160,0.5)",
@@ -137,7 +137,7 @@ export default function MercadoModal({ onClose }: { onClose: () => void }) {
               transition={{ duration: 0.12 }}
               className="flex flex-col gap-3"
             >
-              <p className="text-[9px] uppercase tracking-[0.2em] text-violet/40">Comprar com Ouro</p>
+              <p className="text-[11px] uppercase tracking-[0.2em] text-violet/60">Comprar com Ouro</p>
               {SELO_BUNDLES.filter((b) => b.ouro > 0).map((b) => (
                 <ShopItem
                   key={b.id}
@@ -149,7 +149,7 @@ export default function MercadoModal({ onClose }: { onClose: () => void }) {
                   onBuy={() => buySeloBundle(b)}
                 />
               ))}
-              <p className="mt-2 text-[9px] uppercase tracking-[0.2em] text-violet/40">Comprar com Cristais Astra</p>
+              <p className="mt-2 text-[11px] uppercase tracking-[0.2em] text-violet/60">Comprar com Cristais Astra</p>
               {SELO_BUNDLES.filter((b) => b.cristais > 0).map((b) => (
                 <ShopItem
                   key={b.id}
@@ -196,7 +196,7 @@ export default function MercadoModal({ onClose }: { onClose: () => void }) {
               transition={{ duration: 0.12 }}
               className="flex flex-col gap-3"
             >
-              <p className="mb-1 text-[9px] text-violet/40">
+              <p className="mb-1 text-[11px] text-violet/60">
                 Cristais Astra são a moeda premium do jogo. Use para invocar heróis lendários.
               </p>
               {PREMIUM_BUNDLES.map((b) => (
@@ -207,7 +207,7 @@ export default function MercadoModal({ onClose }: { onClose: () => void }) {
                 >
                   <div>
                     <p className="text-[12px] font-bold text-cream/85">{b.label}</p>
-                    <p className="text-[9px] text-violet/50">{b.description}</p>
+                    <p className="text-[11px] text-violet/50">{b.description}</p>
                   </div>
                   <div
                     className="rounded-lg border border-violet/20 px-3 py-2 text-[10px] font-bold text-violet/50"
@@ -216,7 +216,7 @@ export default function MercadoModal({ onClose }: { onClose: () => void }) {
                   </div>
                 </div>
               ))}
-              <p className="mt-2 text-center text-[9px] text-violet/30">
+              <p className="mt-2 text-center text-[11px] text-violet/30">
                 Compras reais em breve via Stripe
               </p>
             </motion.div>
@@ -243,7 +243,7 @@ function ShopItem({ icon, label, price, priceColor, canAfford, onBuy }: {
         onClick={canAfford ? onBuy : undefined}
         whileTap={canAfford ? { scale: 0.94 } : undefined}
         transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
-        className="rounded-lg border px-3 py-1.5 text-[9px] font-bold"
+        className="rounded-lg border px-3 py-1.5 text-[11px] font-bold"
         style={{
           borderColor: canAfford ? `${priceColor}40` : "rgba(122,111,160,0.1)",
           background:  canAfford ? `${priceColor}10` : "transparent",

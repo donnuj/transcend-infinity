@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -82,7 +82,7 @@ export default function CodexModal({ onClose }: { onClose: () => void }) {
                 onClick={() => setSection(s)}
                 whileTap={{ scale: 0.96 }}
                 transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
-                className="flex-1 rounded-lg py-1.5 text-[8px] font-bold tracking-wider capitalize"
+                className="flex-1 rounded-lg py-1.5 text-[10px] font-bold tracking-wider capitalize"
                 style={{
                   background: section === s ? "rgba(200,155,60,0.1)" : "transparent",
                   color: section === s ? "rgb(200,155,60)" : "rgba(122,111,160,0.5)",
@@ -118,7 +118,7 @@ export default function CodexModal({ onClose }: { onClose: () => void }) {
                           <span className="mb-1 text-2xl" style={{ filter: discovered ? "none" : "grayscale(1)" }}>
                             {discovered ? hero.portrait : "?"}
                           </span>
-                          <p className="text-center text-[8px] font-bold" style={{ color: collected ? "rgba(255,255,255,0.8)" : "rgba(122,111,160,0.5)" }}>
+                          <p className="text-center text-[10px] font-bold" style={{ color: collected ? "rgba(255,255,255,0.8)" : "rgba(122,111,160,0.5)" }}>
                             {discovered ? hero.name.split(",")[0] : "???"}
                           </p>
                           {discovered && (
@@ -151,10 +151,10 @@ export default function CodexModal({ onClose }: { onClose: () => void }) {
                           <span className="text-xl">◈</span>
                           <div className="flex-1 min-w-0">
                             <p className="text-[11px] font-bold text-cream/80">{item.name}</p>
-                            <p className="text-[9px] text-violet/40">{item.description}</p>
+                            <p className="text-[11px] text-violet/60">{item.description}</p>
                           </div>
                           {owned && (
-                            <span className="text-[9px] font-bold text-amber-400">
+                            <span className="text-[11px] font-bold text-amber-400">
                               ×{save.inventory.find((i) => i.itemId === item.itemId)?.qty ?? 0}
                             </span>
                           )}
@@ -184,9 +184,9 @@ export default function CodexModal({ onClose }: { onClose: () => void }) {
                           <span className="text-xl">⚔</span>
                           <div className="flex-1 min-w-0">
                             <p className="text-[11px] font-bold text-cream/80">{eq.name}</p>
-                            <p className="text-[9px] text-violet/40">{eq.slot} · {mainStat}</p>
+                            <p className="text-[11px] text-violet/60">{eq.slot} · {mainStat}</p>
                           </div>
-                          {owned && <span className="text-[9px] font-bold" style={{ color: "rgb(100,160,255)" }}>✓</span>}
+                          {owned && <span className="text-[11px] font-bold" style={{ color: "rgb(100,160,255)" }}>✓</span>}
                         </div>
                       );
                     })}
@@ -212,9 +212,9 @@ export default function CodexModal({ onClose }: { onClose: () => void }) {
                           <span className="text-xl">◈</span>
                           <div className="flex-1 min-w-0">
                             <p className="text-[11px] font-bold text-cream/80">{rune.name}</p>
-                            <p className="text-[9px] text-violet/40">{rune.description}</p>
+                            <p className="text-[11px] text-violet/60">{rune.description}</p>
                           </div>
-                          {owned && <span className="text-[9px] font-bold" style={{ color: "rgb(170,130,255)" }}>✓</span>}
+                          {owned && <span className="text-[11px] font-bold" style={{ color: "rgb(170,130,255)" }}>✓</span>}
                         </div>
                       );
                     })}
@@ -251,18 +251,18 @@ export default function CodexModal({ onClose }: { onClose: () => void }) {
                 <p className="text-[10px]" style={{ color: ELEMENT_COLORS[selectedHero.element] ?? "rgba(122,111,160,0.5)" }}>
                   {selectedHero.element} · {selectedHero.role}
                 </p>
-                <p className="text-[8px] font-bold" style={{ color: RARITY_COLORS[selectedHero.rarity] ?? "rgba(122,111,160,0.4)" }}>
+                <p className="text-[10px] font-bold" style={{ color: RARITY_COLORS[selectedHero.rarity] ?? "rgba(122,111,160,0.4)" }}>
                   {selectedHero.rarity}
                 </p>
               </div>
             </div>
 
             <div className="mb-4 rounded-xl border border-violet/12 px-4 py-3" style={{ background: "rgba(122,111,160,0.04)" }}>
-              <p className="mb-2 text-[9px] font-bold uppercase tracking-[0.2em] text-violet/40">Atributos Base</p>
+              <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.2em] text-violet/60">Atributos Base</p>
               <div className="grid grid-cols-2 gap-x-4">
                 {Object.entries(selectedHero.baseStats).map(([k, v]) => (
                   <div key={k} className="flex items-center justify-between border-b border-violet/8 py-1.5">
-                    <span className="text-[9px] font-bold uppercase tracking-wider text-violet/40">{k}</span>
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-violet/60">{k}</span>
                     <span className="text-[10px] font-bold text-cream/70">{v}</span>
                   </div>
                 ))}
@@ -270,15 +270,15 @@ export default function CodexModal({ onClose }: { onClose: () => void }) {
             </div>
 
             <div className="mb-4 rounded-xl border border-violet/12 px-4 py-3" style={{ background: "rgba(122,111,160,0.04)" }}>
-              <p className="mb-2 text-[9px] font-bold uppercase tracking-[0.2em] text-violet/40">Habilidades</p>
+              <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.2em] text-violet/60">Habilidades</p>
               {selectedHero.skillIds.map((skillId) => {
                 const skill = SKILL_MAP[skillId];
                 if (!skill) return null;
                 return (
                   <div key={skillId} className="mb-2 last:mb-0 border-b border-violet/8 pb-2 last:border-0 last:pb-0">
                     <p className="text-[11px] font-bold text-cream/80">{skill.name}</p>
-                    <p className="text-[9px] text-violet/50">{skill.description}</p>
-                    <p className="mt-0.5 text-[8px] text-violet/35">
+                    <p className="text-[11px] text-violet/50">{skill.description}</p>
+                    <p className="mt-0.5 text-[10px] text-violet/35">
                       CD: {skill.cooldown} · Custo: {skill.manaCost} mana
                     </p>
                   </div>
@@ -288,7 +288,7 @@ export default function CodexModal({ onClose }: { onClose: () => void }) {
 
             {selectedHero.lore && (
               <div className="rounded-xl border border-violet/12 px-4 py-3" style={{ background: "rgba(122,111,160,0.04)" }}>
-                <p className="mb-2 text-[9px] font-bold uppercase tracking-[0.2em] text-violet/40">Lore</p>
+                <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.2em] text-violet/60">Lore</p>
                 <p className="text-[10px] leading-relaxed text-violet/60 italic">&ldquo;{selectedHero.lore}&rdquo;</p>
               </div>
             )}

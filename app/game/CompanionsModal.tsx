@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -67,7 +67,7 @@ export default function CompanionsModal({ onClose }: { onClose: () => void }) {
           <span className="h-4 w-[1px] bg-violet/20" />
           <span className="text-[11px] font-bold tracking-widest text-cream/70">COMPANHEIROS</span>
         </div>
-        <span className="text-[10px] text-violet/40">
+        <span className="text-[10px] text-violet/60">
           {save.companions.length} / {COMPANIONS.length} coletados
         </span>
       </div>
@@ -90,15 +90,15 @@ export default function CompanionsModal({ onClose }: { onClose: () => void }) {
                 >
                   <span className="text-3xl">{COMPANION_MAP[activeId].portrait}</span>
                   <div className="flex-1">
-                    <p className="text-[9px] uppercase tracking-[0.2em] text-violet/40">Companheiro ativo</p>
+                    <p className="text-[11px] uppercase tracking-[0.2em] text-violet/60">Companheiro ativo</p>
                     <p className="text-[13px] font-black tracking-wider text-cream">{COMPANION_MAP[activeId].name}</p>
-                    <p className="text-[9px] text-amber-400">{COMPANION_MAP[activeId].bonus}</p>
+                    <p className="text-[11px] text-amber-400">{COMPANION_MAP[activeId].bonus}</p>
                   </div>
                 </div>
               )}
 
               {/* Companion grid */}
-              <p className="mb-3 mt-4 text-[9px] uppercase tracking-[0.2em] text-violet/40">Todos os Companheiros</p>
+              <p className="mb-3 mt-4 text-[11px] uppercase tracking-[0.2em] text-violet/60">Todos os Companheiros</p>
               <div className="flex flex-col gap-2.5">
                 {COMPANIONS.map((def) => {
                   const saved = getCompanion(def.id);
@@ -127,7 +127,7 @@ export default function CompanionsModal({ onClose }: { onClose: () => void }) {
                             <span className="rounded-full border border-amber/40 px-1.5 py-0.5 text-[7px] font-bold text-amber-400">ATIVO</span>
                           )}
                         </div>
-                        <p className="text-[8px]" style={{ color, opacity: 0.8 }}>{def.rarity}</p>
+                        <p className="text-[10px]" style={{ color, opacity: 0.8 }}>{def.rarity}</p>
                         {collected ? (
                           <div className="mt-1 flex items-center gap-2">
                             <div className="h-1 flex-1 overflow-hidden rounded-full bg-violet/12">
@@ -136,20 +136,20 @@ export default function CompanionsModal({ onClose }: { onClose: () => void }) {
                                 style={{ width: `${Math.min(100, saved.bond)}%`, background: color, boxShadow: `0 0 6px ${color}66` }}
                               />
                             </div>
-                            <span className="text-[7px] text-violet/40">{saved.bond}/100</span>
+                            <span className="text-[7px] text-violet/60">{saved.bond}/100</span>
                           </div>
                         ) : (
-                          <p className="mt-0.5 text-[8px] text-violet/35">{def.description.slice(0, 40)}…</p>
+                          <p className="mt-0.5 text-[10px] text-violet/35">{def.description.slice(0, 40)}…</p>
                         )}
                       </div>
                       {collected && (
                         <div className="text-right">
-                          <p className="text-[8px] font-bold" style={{ color }}>{currentForm.label}</p>
+                          <p className="text-[10px] font-bold" style={{ color }}>{currentForm.label}</p>
                           <p className="text-[7px] text-violet/35">Forma {saved.form + 1}</p>
                         </div>
                       )}
                       {!collected && (
-                        <span className="text-[9px] font-bold text-violet/30">→</span>
+                        <span className="text-[11px] font-bold text-violet/30">→</span>
                       )}
                     </motion.button>
                   );
@@ -220,7 +220,7 @@ function CompanionDetail({
         <p className="mt-2 max-w-[260px] text-center text-[10px] leading-relaxed text-violet/50">{def.description}</p>
         {currentForm && (
           <div className="mt-3 rounded-full border px-3 py-1" style={{ borderColor: `${color}30`, background: `${color}10` }}>
-            <span className="text-[9px] font-bold" style={{ color }}>{currentForm.label} — {currentForm.bonus}</span>
+            <span className="text-[11px] font-bold" style={{ color }}>{currentForm.label} — {currentForm.bonus}</span>
           </div>
         )}
       </div>
@@ -242,13 +242,13 @@ function CompanionDetail({
             />
           </div>
           {nextForm && (
-            <p className="mt-1.5 text-[8px] text-violet/35">Próxima forma em {nextForm.bondRequired} de vínculo</p>
+            <p className="mt-1.5 text-[10px] text-violet/35">Próxima forma em {nextForm.bondRequired} de vínculo</p>
           )}
         </div>
       )}
 
       {/* Forms */}
-      <p className="mb-2 text-[9px] uppercase tracking-[0.2em] text-violet/40">Formas de Evolução</p>
+      <p className="mb-2 text-[11px] uppercase tracking-[0.2em] text-violet/60">Formas de Evolução</p>
       <div className="mb-5 flex flex-col gap-1.5">
         {def.forms.map((form) => {
           const reached = saved && saved.form >= form.form;
@@ -266,9 +266,9 @@ function CompanionDetail({
               <div>
                 <span className="text-[10px] font-bold text-cream/80">{form.label}</span>
                 {isCurrent && <span className="ml-2 text-[7px] font-bold" style={{ color }}>ATUAL</span>}
-                <p className="text-[8px] font-bold" style={{ color, opacity: 0.75 }}>{form.bonus}</p>
+                <p className="text-[10px] font-bold" style={{ color, opacity: 0.75 }}>{form.bonus}</p>
               </div>
-              <span className="text-[8px] text-violet/35">{form.bondRequired} vínc.</span>
+              <span className="text-[10px] text-violet/35">{form.bondRequired} vínc.</span>
             </div>
           );
         })}

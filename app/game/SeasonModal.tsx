@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { motion } from "framer-motion";
 import { useGameStore } from "@/lib/game/store";
@@ -102,7 +102,7 @@ export default function SeasonModal({ onClose }: { onClose: () => void }) {
           <span className="text-[11px] font-bold tracking-widest text-cream/70">TEMPORADA</span>
         </div>
         {unclaimedAvailable > 0 && (
-          <span className="rounded-full border border-amber/30 bg-amber/10 px-2 py-0.5 text-[8px] font-bold text-amber-400">
+          <span className="rounded-full border border-amber/30 bg-amber/10 px-2 py-0.5 text-[10px] font-bold text-amber-400">
             {unclaimedAvailable} pendente{unclaimedAvailable > 1 ? "s" : ""}
           </span>
         )}
@@ -114,11 +114,11 @@ export default function SeasonModal({ onClose }: { onClose: () => void }) {
           className="mb-5 mt-4 rounded-xl border border-amber/20 px-5 py-5"
           style={{ background: "linear-gradient(135deg, rgba(200,155,60,0.1) 0%, rgba(10,10,22,0.95) 70%)" }}
         >
-          <p className="text-[9px] uppercase tracking-[0.25em] text-violet/50">Temporada {CURRENT_SEASON.id}</p>
+          <p className="text-[11px] uppercase tracking-[0.25em] text-violet/50">Temporada {CURRENT_SEASON.id}</p>
           <h2 className="mt-0.5 text-xl font-black tracking-[0.15em] text-cream" style={{ fontFamily: "var(--font-cinzel)" }}>
             {CURRENT_SEASON.name.toUpperCase()}
           </h2>
-          <p className="mt-1 text-[9px] text-violet/40">Encerra em {CURRENT_SEASON.endDate}</p>
+          <p className="mt-1 text-[11px] text-violet/60">Encerra em {CURRENT_SEASON.endDate}</p>
         </div>
 
         {/* Level progress */}
@@ -140,14 +140,14 @@ export default function SeasonModal({ onClose }: { onClose: () => void }) {
             onClick={() => addSeasonXp(500)}
             whileTap={{ scale: 0.94 }}
             transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
-            className="mt-2 rounded-lg border border-violet/10 px-3 py-1.5 text-[8px] text-violet/40"
+            className="mt-2 rounded-lg border border-violet/10 px-3 py-1.5 text-[10px] text-violet/60"
           >
             +500 XP (teste)
           </motion.button>
         </div>
 
         {/* Rewards */}
-        <p className="mb-3 text-[9px] uppercase tracking-[0.2em] text-violet/40">Recompensas da Temporada</p>
+        <p className="mb-3 text-[11px] uppercase tracking-[0.2em] text-violet/60">Recompensas da Temporada</p>
         <div className="flex flex-col gap-2">
           {SEASON_REWARDS.map((reward) => {
             const locked = reward.level > currentLevel;
@@ -157,7 +157,7 @@ export default function SeasonModal({ onClose }: { onClose: () => void }) {
               <div key={reward.level} className="flex items-center gap-2">
                 {/* Level badge */}
                 <div
-                  className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg text-[9px] font-black"
+                  className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg text-[11px] font-black"
                   style={{
                     background: locked ? "rgba(122,111,160,0.06)" : "rgba(200,155,60,0.1)",
                     color: locked ? "rgba(122,111,160,0.3)" : "rgb(200,155,60)",
@@ -182,7 +182,7 @@ export default function SeasonModal({ onClose }: { onClose: () => void }) {
                 >
                   <span className="text-base">{reward.icon}</span>
                   <span
-                    className="text-[9px] font-bold"
+                    className="text-[11px] font-bold"
                     style={{ color: claimed ? "rgb(100,220,140)" : locked ? "rgba(122,111,160,0.4)" : "rgba(255,255,255,0.8)" }}
                   >
                     {claimed ? "✓ " : locked ? "🔒 " : "RESGATAR — "}{reward.label}

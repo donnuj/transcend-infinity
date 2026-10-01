@@ -35,7 +35,8 @@ export async function loadCloudSave(): Promise<number | null> {
     _revision = res.revision ?? 0;
     useGameStore.setState((s) => ({ ...s, save: res.data as typeof s.save, cloudSynced: true, lastSyncAt: new Date().toISOString() }));
     return res.serverOfflineMs ?? 0;
-  } catch {
+  } catch (err) {
+    console.error("[save] load failed", err);
     return null;
   }
 }
@@ -60,11 +61,13 @@ export async function uploadCloudSave(retrying = false): Promise<void> {
   } catch (err: unknown) {
     const status = (err as { status?: number })?.status;
     if (status === 409 && !retrying) {
-      await loadCloudSave();
-      await new Promise<void>((r) => setTimeout(r, 1000));
       _uploading = false;
-      return uploadCloudSave(true);
+      await loadCloudSave();
+      await new Promise<void>((r) => setTimeout(r, 500));
+      await uploadCloudSave(true);
+      return;
     }
+    console.error("[save] upload failed", status, err);
     useGameStore.getState().setCloudSynced(false);
   } finally {
     _uploading = false;

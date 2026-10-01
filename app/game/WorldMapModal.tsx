@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -90,7 +90,7 @@ export default function WorldMapModal({ onClose }: { onClose: () => void }) {
           <span className="h-4 w-[1px] bg-violet/20" />
           <span className="text-[11px] font-bold tracking-widest text-cream/70">MAPA MUNDIAL</span>
         </div>
-        <span className="text-[10px] text-violet/40">
+        <span className="text-[10px] text-violet/60">
           {discoveredRegions.length} / {REGIONS.length} regiões
         </span>
       </div>
@@ -129,7 +129,7 @@ export default function WorldMapModal({ onClose }: { onClose: () => void }) {
                 <span className="mt-0.5 max-w-[60px] text-center text-[7px] font-bold leading-tight text-cream/70">
                   {region.name.split(" ").slice(0, 2).join(" ")}
                 </span>
-                <span className="text-[7px] text-violet/40">Nv.{region.level}</span>
+                <span className="text-[7px] text-violet/60">Nv.{region.level}</span>
                 {isCurrent && <span className="mt-0.5 text-[6px] font-bold text-green-400">ATUAL</span>}
               </motion.button>
             );
@@ -171,8 +171,8 @@ export default function WorldMapModal({ onClose }: { onClose: () => void }) {
                             </span>
                           )}
                         </div>
-                        <p className="text-[8px] text-violet/40">{selectedRegion.biome} · Nv.{selectedRegion.level}</p>
-                        <p className="mt-1 text-[9px] leading-relaxed text-violet/55">{selectedRegion.description}</p>
+                        <p className="text-[10px] text-violet/60">{selectedRegion.biome} · Nv.{selectedRegion.level}</p>
+                        <p className="mt-1 text-[11px] leading-relaxed text-violet/55">{selectedRegion.description}</p>
                       </div>
                     </div>
 
@@ -194,7 +194,7 @@ export default function WorldMapModal({ onClose }: { onClose: () => void }) {
                   </div>
 
                   {/* POIs */}
-                  <p className="mb-2.5 text-[9px] uppercase tracking-[0.2em] text-violet/40">
+                  <p className="mb-2.5 text-[11px] uppercase tracking-[0.2em] text-violet/60">
                     Pontos de Interesse
                   </p>
                   <div className="flex flex-col gap-2">
@@ -226,7 +226,7 @@ export default function WorldMapModal({ onClose }: { onClose: () => void }) {
                             </div>
                             <div>
                               <p className="text-[11px] font-bold text-cream/80">{poi.name}</p>
-                              <p className="text-[8px] font-bold capitalize" style={{ color: poiColor, opacity: 0.75 }}>
+                              <p className="text-[10px] font-bold capitalize" style={{ color: poiColor, opacity: 0.75 }}>
                                 {poi.type}
                               </p>
                             </div>
@@ -238,13 +238,13 @@ export default function WorldMapModal({ onClose }: { onClose: () => void }) {
                               onClick={() => explorePoi(poi.poiId)}
                               whileTap={{ scale: 0.93 }}
                               transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
-                              className="rounded-lg border border-violet/20 px-2.5 py-1 text-[8px] font-bold text-violet/55"
+                              className="rounded-lg border border-violet/20 px-2.5 py-1 text-[10px] font-bold text-violet/55"
                               style={{ background: "rgba(122,111,160,0.06)" }}
                             >
                               EXPLORAR
                             </motion.button>
                           ) : (
-                            <span className="text-[8px] text-violet/25">?</span>
+                            <span className="text-[10px] text-violet/25">?</span>
                           )}
                         </div>
                       );
@@ -261,7 +261,7 @@ export default function WorldMapModal({ onClose }: { onClose: () => void }) {
                       }}
                       whileTap={{ scale: 0.96 }}
                       transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
-                      className="mt-3 w-full rounded-xl border border-violet/12 py-2.5 text-[9px] font-bold tracking-wider text-violet/40"
+                      className="mt-3 w-full rounded-xl border border-violet/12 py-2.5 text-[11px] font-bold tracking-wider text-violet/60"
                       style={{ background: "rgba(122,111,160,0.03)" }}
                     >
                       REVELAR TODOS OS POIs

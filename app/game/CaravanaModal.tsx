@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -184,21 +184,21 @@ export default function CaravanaModal({ onClose }: { onClose: () => void }) {
             className="mb-5 mt-4 rounded-xl border border-amber/25 px-5 py-5"
             style={{ background: "linear-gradient(135deg, rgba(200,155,60,0.08) 0%, rgba(10,10,22,0.97) 70%)" }}
           >
-            <p className="mb-2 text-[9px] uppercase tracking-[0.2em] text-violet/40">Caravana em rota</p>
+            <p className="mb-2 text-[11px] uppercase tracking-[0.2em] text-violet/60">Caravana em rota</p>
             <div className="flex items-center gap-3 mb-4">
               <span className="text-3xl">{activeRoute.icon}</span>
               <div>
                 <p className="text-[14px] font-black tracking-wide text-cream">{activeRoute.name}</p>
-                <p className="text-[9px] text-violet/45">{activeRoute.from} → {activeRoute.to}</p>
+                <p className="text-[11px] text-violet/65">{activeRoute.from} → {activeRoute.to}</p>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3 mb-4">
               <div className="rounded-lg border border-amber/15 px-3 py-2" style={{ background: "rgba(200,155,60,0.06)" }}>
-                <p className="text-[8px] text-violet/40">Investido</p>
+                <p className="text-[10px] text-violet/60">Investido</p>
                 <p className="text-[13px] font-black text-amber-400">{caravan.investedGold.toLocaleString("pt-BR")} ouro</p>
               </div>
               <div className="rounded-lg border border-amber/15 px-3 py-2" style={{ background: "rgba(200,155,60,0.06)" }}>
-                <p className="text-[8px] text-violet/40">Retorno esperado</p>
+                <p className="text-[10px] text-violet/60">Retorno esperado</p>
                 <p className="text-[13px] font-black text-green-400">
                   {Math.floor(caravan.investedGold * activeRoute.returnMultiplier).toLocaleString("pt-BR")} ouro
                 </p>
@@ -207,7 +207,7 @@ export default function CaravanaModal({ onClose }: { onClose: () => void }) {
             {timeLeft > 0 ? (
               <div>
                 <div className="mb-1.5 flex items-center justify-between">
-                  <span className="text-[9px] text-violet/40">Chegada em</span>
+                  <span className="text-[11px] text-violet/60">Chegada em</span>
                   <span className="text-[11px] font-bold text-cream/70">{formatTime(timeLeft)}</span>
                 </div>
                 <div className="h-2 w-full overflow-hidden rounded-full bg-violet/10">
@@ -238,7 +238,7 @@ export default function CaravanaModal({ onClose }: { onClose: () => void }) {
         {/* Route selection */}
         {!caravan.inTransit && (
           <>
-            <p className="mb-3 mt-4 text-[9px] uppercase tracking-[0.2em] text-violet/40">Rotas disponíveis</p>
+            <p className="mb-3 mt-4 text-[11px] uppercase tracking-[0.2em] text-violet/60">Rotas disponíveis</p>
             <div className="flex flex-col gap-2.5 mb-5">
               {ROUTES.map((route) => {
                 const riskColor = RISK_COLORS[route.riskLevel];
@@ -265,11 +265,11 @@ export default function CaravanaModal({ onClose }: { onClose: () => void }) {
                             {route.riskLevel}
                           </span>
                         </div>
-                        <p className="text-[8px] text-violet/45">{route.from} → {route.to}</p>
-                        <p className="mt-0.5 text-[8px] text-violet/35">{route.description}</p>
+                        <p className="text-[10px] text-violet/65">{route.from} → {route.to}</p>
+                        <p className="mt-0.5 text-[10px] text-violet/35">{route.description}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-[9px] font-bold text-green-400">×{route.returnMultiplier}</p>
+                        <p className="text-[11px] font-bold text-green-400">×{route.returnMultiplier}</p>
                         <p className="text-[7px] text-violet/35">{formatTime(route.durationMs)}</p>
                       </div>
                     </div>
@@ -286,7 +286,7 @@ export default function CaravanaModal({ onClose }: { onClose: () => void }) {
                         >
                           <div className="border-t border-amber/12 pt-3">
                             <div className="mb-2 flex items-center justify-between">
-                              <span className="text-[9px] text-violet/50">Investimento</span>
+                              <span className="text-[11px] text-violet/50">Investimento</span>
                               <span className="text-[10px] font-bold text-cream/70">
                                 {investAmount.toLocaleString("pt-BR")} ouro
                               </span>
@@ -328,7 +328,7 @@ export default function CaravanaModal({ onClose }: { onClose: () => void }) {
           </>
         )}
 
-        <p className="text-center text-[9px] text-violet/30">
+        <p className="text-center text-[11px] text-violet/30">
           Ouro disponível: <span className="font-bold text-amber-400">{save.wallet.ouro.toLocaleString("pt-BR")}</span>
         </p>
       </div>

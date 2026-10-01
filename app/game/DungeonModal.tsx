@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -218,7 +218,7 @@ function DungeonList({ pendingDungeons, now, onSelect, onCollect, onCancel }: {
       {/* Active runs */}
       {pendingDungeons.length > 0 && (
         <div className="mb-4">
-          <p className="mb-2 text-[9px] uppercase tracking-[0.25em] text-violet/40">Missões Ativas</p>
+          <p className="mb-2 text-[11px] uppercase tracking-[0.25em] text-violet/60">Missões Ativas</p>
           <div className="flex flex-col gap-2">
             {pendingDungeons.map((run) => {
               const remaining = Math.max(0, new Date(run.endTime).getTime() - now);
@@ -237,7 +237,7 @@ function DungeonList({ pendingDungeons, now, onSelect, onCollect, onCancel }: {
                   <div className="mb-2 flex items-start justify-between">
                     <div>
                       <p className="text-[10px] font-bold text-cream/80">{d?.name ?? run.dungeonId}</p>
-                      <p className="text-[8px]" style={{ color: diffColor }}>{DIFFICULTY_LABELS[run.difficulty]}</p>
+                      <p className="text-[10px]" style={{ color: diffColor }}>{DIFFICULTY_LABELS[run.difficulty]}</p>
                     </div>
                     {!isReady && (
                       <p className="text-[15px] font-black text-amber-400" style={{ fontFamily: "var(--font-cinzel)" }}>
@@ -269,7 +269,7 @@ function DungeonList({ pendingDungeons, now, onSelect, onCollect, onCancel }: {
                       onClick={() => onCancel(run.runId)}
                       whileTap={{ scale: 0.97 }}
                       transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
-                      className="w-full rounded-lg border border-red-500/20 py-1.5 text-[9px] font-bold tracking-wider text-red-400/50"
+                      className="w-full rounded-lg border border-red-500/20 py-1.5 text-[11px] font-bold tracking-wider text-red-400/50"
                     >
                       Cancelar
                     </motion.button>
@@ -281,7 +281,7 @@ function DungeonList({ pendingDungeons, now, onSelect, onCollect, onCancel }: {
         </div>
       )}
 
-      <p className="mb-4 text-[9px] uppercase tracking-[0.25em] text-violet/40">Masmorras</p>
+      <p className="mb-4 text-[11px] uppercase tracking-[0.25em] text-violet/60">Masmorras</p>
       <div className="flex flex-col gap-3">
         {DUNGEONS.map((d, i) => {
           const prog = save.dungeon.find((dp) => dp.dungeonId === d.dungeonId);
@@ -302,10 +302,10 @@ function DungeonList({ pendingDungeons, now, onSelect, onCollect, onCancel }: {
             >
               <div>
                 <p className="text-[13px] font-bold text-cream/85">{d.name}</p>
-                <p className="mt-0.5 text-[9px] text-violet/45">
+                <p className="mt-0.5 text-[11px] text-violet/65">
                   Nv.{d.recommendedLevel} · {d.stages} andares · {prog?.totalRuns ?? 0} tentativas
                 </p>
-                {d.description && <p className="mt-1 text-[9px] text-violet/40 line-clamp-1">{d.description}</p>}
+                {d.description && <p className="mt-1 text-[11px] text-violet/60 line-clamp-1">{d.description}</p>}
               </div>
               <div className="flex flex-col items-end gap-1">
                 {cleared ? (
@@ -313,9 +313,9 @@ function DungeonList({ pendingDungeons, now, onSelect, onCollect, onCancel }: {
                     {prog!.bestRank}
                   </span>
                 ) : (
-                  <span className="text-[9px] text-violet/30">Novo</span>
+                  <span className="text-[11px] text-violet/30">Novo</span>
                 )}
-                <span className="text-[8px] text-violet/30">→</span>
+                <span className="text-[10px] text-violet/30">→</span>
               </div>
             </motion.button>
           );
@@ -343,8 +343,8 @@ function DifficultyPicker({ dungeon, selected, onSelect, onNext }: {
       transition={{ duration: 0.18, ease }}
     >
       <div className="flex-1 overflow-y-auto px-4 pt-4">
-        <p className="mb-1 text-[9px] uppercase tracking-[0.2em] text-violet/40">Dificuldade</p>
-        <p className="mb-4 text-[9px] text-violet/40">{dungeon.description}</p>
+        <p className="mb-1 text-[11px] uppercase tracking-[0.2em] text-violet/60">Dificuldade</p>
+        <p className="mb-4 text-[11px] text-violet/60">{dungeon.description}</p>
         <div className="flex flex-col gap-2">
           {difficulties.map((diff) => {
             const rewards = DUNGEON_REWARDS[diff];
@@ -367,10 +367,10 @@ function DifficultyPicker({ dungeon, selected, onSelect, onNext }: {
                   <p className="text-[11px] font-bold" style={{ color: sel ? color : "rgba(232,217,160,0.7)" }}>
                     {DIFFICULTY_LABELS[diff]}
                   </p>
-                  <p className="text-[8px] text-violet/40">
+                  <p className="text-[10px] text-violet/60">
                     {rewards.xp.toLocaleString("pt-BR")} XP · {rewards.gold.toLocaleString("pt-BR")} ouro · {rewards.crystals} cristais
                   </p>
-                  <p className="text-[8px]" style={{ color: `${color}80` }}>
+                  <p className="text-[10px]" style={{ color: `${color}80` }}>
                     {Math.round(rewards.itemChance * 100)}% chance de item {rewards.itemRarity}
                   </p>
                 </div>
@@ -378,7 +378,7 @@ function DifficultyPicker({ dungeon, selected, onSelect, onNext }: {
                   <p className="text-[13px] font-bold" style={{ color: sel ? color : "rgba(122,111,160,0.6)" }}>
                     {fmtDuration(secs)}
                   </p>
-                  <p className="text-[8px] text-violet/40">duração</p>
+                  <p className="text-[10px] text-violet/60">duração</p>
                 </div>
               </motion.button>
             );
@@ -438,10 +438,10 @@ function TeamPicker({ dungeon, difficulty, team, busyIds, onTeamChange, onDispat
     >
       <div className="px-4 pt-4">
         <div className="mb-3 flex items-center justify-between">
-          <p className="text-[9px] uppercase tracking-[0.2em] text-violet/40">
+          <p className="text-[11px] uppercase tracking-[0.2em] text-violet/60">
             Time ({team.length}/{MAX_TEAM})
           </p>
-          <span className="text-[9px] font-bold" style={{ color: diffColor }}>
+          <span className="text-[11px] font-bold" style={{ color: diffColor }}>
             {DIFFICULTY_LABELS[difficulty]} · {fmtDuration(DUNGEON_DURATIONS[difficulty])}
           </span>
         </div>
@@ -491,7 +491,7 @@ function TeamPicker({ dungeon, difficulty, team, busyIds, onTeamChange, onDispat
                   }}
                 >
                   <span className="mb-1 text-2xl">{hero.portrait}</span>
-                  <p className="text-[8px] font-bold text-cream/70">{hero.name.split(",")[0]}</p>
+                  <p className="text-[10px] font-bold text-cream/70">{hero.name.split(",")[0]}</p>
                   {busy && <p className="text-[7px] text-red-400/70">ocupado</p>}
                   {selected && !busy && <p className="text-[7px]" style={{ color: diffColor }}>✓</p>}
                 </motion.button>
@@ -560,7 +560,7 @@ function ResultScreen({ run, dungeon, droppedItem, onClose, onRetry }: {
         className="w-full rounded-xl border px-4 py-4"
         style={{ borderColor: `${diffColor}30`, background: `${diffColor}06` }}
       >
-        <p className="mb-3 text-[9px] uppercase tracking-[0.2em] text-violet/40">Recompensas</p>
+        <p className="mb-3 text-[11px] uppercase tracking-[0.2em] text-violet/60">Recompensas</p>
         <div className="flex flex-col gap-1.5">
           <RewardRow label="Ouro" value={`+${rewards.gold.toLocaleString("pt-BR")}`} color="rgb(200,155,60)" />
           <RewardRow label="Cristais Astra" value={`+${rewards.crystals}`} color="rgb(170,130,255)" />
