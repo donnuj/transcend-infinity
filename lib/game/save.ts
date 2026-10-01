@@ -23,6 +23,7 @@ type CloudSaveResponse = {
 };
 
 let _revision = 0;
+let _loaded = false; // true after confirmed server state (save found or 404)
 let _syncTimer: ReturnType<typeof setTimeout> | null = null;
 let _uploading = false;
 
@@ -36,14 +37,21 @@ export async function loadCloudSave(): Promise<number | null> {
     res = await api.get<CloudSaveDownload | null>("/player/save");
   } catch (err) {
     const status = (err as { status?: number })?.status;
-    if (status === 404) return null; // save não existe — seguro criar
+    if (status === 404) {
+      _loaded = true; // confirmado: sem save — seguro criar com revision=0
+      return null;
+    }
     console.error("[save] load failed", err);
     throw err; // não retorna null — evita upload acidental sobre save existente
   }
 
-  if (!res || !res.data || typeof res.data !== "object") return null;
+  if (!res || !res.data || typeof res.data !== "object") {
+    _loaded = true;
+    return null;
+  }
 
   _revision = res.revision ?? 0;
+  _loaded = true;
   useGameStore.setState((s) => ({ ...s, save: res!.data as typeof s.save, cloudSynced: true, lastSyncAt: new Date().toISOString() }));
   return res.serverOfflineMs ?? 0;
 }
@@ -51,6 +59,14 @@ export async function loadCloudSave(): Promise<number | null> {
 // Sobe save para a nuvem. Em conflito de revisão, re-baixa primeiro e re-tenta uma vez.
 export async function uploadCloudSave(retrying = false): Promise<void> {
   if (_uploading) return;
+
+  // Se ainda não confirmamos o estado do servidor (ex: loadCloudSave falhou no início
+  // da sessão por servidor frio), tentar carregar agora antes de sobrescrever com dados locais.
+  if (!_loaded && !retrying) {
+    try { await loadCloudSave(); }
+    catch { /* falhou de novo — continua; server rejeitará com 409 se necessário */ }
+  }
+
   _uploading = true;
   const now = new Date().toISOString();
   const { save } = useGameStore.getState();
@@ -69,8 +85,8 @@ export async function uploadCloudSave(retrying = false): Promise<void> {
     const status = (err as { status?: number })?.status;
     if (status === 409 && !retrying) {
       _uploading = false;
-      await loadCloudSave();
-      await new Promise<void>((r) => setTimeout(r, 500));
+      await loadCloudSave().catch(() => null);
+      await new Promise<void>((r) => setTimeout(r, 200));
       await uploadCloudSave(true);
       return;
     }
