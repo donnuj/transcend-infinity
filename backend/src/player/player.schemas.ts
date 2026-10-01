@@ -23,8 +23,6 @@ export const MONOTONIC_PATHS: Array<{ path: string[]; max: number }> = [
   // so newXp < oldXp is valid and must not trigger a conflict.
 ];
 
-const PROTECTED_SAVE_FIELDS = new Set<string>([]);
-
 function getDepth(value: unknown, currentDepth = 0): number {
   if (currentDepth > MAX_SAVE_DEPTH) return currentDepth;
   let maximumDepth = currentDepth;
@@ -44,18 +42,6 @@ function getDepth(value: unknown, currentDepth = 0): number {
   }
 
   return maximumDepth;
-}
-
-function containsProtectedField(value: unknown): boolean {
-  if (Array.isArray(value)) return value.some(containsProtectedField);
-  if (value === null || typeof value !== 'object') return false;
-
-  const record = value as Record<string, unknown>;
-  return Object.entries(record).some(
-    ([key, child]) =>
-      PROTECTED_SAVE_FIELDS.has(key.toLowerCase()) ||
-      containsProtectedField(child),
-  );
 }
 
 function getNestedValue(obj: Record<string, unknown>, path: string[]): unknown {
@@ -93,10 +79,6 @@ function monotonicValid(save: Record<string, unknown>): string | null {
 const saveDataSchema = z
   .record(z.string(), z.unknown())
   .refine((save) => getDepth(save) <= MAX_SAVE_DEPTH, 'Save muito profundo.')
-  .refine(
-    (save) => !containsProtectedField(save),
-    'Save contém campo controlado pelo servidor.',
-  )
   .superRefine((save, ctx) => {
     const capsError = capsValid(save);
     if (capsError) ctx.addIssue({ code: z.ZodIssueCode.custom, message: capsError });
