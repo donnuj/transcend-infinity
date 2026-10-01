@@ -1,8 +1,10 @@
 ﻿"use client";
 
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGameStore } from "@/lib/game/store";
 import { scheduleSave } from "@/lib/game/save";
+import { api } from "@/lib/api";
 
 const ease = [0.23, 1, 0.32, 1] as const;
 
@@ -43,6 +45,26 @@ const PREMIUM_REWARDS: Record<number, Reward> = {
 export default function BattlePassModal({ onClose }: { onClose: () => void }) {
   const { save, addCurrency, addItem } = useGameStore();
   const bp = save.battlePass;
+  const [buyLoading, setBuyLoading] = useState<"monthly" | "season" | null>(null);
+
+  async function handleBuy(type: "monthly" | "season") {
+    setBuyLoading(type);
+    try {
+      const { init_point } = await api.post<{ init_point: string; preference_id: string }>(
+        "/payment/create-preference",
+        { type },
+      );
+      window.location.href = init_point;
+    } catch {
+      setBuyLoading(null);
+    }
+  }
+
+  function premiumExpiryLabel() {
+    if (!bp.premiumExpiresAt) return null;
+    const d = new Date(bp.premiumExpiresAt);
+    return `Válido até ${d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })}`;
+  }
   const currentLevel = bp.level;
   const xpPct = Math.min(100, (bp.xp / XP_PER_LEVEL) * 100);
 
@@ -178,22 +200,73 @@ export default function BattlePassModal({ onClose }: { onClose: () => void }) {
           })}
         </div>
 
+        {bp.isPremium && premiumExpiryLabel() && (
+          <div className="mt-4 rounded-xl border border-amber/20 px-4 py-3" style={{ background: "rgba(200,155,60,0.05)" }}>
+            <p className="text-[10px] text-amber-400/70">{premiumExpiryLabel()}</p>
+          </div>
+        )}
+
         {!bp.isPremium && (
-          <div className="mt-5 rounded-xl border border-violet/20 px-4 py-4" style={{ background: "rgba(170,130,255,0.05)" }}>
-            <p className="text-[11px] font-bold text-cream/70">Upgrade para Premium</p>
-            <p className="mt-0.5 text-[11px] text-violet/50">Desbloqueie recompensas extras e selos adicionais em todas as temporadas</p>
-            <motion.button
-              onClick={() => {
-                useGameStore.setState((s) => { s.save.battlePass.isPremium = true; });
-                scheduleSave();
-              }}
-              whileTap={{ scale: 0.97 }}
-              transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
-              className="mt-3 w-full rounded-xl border border-violet/40 py-3 text-[12px] font-bold tracking-wide"
-              style={{ background: "rgba(170,130,255,0.12)", color: "rgba(200,175,255,0.9)" }}
-            >
-              COMPRAR PREMIUM — R$ 14,99
-            </motion.button>
+          <div className="mt-5 rounded-xl border border-violet/20 px-4 py-5" style={{ background: "rgba(170,130,255,0.05)" }}>
+            <p className="text-[12px] font-black tracking-wide text-cream/80">Upgrade para Premium</p>
+            <p className="mt-1 text-[11px] text-violet/50">Desbloqueie todas as recompensas premium e selos adicionais</p>
+
+            <div className="mt-4 flex flex-col gap-2.5">
+              {/* Mensal */}
+              <motion.button
+                onClick={() => handleBuy("monthly")}
+                disabled={!!buyLoading}
+                whileTap={!buyLoading ? { scale: 0.97 } : undefined}
+                transition={{ duration: 0.08, ease }}
+                className="w-full rounded-xl border py-4 text-left px-4"
+                style={{
+                  borderColor: "rgba(170,130,255,0.4)",
+                  background: "rgba(170,130,255,0.09)",
+                  opacity: buyLoading && buyLoading !== "monthly" ? 0.4 : 1,
+                }}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-[12px] font-bold text-cream/85">Premium Mensal</p>
+                    <p className="text-[10px] text-violet/55">30 dias · Renovação manual</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[14px] font-black text-amber-400">R$ 14,99</p>
+                    {buyLoading === "monthly" && <p className="text-[9px] text-violet/50">Aguarde...</p>}
+                  </div>
+                </div>
+              </motion.button>
+
+              {/* Temporada */}
+              <motion.button
+                onClick={() => handleBuy("season")}
+                disabled={!!buyLoading}
+                whileTap={!buyLoading ? { scale: 0.97 } : undefined}
+                transition={{ duration: 0.08, ease }}
+                className="relative w-full overflow-hidden rounded-xl border py-4 text-left px-4"
+                style={{
+                  borderColor: "rgba(200,155,60,0.45)",
+                  background: "linear-gradient(135deg,rgba(200,155,60,0.12),rgba(170,130,255,0.06))",
+                  opacity: buyLoading && buyLoading !== "season" ? 0.4 : 1,
+                }}
+              >
+                <div className="absolute right-3 top-2 rounded-full border border-amber/40 bg-amber/15 px-2 py-0.5 text-[8px] font-black tracking-widest text-amber-400">
+                  MELHOR VALOR
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-[12px] font-bold text-cream/85">Premium Temporada</p>
+                    <p className="text-[10px] text-violet/55">Válido até 31/dez · Compra única</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[14px] font-black text-amber-400">R$ 29,99</p>
+                    {buyLoading === "season" && <p className="text-[9px] text-violet/50">Aguarde...</p>}
+                  </div>
+                </div>
+              </motion.button>
+            </div>
+
+            <p className="mt-3 text-center text-[9px] text-violet/30">Pagamento seguro via Mercado Pago · PIX, cartão e boleto</p>
           </div>
         )}
       </div>

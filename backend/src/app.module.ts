@@ -6,6 +6,7 @@ import { TerminusModule } from '@nestjs/terminus';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { PlayerModule } from './player/player.module';
+import { PaymentModule } from './payment/payment.module';
 import { validateEnvironment } from './config/env.schema';
 import { HealthController } from './health/health.controller';
 
@@ -27,6 +28,7 @@ import { HealthController } from './health/health.controller';
     PrismaModule,
     AuthModule,
     PlayerModule,
+    PaymentModule,
   ],
   controllers: [HealthController],
   providers: [

@@ -76,7 +76,7 @@ export function newSave(): SaveData {
     caravan: { activeRouteId: "", investedGold: 0, inTransit: false, arrivalTime: "", assignedHeroIds: [], successChance: 1 },
     housing: { houseLevel: 0, unlockedRooms: [] },
     bossHunt: { weekStart: "", weeklyDefeated: [], allTimeKills: [] },
-    battlePass: { xp: 0, level: 1, isPremium: false, claimedFree: [], claimedPremium: [] },
+    battlePass: { xp: 0, level: 1, isPremium: false, premiumType: "", premiumExpiresAt: "", claimedFree: [], claimedPremium: [] },
     guildAdvanced: { specialization: 0, treasury: 0, completedMissions: [], completedResearch: [], buildings: [], founded: false, guildName: "", factionAffiliation: "" },
     profession: { chosenProfession: "", xp: 0, craftedRecipeIds: [] },
     season: { seasonId: 1, xp: 0, level: 1, claimedLevels: [] },

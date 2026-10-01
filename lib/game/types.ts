@@ -401,6 +401,8 @@ export type BattlePassSave = {
   xp: number;
   level: number;
   isPremium: boolean;
+  premiumType: "monthly" | "season" | "";
+  premiumExpiresAt: string;
   claimedFree: number[];
   claimedPremium: number[];
 };
