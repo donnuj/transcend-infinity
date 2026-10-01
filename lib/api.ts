@@ -67,8 +67,12 @@ async function request<T>(path: string, options: RequestOptions = {}, isRetry = 
       : typeof raw === "object" && raw !== null
         ? String((raw as { message?: unknown }).message ?? res.statusText)
         : res.statusText;
-    const error = new Error(msg) as Error & { status: number };
+    const issues = typeof raw === "object" && raw !== null
+      ? (raw as { issues?: unknown }).issues
+      : undefined;
+    const error = new Error(msg) as Error & { status: number; issues?: unknown };
     error.status = res.status;
+    error.issues = issues;
     throw error;
   }
 

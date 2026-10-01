@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   type PipeTransform,
 } from '@nestjs/common';
 import type { z } from 'zod';
@@ -10,11 +11,17 @@ export class ZodValidationPipe<TOutput> implements PipeTransform<
   unknown,
   TOutput
 > {
+  private readonly logger = new Logger(ZodValidationPipe.name);
+
   constructor(private readonly schema: z.ZodType<TOutput>) {}
 
   transform(value: unknown): TOutput {
     const result = this.schema.safeParse(value);
     if (result.success) return result.data;
+
+    this.logger.warn(
+      `Validation failed: ${JSON.stringify(result.error.issues)}`,
+    );
 
     throw new BadRequestException({
       statusCode: 400,

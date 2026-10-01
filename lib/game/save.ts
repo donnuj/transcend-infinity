@@ -67,7 +67,7 @@ export async function uploadCloudSave(retrying = false): Promise<void> {
       await uploadCloudSave(true);
       return;
     }
-    console.error("[save] upload failed", status, err);
+    console.error("[save] upload failed", status, err, (err as { issues?: unknown })?.issues);
     useGameStore.getState().setCloudSynced(false);
   } finally {
     _uploading = false;
