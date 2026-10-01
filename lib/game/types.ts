@@ -372,6 +372,9 @@ export type ArenaSave = {
   wins: number;
   losses: number;
   weekStart: string;
+  defenderHeroId: string;
+  dailyFights: number;
+  lastFightDate: string;
 };
 
 export type CaravanSave = {
@@ -379,6 +382,8 @@ export type CaravanSave = {
   investedGold: number;
   inTransit: boolean;
   arrivalTime: string;
+  assignedHeroIds: string[];
+  successChance: number;
 };
 
 export type HousingSave = {
@@ -451,6 +456,8 @@ export type WorldMapSave = {
   currentRegionId: string;
   discoveredRegions: string[];
   discoveredPois: string[];
+  exploration: { heroId: string; regionId: string; endTime: string } | null;
+  injuredHeroes: { heroId: string; healTime: string }[];
 };
 
 export type NpcStateSave = {

@@ -225,20 +225,32 @@ export default function NpcDialogueModal({ onClose }: { onClose: () => void }) {
                       onClick={() => makeChoice(choice.choiceId, choice.nextId, choice.rewardType, choice.rewardAmount)}
                       whileTap={{ scale: 0.97 }}
                       transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
-                      className="flex items-center gap-3 rounded-xl border px-4 py-3 text-left"
+                      className="flex items-start gap-3 rounded-xl border px-4 py-3 text-left"
                       style={{
-                        borderColor: chosen ? "rgba(122,111,160,0.12)" : "rgba(122,111,160,0.2)",
-                        background: chosen ? "rgba(122,111,160,0.03)" : "rgba(122,111,160,0.06)",
+                        borderColor: choice.isQuest
+                          ? chosen ? "rgba(100,220,140,0.1)" : "rgba(100,220,140,0.3)"
+                          : chosen ? "rgba(122,111,160,0.12)" : "rgba(122,111,160,0.2)",
+                        background: choice.isQuest
+                          ? chosen ? "rgba(100,220,140,0.02)" : "rgba(100,220,140,0.05)"
+                          : chosen ? "rgba(122,111,160,0.03)" : "rgba(122,111,160,0.06)",
                         opacity: chosen ? 0.65 : 1,
                       }}
                     >
-                      <span className="text-[10px] font-bold text-violet/50">
-                        {!choice.nextId ? "◇" : "▷"}
+                      <span className="mt-0.5 text-[10px] font-bold" style={{ color: choice.isQuest ? "rgb(100,220,140)" : "rgba(122,111,160,0.5)" }}>
+                        {choice.isQuest ? "!" : !choice.nextId ? "◇" : "▷"}
                       </span>
-                      <span className="flex-1 text-[11px] text-cream/75">{choice.text}</span>
+                      <div className="flex-1">
+                        <span className="text-[11px] text-cream/75">{choice.text}</span>
+                        {choice.questLabel && (
+                          <p className="mt-0.5 text-[9px] font-bold text-green-400/70">{choice.questLabel}</p>
+                        )}
+                      </div>
                       {choice.rewardType && (
-                        <span className="rounded-full border border-amber/25 px-1.5 py-0.5 text-[7px] font-bold text-amber-400">
-                          +{choice.rewardAmount}
+                        <span
+                          className="rounded-full border px-1.5 py-0.5 text-[7px] font-bold"
+                          style={{ borderColor: "rgba(200,155,60,0.3)", color: "rgb(200,155,60)", background: "rgba(200,155,60,0.08)" }}
+                        >
+                          +{choice.rewardAmount} {choice.rewardType === "ouro" ? "◆" : choice.rewardType === "cristaisAstra" ? "✦" : "selos"}
                         </span>
                       )}
                     </motion.button>

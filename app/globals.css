@@ -55,8 +55,8 @@
   --color-amber-glow:  rgba(200, 155, 60, 0.15);
   --color-cream:       rgb(232, 217, 160);
   --color-cream-muted: rgba(232, 217, 160, 0.65);
-  --color-violet:      rgb(168, 160, 210);
-  --color-violet-dim:  rgba(168, 160, 210, 0.5);
+  --color-violet:      rgb(210, 205, 240);
+  --color-violet-dim:  rgba(210, 205, 240, 0.5);
 
   /* Semantic gameplay — NUNCA alterar */
   --color-rarity-comum:    rgb(150, 150, 150);

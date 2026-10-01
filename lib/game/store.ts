@@ -72,8 +72,8 @@ export function newSave(): SaveData {
     loginBonus: { dayInCycle: 1, cycle: 1, claimedToday: false, lastClaimDate: "" },
     karma: { value: 0, nonRepeatableDone: [] },
     tower: { bestFloor: 0, weeklyBest: 0, weekStart: "" },
-    arena: { rating: 1000, wins: 0, losses: 0, weekStart: "" },
-    caravan: { activeRouteId: "", investedGold: 0, inTransit: false, arrivalTime: "" },
+    arena: { rating: 1000, wins: 0, losses: 0, weekStart: "", defenderHeroId: "", dailyFights: 0, lastFightDate: "" },
+    caravan: { activeRouteId: "", investedGold: 0, inTransit: false, arrivalTime: "", assignedHeroIds: [], successChance: 1 },
     housing: { houseLevel: 0, unlockedRooms: [] },
     bossHunt: { weekStart: "", weeklyDefeated: [], allTimeKills: [] },
     battlePass: { xp: 0, level: 1, isPremium: false, claimedFree: [], claimedPremium: [] },
@@ -82,7 +82,7 @@ export function newSave(): SaveData {
     season: { seasonId: 1, xp: 0, level: 1, claimedLevels: [] },
     playerLevel: { xp: 0, level: 1 },
     dialogue: { seenDialogues: [], choiceHistory: [] },
-    worldMap: { currentRegionId: "reg_valdris", discoveredRegions: ["reg_valdris"], discoveredPois: [] },
+    worldMap: { currentRegionId: "reg_valdris", discoveredRegions: ["reg_valdris"], discoveredPois: [], exploration: null, injuredHeroes: [] },
     npcState: { gameHour: 8, instances: [] },
     alchemy: { stationLevel: 1 },
     fortress: {
@@ -382,7 +382,7 @@ export const useGameStore = create<GameStore>()(
       },
 
       rankUpHero(heroId) {
-        const RANK_FRAG_COST = [10, 20, 30, 40, 50, 60];
+        const RANK_FRAG_COST = [50, 200, 600, 1500, 4000, 10000];
         const prog = get().getHeroProgression(heroId);
         if (prog.rank >= 6) return false;
         const cost = RANK_FRAG_COST[prog.rank];
@@ -399,7 +399,7 @@ export const useGameStore = create<GameStore>()(
       },
 
       upgradeHeroStars(heroId) {
-        const STAR_FRAG_COST = [5, 10, 15, 20];
+        const STAR_FRAG_COST = [30, 80, 200, 500];
         const prog = get().getHeroProgression(heroId);
         if (prog.stars >= 5) return false;
         const cost = STAR_FRAG_COST[prog.stars - 1];
@@ -416,7 +416,7 @@ export const useGameStore = create<GameStore>()(
       },
 
       awakenHero(heroId) {
-        const AWAKEN_FRAG_COST = [20, 40, 60, 80, 100];
+        const AWAKEN_FRAG_COST = [100, 250, 600, 1500, 3500];
         const prog = get().getHeroProgression(heroId);
         if (prog.awakenLevel >= 5) return false;
         const cost = AWAKEN_FRAG_COST[prog.awakenLevel];

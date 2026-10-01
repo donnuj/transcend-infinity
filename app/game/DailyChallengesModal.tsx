@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { useGameStore } from "@/lib/game/store";
 import { DAILY_CHALLENGES } from "@/lib/game/data/challenges";
@@ -10,7 +11,7 @@ const ease = [0.23, 1, 0.32, 1] as const;
 export default function DailyChallengesModal({ onClose }: { onClose: () => void }) {
   const { save, claimDailyReward, getDailyProgress, resetDailyChallengesIfNeeded } = useGameStore();
 
-  resetDailyChallengesIfNeeded();
+  useEffect(() => { resetDailyChallengesIfNeeded(); }, [resetDailyChallengesIfNeeded]);
 
   const dc = save.dailyChallenges;
   const completedCount = dc.completed.length;
