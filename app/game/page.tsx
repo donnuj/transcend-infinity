@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { GlobeSimple, Cards, Sparkle, Shield, User } from "@phosphor-icons/react";
@@ -66,7 +66,6 @@ const ease = [0.23, 1, 0.32, 1] as const;
 
 export default function GamePage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const wallet = useGameStore((s) => s.save.wallet);
   const [user, setUser] = useState<StoredUser | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -94,7 +93,7 @@ export default function GamePage() {
   const [showWiki, setShowWiki] = useState(false);
   const [offlineReward, setOfflineReward] = useState<{ ouro: number; xp: number } | null>(null);
   const [showNovatos, setShowNovatos] = useState(false);
-  const paymentStatus = searchParams.get("payment") as "success" | "failure" | "pending" | null;
+
   const isPremium = useGameStore((s) => s.save.battlePass.isPremium);
 
   // Modal callbacks — stable references
@@ -174,12 +173,6 @@ export default function GamePage() {
       .finally(() => { setUser(u); setShowNovatos(true); });
   }, [router]);
 
-  // Detecta retorno do checkout MP
-  useEffect(() => {
-    if (paymentStatus === "success") {
-      setTimeout(() => loadCloudSave().catch(() => null), 3000);
-    }
-  }, [paymentStatus]);
 
   // Keep-alive: mantém o backend no Render acordado enquanto o jogador está na sessão
   useEffect(() => {
@@ -304,36 +297,9 @@ export default function GamePage() {
       </AnimatePresence>
 
       {/* Retorno de pagamento */}
-      <AnimatePresence>
-        {paymentStatus && (
-          <motion.div
-            className="absolute inset-x-0 bottom-20 z-[90] flex justify-center px-4"
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 16 }}
-            transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
-          >
-            <div
-              className="flex items-center gap-3 rounded-2xl border px-5 py-3.5 shadow-2xl"
-              style={{
-                background: paymentStatus === "success" ? "rgba(10,30,15,0.98)" : "rgba(20,10,10,0.98)",
-                borderColor: paymentStatus === "success" ? "rgba(100,220,140,0.35)" : paymentStatus === "pending" ? "rgba(200,155,60,0.35)" : "rgba(255,100,100,0.35)",
-              }}
-            >
-              <span className="text-xl">{paymentStatus === "success" ? "🎉" : paymentStatus === "pending" ? "⏳" : "❌"}</span>
-              <div>
-                <p className="text-[12px] font-bold" style={{ color: paymentStatus === "success" ? "rgb(100,220,140)" : paymentStatus === "pending" ? "rgb(200,155,60)" : "rgb(255,100,100)" }}>
-                  {paymentStatus === "success" ? "Pagamento aprovado!" : paymentStatus === "pending" ? "Pagamento em análise" : "Pagamento não concluído"}
-                </p>
-                <p className="text-[10px] text-violet/60">
-                  {paymentStatus === "success" ? "Premium ativado. Recarregando save..." : paymentStatus === "pending" ? "Você será notificado quando confirmar." : "Tente novamente quando quiser."}
-                </p>
-              </div>
-              <motion.button onClick={() => router.replace("/game")} whileTap={{ scale: 0.9 }} transition={{ duration: 0.08 }} className="ml-2 text-[11px] text-violet/40">✕</motion.button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <Suspense fallback={null}>
+        <PaymentToast />
+      </Suspense>
 
       {/* Guia do Novato banner */}
       <AnimatePresence>
@@ -502,5 +468,49 @@ function Chip({ icon, value, color }: { icon: string; value: number; color: stri
       <span className="text-[10px]">{icon}</span>
       <span>{value.toLocaleString("pt-BR")}</span>
     </div>
+  );
+}
+
+function PaymentToast() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const status = searchParams.get("payment") as "success" | "failure" | "pending" | null;
+
+  useEffect(() => {
+    if (status === "success") {
+      setTimeout(() => loadCloudSave().catch(() => null), 3000);
+    }
+  }, [status]);
+
+  if (!status) return null;
+  return (
+    <AnimatePresence>
+      <motion.div
+        className="absolute inset-x-0 bottom-20 z-[90] flex justify-center px-4"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 16 }}
+        transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
+      >
+        <div
+          className="flex items-center gap-3 rounded-2xl border px-5 py-3.5 shadow-2xl"
+          style={{
+            background: status === "success" ? "rgba(10,30,15,0.98)" : "rgba(20,10,10,0.98)",
+            borderColor: status === "success" ? "rgba(100,220,140,0.35)" : status === "pending" ? "rgba(200,155,60,0.35)" : "rgba(255,100,100,0.35)",
+          }}
+        >
+          <span className="text-xl">{status === "success" ? "🎉" : status === "pending" ? "⏳" : "❌"}</span>
+          <div>
+            <p className="text-[12px] font-bold" style={{ color: status === "success" ? "rgb(100,220,140)" : status === "pending" ? "rgb(200,155,60)" : "rgb(255,100,100)" }}>
+              {status === "success" ? "Pagamento aprovado!" : status === "pending" ? "Pagamento em análise" : "Pagamento não concluído"}
+            </p>
+            <p className="text-[10px] text-violet/60">
+              {status === "success" ? "Premium ativado. Recarregando save..." : status === "pending" ? "Você será notificado quando confirmar." : "Tente novamente quando quiser."}
+            </p>
+          </div>
+          <motion.button onClick={() => router.replace("/game")} whileTap={{ scale: 0.9 }} transition={{ duration: 0.08 }} className="ml-2 text-[11px] text-violet/40">✕</motion.button>
+        </div>
+      </motion.div>
+    </AnimatePresence>
   );
 }
