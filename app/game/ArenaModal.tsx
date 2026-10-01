@@ -36,10 +36,9 @@ type Screen = "overview" | "choose-defender" | "challengers" | "result";
 
 export default function ArenaModal({ onClose }: { onClose: () => void }) {
   const [screen, setScreen] = useState<Screen>("overview");
-  const [selectedOpponent, setSelectedOpponent] = useState<RealOpponent | null>(null);
   const [result, setResult] = useState<{ won: boolean; ratingChange: number; opponentName: string } | null>(null);
-  const [realOpponents, setRealOpponents] = useState<RealOpponent[]>([]);
-  const [loadingOpponents, setLoadingOpponents] = useState(false);
+  const [realOpponents, setRealOpponents] = useState<RealOpponent[] | null>(null);
+  const loadingOpponents = screen === "challengers" && realOpponents === null;
 
   const store = useGameStore.getState();
   const { save } = useGameStore();
@@ -56,11 +55,9 @@ export default function ArenaModal({ onClose }: { onClose: () => void }) {
 
   useEffect(() => {
     if (screen !== "challengers") return;
-    setLoadingOpponents(true);
     api.get<RealOpponent[]>(`/player/arena-opponents?rating=${arena.rating}`)
       .then((data) => setRealOpponents(data))
-      .catch(() => setRealOpponents([]))
-      .finally(() => setLoadingOpponents(false));
+      .catch(() => setRealOpponents([]));
   }, [screen, arena.rating]);
 
   const collected = Array.from(new Set(save.collectedHeroIds.map((k) => k.split("|")[1])))
@@ -337,9 +334,9 @@ export default function ArenaModal({ onClose }: { onClose: () => void }) {
                 <div className="flex items-center justify-center py-12">
                   <div className="h-5 w-5 animate-spin rounded-full border-2 border-amber/20 border-t-amber" />
                 </div>
-              ) : realOpponents.length === 0 ? (
+              ) : realOpponents?.length === 0 ? (
                 <p className="py-8 text-center text-[11px] text-violet/40">Nenhum oponente disponível ainda. Seja o primeiro a desafiar!</p>
-              ) : realOpponents.map((opp, i) => {
+              ) : realOpponents?.map((opp, i) => {
                 const oppHero = HERO_MAP[opp.heroId];
                 const oppTier = getRankTier(opp.rating);
                 const oppLevel = Math.max(1, Math.floor(opp.rating / 30));
@@ -381,7 +378,7 @@ export default function ArenaModal({ onClose }: { onClose: () => void }) {
                     </div>
 
                     <motion.button
-                      onClick={() => { setSelectedOpponent(opp); fightOpponent(opp); }}
+                      onClick={() => fightOpponent(opp)}
                       whileTap={{ scale: 0.97 }}
                       transition={{ duration: 0.08 }}
                       className="w-full rounded-xl border py-2.5 text-[10px] font-bold tracking-widest"
