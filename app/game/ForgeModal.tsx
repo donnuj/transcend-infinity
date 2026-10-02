@@ -60,8 +60,10 @@ export default function ForgeModal({ onClose }: { onClose: () => void }) {
       const resolved = resolveForgePending();
       if (resolved) {
         const lvl = getForgeLevel(resolved.equipId);
-        setToast(`Forja completa! +${lvl} — ${ENHANCE_BONUSES[lvl - 1]}`);
-        setTimeout(() => setToast(""), 3000);
+        setTimeout(() => {
+          setToast(`Forja completa! +${lvl} — ${ENHANCE_BONUSES[lvl - 1]}`);
+          setTimeout(() => setToast(""), 3000);
+        }, 0);
         incrementDailyProgress("forge_today");
         scheduleSave();
       }
@@ -78,6 +80,11 @@ export default function ForgeModal({ onClose }: { onClose: () => void }) {
     if (sort === "level")  return b.forgeLevel - a.forgeLevel;
     return a.def.name.localeCompare(b.def.name);
   });
+
+  // eslint-disable-next-line react-hooks/purity
+  const pendingProgressPct = pending
+    ? Math.min(100, (Date.now() - new Date(pending.startTime).getTime()) / (new Date(pending.endTime).getTime() - new Date(pending.startTime).getTime()) * 100)
+    : 0;
 
   const sel = selected ? equipment.find((e) => e.id === selected) : null;
   const nextCost = sel ? FORGE_COSTS[sel.forgeLevel] ?? null : null;
@@ -143,9 +150,7 @@ export default function ForgeModal({ onClose }: { onClose: () => void }) {
           </div>
           {/* Animated progress bar */}
           {(() => {
-            const total = new Date(pending.endTime).getTime() - new Date(pending.startTime).getTime();
-            const elapsed = Date.now() - new Date(pending.startTime).getTime();
-            const pct = Math.min(100, (elapsed / total) * 100);
+            const pct = pendingProgressPct;
             const equipDef = EQUIP_MAP[pending.equipId];
             return (
               <>
