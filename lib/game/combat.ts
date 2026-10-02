@@ -131,7 +131,6 @@ function takeTurn(
     return { tick, actorId: actor.id, targetId: target.id, skillId: "basic", skillName: "Ataque", value: 0, type: "miss", isCrit: false, killedTarget: false };
   }
 
-  const isHealSkill = false;
   const baseDmg = actor.isHero ? actor.stats.physAtk : actor.stats.physAtk;
   const elemMult = elementMultiplier(actor.element, target.element);
   const crit = Math.random() < actor.stats.critChance;

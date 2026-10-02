@@ -403,7 +403,7 @@ function DifficultyPicker({ dungeon, selected, onSelect, onNext }: {
 
 // ── Team Picker ─────────────────────────────────────────────────────────────────
 
-function TeamPicker({ dungeon: _dungeon, difficulty, team, busyIds, onTeamChange, onDispatch }: {
+function TeamPicker({ difficulty, team, busyIds, onTeamChange, onDispatch }: {
   dungeon: DungeonDef;
   difficulty: DungeonDifficulty;
   team: string[];

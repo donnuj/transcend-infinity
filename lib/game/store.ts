@@ -4,9 +4,8 @@ import { persist, createJSONStorage } from "zustand/middleware";
 import type { SaveData, DungeonDifficulty, PendingTowerClimb, PendingDungeonRun, ForgePending } from "./types";
 import { ACHIEVEMENTS } from "./data/achievements";
 import { DAILY_CHALLENGES } from "./data/challenges";
-import { maxFloorInBudget, calcTowerTimeSeconds, DUNGEON_DURATIONS } from "./data/towerData";
+import { calcTowerTimeSeconds, DUNGEON_DURATIONS } from "./data/towerData";
 import { COMPANION_MAP } from "./data/companions";
-import { FACTIONS } from "./data/world";
 
 // ── Bonus memo cache (avoids recomputing on every addCurrency call) ───────────
 

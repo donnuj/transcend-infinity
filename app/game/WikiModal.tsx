@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   X, BookOpen, Star, Sword, Coins, Calendar, ArrowRight,
   CheckCircle, Warning, Info,
-  Lightning, Crown, Lock,
+  Lightning, Crown,
   type Icon as PhosphorIcon,
 } from "@phosphor-icons/react";
 

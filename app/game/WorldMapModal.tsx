@@ -74,7 +74,7 @@ function formatHealTime(ms: number): string {
 type Screen = "map" | "detail" | "select-hero";
 
 export default function WorldMapModal({ onClose }: { onClose: () => void }) {
-  const { save, discoverRegion, discoverPoi } = useGameStore();
+  const { save, discoverPoi } = useGameStore();
   const [selectedRegionId, setSelectedRegionId] = useState<string>(
     save.worldMap.currentRegionId ?? "reg_valdris"
   );
