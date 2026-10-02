@@ -7,6 +7,7 @@ import { scheduleSave } from "@/lib/game/save";
 import { BANNERS, BANNER_MAP } from "@/lib/game/data/banners";
 import { HERO_MAP } from "@/lib/game/data/heroes";
 import type { BannerDef, GachaRarity, HeroDef } from "@/lib/game/types";
+import { sfx } from "@/lib/game/sfx";
 
 const ease = [0.23, 1, 0.32, 1] as const;
 
@@ -83,6 +84,7 @@ export default function InvocarTab() {
 
   function executePull(count: 1 | 10) {
     if (selos < count) return;
+    sfx.click();
     setPulling(true);
 
     setTimeout(() => {
@@ -120,6 +122,7 @@ export default function InvocarTab() {
       store.incrementDailyProgress("pulls_today", count);
       scheduleSave();
 
+      sfx.victory();
       setResults(pullResults);
       setPulling(false);
     }, 400);
