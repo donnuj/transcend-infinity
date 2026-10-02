@@ -25,8 +25,8 @@ const ENHANCE_BONUSES = [
 
 const FORGE_DURATION_SECONDS = 90;
 
-function formatCountdown(endTime: string): string {
-  const ms = new Date(endTime).getTime() - Date.now();
+function formatCountdown(endTime: string, nowMs: number): string {
+  const ms = new Date(endTime).getTime() - nowMs;
   if (ms <= 0) return "Pronto!";
   const s = Math.ceil(ms / 1000);
   const m = Math.floor(s / 60);
@@ -41,22 +41,21 @@ export default function ForgeModal({ onClose }: { onClose: () => void }) {
   const [selected, setSelected] = useState<string | null>(null);
   const [sort, setSort] = useState<SortMode>("rarity");
   const [toast, setToast] = useState("");
-  const [, setTick] = useState(0);
+  const [now, setNow] = useState(() => Date.now());
 
   const pending = save.forgePending;
 
-  // Tick every second to refresh countdown
+  // Tick every second to refresh countdown and progress bar
   useEffect(() => {
     if (!pending) return;
-    const id = setInterval(() => setTick((t) => t + 1), 1000);
+    const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
   }, [pending]);
 
-  // Auto-resolve when timer expires — intentionally runs every render to check elapsed time
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // Auto-resolve when timer expires — runs on every `now` tick
   useEffect(() => {
     if (!pending) return;
-    if (new Date() >= new Date(pending.endTime)) {
+    if (now >= new Date(pending.endTime).getTime()) {
       const resolved = resolveForgePending();
       if (resolved) {
         const lvl = getForgeLevel(resolved.equipId);
@@ -68,7 +67,7 @@ export default function ForgeModal({ onClose }: { onClose: () => void }) {
         scheduleSave();
       }
     }
-  });
+  }, [now, pending, resolveForgePending, getForgeLevel, incrementDailyProgress]);
 
   const equipment = save.equipmentInventory
     .filter((id) => EQUIP_MAP[id])
@@ -81,9 +80,8 @@ export default function ForgeModal({ onClose }: { onClose: () => void }) {
     return a.def.name.localeCompare(b.def.name);
   });
 
-  // eslint-disable-next-line react-hooks/purity
   const pendingProgressPct = pending
-    ? Math.min(100, (Date.now() - new Date(pending.startTime).getTime()) / (new Date(pending.endTime).getTime() - new Date(pending.startTime).getTime()) * 100)
+    ? Math.min(100, (now - new Date(pending.startTime).getTime()) / (new Date(pending.endTime).getTime() - new Date(pending.startTime).getTime()) * 100)
     : 0;
 
   const sel = selected ? equipment.find((e) => e.id === selected) : null;
@@ -146,7 +144,7 @@ export default function ForgeModal({ onClose }: { onClose: () => void }) {
         >
           <div className="mb-3 flex items-center justify-between">
             <p className="text-[11px] font-bold tracking-wider text-amber-400">FORJANDO...</p>
-            <p className="text-[13px] font-black text-amber-400 tabular-nums">{formatCountdown(pending.endTime)}</p>
+            <p className="text-[13px] font-black text-amber-400 tabular-nums">{formatCountdown(pending.endTime, now)}</p>
           </div>
           {/* Animated progress bar */}
           {(() => {
@@ -252,7 +250,7 @@ export default function ForgeModal({ onClose }: { onClose: () => void }) {
                         )}
                         {isPending && (
                           <span className="rounded px-1.5 py-0.5 text-[10px] font-bold" style={{ background: "rgba(200,155,60,0.2)", color: "rgb(200,155,60)" }}>
-                            {formatCountdown(pending.endTime)}
+                            {formatCountdown(pending.endTime, now)}
                           </span>
                         )}
                       </div>
