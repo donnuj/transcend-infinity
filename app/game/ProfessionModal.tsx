@@ -132,7 +132,7 @@ function xpForLevel(level: number) {
 }
 
 export default function ProfessionModal({ onClose }: { onClose: () => void }) {
-  const { save, chooseProfession, completeProfessionTask, addProfessionXp } = useGameStore();
+  const { save, chooseProfession } = useGameStore();
   const prof = save.profession;
   const currentLevel = getProfLevel(prof.xp);
   const chosen = PROFESSIONS.find((p) => p.id === prof.chosenProfession);

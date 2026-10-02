@@ -52,7 +52,8 @@ export default function ForgeModal({ onClose }: { onClose: () => void }) {
     return () => clearInterval(id);
   }, [pending]);
 
-  // Auto-resolve when timer expires
+  // Auto-resolve when timer expires — intentionally runs every render to check elapsed time
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!pending) return;
     if (new Date() >= new Date(pending.endTime)) {

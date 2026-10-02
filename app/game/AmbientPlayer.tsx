@@ -10,7 +10,7 @@ export default function AmbientPlayer() {
   useEffect(() => {
     const audio = new Audio("/audio/ambient.mp3");
     audio.loop = true;
-    audio.volume = musicVolume;
+    audio.volume = 1;
     audioRef.current = audio;
 
     const play = () => audio.play().catch(() => null);
