@@ -102,7 +102,7 @@ export const REGION_MAP: Record<string, RegionDef> =
 
 export const NPCS: NpcDef[] = [
   { npcId: "npc_comerciante_valdris", name: "Brennus, o Mercador",     role: "Comerciante",   regionId: "reg_valdris",        portraitEmoji: "🛒", dialogueRootId: "dlg_brennus_1"     },
-  { npcId: "npc_ferreiro_picos",      name: "Thorgam",                  role: "Ferreiro",      regionId: "reg_picos_eternos",  portraitEmoji: "⚒",  dialogueRootId: "dlg_thorgam_1"     },
+  { npcId: "npc_ferreiro_picos",      name: "Thorgam",                  role: "Ferreiro",      regionId: "reg_valdris",        portraitEmoji: "⚒",  dialogueRootId: "dlg_thorgam_1"     },
   { npcId: "npc_sage_floresta",       name: "Eira, a Sábia",            role: "Sábia",         regionId: "reg_floresta_eterna",portraitEmoji: "📖", dialogueRootId: "dlg_eira_1"        },
   { npcId: "npc_capitao_porto",       name: "Capitão Nereus",           role: "Navegador",     regionId: "reg_mar_interno",    portraitEmoji: "⚓", dialogueRootId: "dlg_nereus_1"      },
   { npcId: "npc_arconte_luz",         name: "Arconte Solaris",          role: "Arconte",       regionId: "reg_planicie_ceu",   portraitEmoji: "☀",  dialogueRootId: "dlg_solaris_1"     },

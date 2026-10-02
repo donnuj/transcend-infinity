@@ -202,9 +202,16 @@ export default function ProfessionModal({ onClose }: { onClose: () => void }) {
               transition={{ duration: 0.2, ease }}
             >
               <p className="mb-1 text-[11px] font-bold text-cream/70">Escolha sua Profissão</p>
-              <p className="mb-5 text-[11px] leading-relaxed text-violet/60">
-                Sua profissão define bônus passivos e tarefas diárias exclusivas. Pode ser trocada com custo de ouro.
-              </p>
+              <div className="mb-5 rounded-xl border border-violet/12 px-4 py-3.5" style={{ background: "rgba(122,111,160,0.04)" }}>
+                <p className="mb-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-violet/50">Por que ter uma profissão?</p>
+                <p className="text-[11px] leading-relaxed text-violet/65">
+                  Seus heróis combatem, mas você — o Invocador — opera nos bastidores. Sua profissão
+                  representa como você sustenta, treina e expande seu arsenal. Enquanto um Ferreiro
+                  forja armas mais baratas, um Caçador obtém mais drops de bosses. A profissão é a
+                  identidade estratégica do jogador: afeta economia, progressão e acesso a conteúdo exclusivo.
+                </p>
+                <p className="mt-2 text-[10px] text-violet/40">Pode ser trocada a qualquer momento com custo em ouro.</p>
+              </div>
               <div className="flex flex-col gap-3">
                 {PROFESSIONS.map((p) => (
                   <motion.button

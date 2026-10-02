@@ -256,6 +256,26 @@ export default function FortressModal({ onClose }: { onClose: () => void }) {
               </div>
             </div>
 
+            {/* Resource acquisition hints */}
+            <div className="mb-4 rounded-xl border border-violet/10 px-4 py-3" style={{ background: "rgba(122,111,160,0.04)" }}>
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-violet/50">Como obter recursos</p>
+              <div className="flex flex-col gap-1.5">
+                {[
+                  { icon: "◈", color: "rgb(180,130,60)",   label: "Madeira",  hint: "Dungeon Florestal · Exploração do Mapa · Caravanas" },
+                  { icon: "●", color: "rgb(160,160,180)",  label: "Pedra",    hint: "Dungeon de Caverna · Exploração do Mapa · Caravanas" },
+                  { icon: "◉", color: "rgb(60,200,120)",   label: "Ervas",    hint: "Jardim de Ervas (Moradia) · Dungeon de Floresta" },
+                  { icon: "◆", color: "rgb(100,200,60)",   label: "Comida",   hint: "Recompensas offline · Desafios Diários · Caravanas" },
+                  { icon: "★", color: "rgb(200,155,60)",   label: "Moral",    hint: "NPCs · Battle Pass · Missões de Guilda" },
+                ].map(({ icon, color, label, hint }) => (
+                  <div key={label} className="flex items-start gap-2">
+                    <span className="mt-0.5 text-[11px] font-bold" style={{ color }}>{icon}</span>
+                    <span className="text-[10px] font-bold text-cream/60 w-14 flex-shrink-0">{label}</span>
+                    <span className="text-[10px] text-violet/50">{hint}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             {/* Pending construction banner */}
             {pending && pendingDef && (
               <div className="mb-4 flex items-center justify-between rounded-xl border px-4 py-3"

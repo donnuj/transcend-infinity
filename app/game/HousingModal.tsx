@@ -25,12 +25,12 @@ const ROOMS: Room[] = [
   { id: "santuario",  name: "Santuário do Guardião", description: "Companheiro ativo ganha +15% de bônus.",    icon: "⛩", unlockLevel: 6,  ouroReq: 6000,  bonus: "+15% companheiro" },
 ];
 
-const HOUSE_UPGRADES: { level: number; name: string; ouroReq: number; description: string }[] = [
-  { level: 1, name: "Cabana",          ouroReq: 0,    description: "Um abrigo simples. Ponto de partida." },
-  { level: 2, name: "Casa",            ouroReq: 800,  description: "Estrutura sólida com múltiplos cômodos." },
-  { level: 3, name: "Mansão",          ouroReq: 2500, description: "Residência espaçosa com área de treinamento." },
-  { level: 4, name: "Cidadela",        ouroReq: 6000, description: "Fortaleza pessoal de um herói lendário." },
-  { level: 5, name: "Palácio Arcano",  ouroReq: 15000,description: "Obra-prima arquitetônica imbuída de magia." },
+const HOUSE_UPGRADES: { level: number; name: string; ouroReq: number; description: string; unlocks: string }[] = [
+  { level: 1, name: "Cabana",          ouroReq: 0,    description: "Um abrigo simples. Ponto de partida.",                                  unlocks: "Desbloqueia: Quarto do Herói" },
+  { level: 2, name: "Casa",            ouroReq: 800,  description: "Estrutura sólida. Novos cômodos disponíveis.",                         unlocks: "Desbloqueia: Biblioteca (+5% EXP)" },
+  { level: 3, name: "Mansão",          ouroReq: 2500, description: "Residência espaçosa com área de trabalho própria.",                    unlocks: "Desbloqueia: Forja Pessoal (forja itens raros)" },
+  { level: 4, name: "Cidadela",        ouroReq: 6000, description: "Fortaleza pessoal. Produção passiva de recursos.",                     unlocks: "Desbloqueia: Jardim de Ervas (+5 Ervas/dia)" },
+  { level: 5, name: "Palácio Arcano",  ouroReq: 15000,description: "Obra-prima imbuída de magia. Bônus máximos desbloqueados.",            unlocks: "Desbloqueia: Observatório (+3% drop) e Santuário (+15% companheiro)" },
 ];
 
 export default function HousingModal({ onClose }: { onClose: () => void }) {
@@ -98,9 +98,13 @@ export default function HousingModal({ onClose }: { onClose: () => void }) {
               <div key={u.level} className="flex-1 rounded-full" style={{ height: 4, background: housing.houseLevel >= u.level ? "rgb(200,155,60)" : "rgba(122,111,160,0.15)", boxShadow: housing.houseLevel >= u.level ? "0 0 6px rgba(200,155,60,0.4)" : "none" }} />
             ))}
           </div>
+          <p className="mt-3 text-[10px] leading-relaxed text-violet/50">{currentHouse.unlocks}</p>
           {nextHouseUpgrade ? (
             <div className="mt-3 flex items-center justify-between">
-              <span className="text-[11px] text-violet/60">Próximo: {nextHouseUpgrade.name}</span>
+              <div>
+                <span className="text-[11px] text-violet/60">Próximo: {nextHouseUpgrade.name}</span>
+                <p className="mt-0.5 text-[10px] text-violet/35">{nextHouseUpgrade.unlocks}</p>
+              </div>
               <motion.button
                 onClick={save.wallet.ouro >= nextHouseUpgrade.ouroReq ? upgradeHouse : undefined}
                 whileTap={save.wallet.ouro >= nextHouseUpgrade.ouroReq ? { scale: 0.94 } : undefined}

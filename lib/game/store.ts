@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import { persist, createJSONStorage } from "zustand/middleware";
-import type { SaveData, DungeonDifficulty, PendingTowerClimb, PendingDungeonRun } from "./types";
+import type { SaveData, DungeonDifficulty, PendingTowerClimb, PendingDungeonRun, ForgePending } from "./types";
 import { ACHIEVEMENTS } from "./data/achievements";
 import { DAILY_CHALLENGES } from "./data/challenges";
 import { maxFloorInBudget, calcTowerTimeSeconds, DUNGEON_DURATIONS } from "./data/towerData";
@@ -105,6 +105,7 @@ export function newSave(): SaveData {
     offline: { lastActiveAt: new Date().toISOString() },
     pendingTower: null,
     pendingDungeons: [],
+    forgePending: null,
   };
 }
 
@@ -142,6 +143,7 @@ type GameStore = {
   awakenHero: (heroId: string) => boolean;
   upgradeHeroSkill: (heroId: string, skillId: string) => boolean;
   equipItem: (heroId: string, slot: "weaponId" | "armorId" | "accessoryId" | "reliquiaId", equipId: string) => void;
+  unequipItem: (heroId: string, slot: "weaponId" | "armorId" | "accessoryId" | "reliquiaId") => void;
   equipRune: (heroId: string, slot: "slot0" | "slot1", runeId: string) => void;
 
   // Inventory
@@ -204,6 +206,9 @@ type GameStore = {
   // Forge
   getForgeLevel: (equipId: string) => number;
   forgeEnhance: (equipId: string) => boolean;
+  startForgePending: (equipId: string, durationSeconds: number) => boolean;
+  resolveForgePending: () => ForgePending | null;
+  cancelForgePending: () => void;
 
   // Profession
   chooseProfession: (profId: string) => void;
@@ -467,6 +472,17 @@ export const useGameStore = create<GameStore>()(
           const prev = (entry as Record<string, string | undefined>)[slot];
           if (prev) s.save.equipmentInventory.push(prev);
           (entry as Record<string, string>)[slot] = equipId;
+        });
+      },
+
+      unequipItem(heroId, slot) {
+        set((s) => {
+          const entry = s.save.heroEquipment.find((h) => h.heroId === heroId);
+          if (!entry) return;
+          const equipId = (entry as Record<string, string | undefined>)[slot];
+          if (!equipId) return;
+          s.save.equipmentInventory.push(equipId);
+          delete (entry as Record<string, string | undefined>)[slot];
         });
       },
 
@@ -828,6 +844,44 @@ export const useGameStore = create<GameStore>()(
           else s.save.forge.push({ equipId, level: 1 });
         });
         return true;
+      },
+
+      startForgePending(equipId, durationSeconds) {
+        const FORGE_COSTS = [200, 400, 800, 1500, 2500, 4000, 6000, 9000, 13000, 18000];
+        const current = get().getForgeLevel(equipId);
+        if (current >= 10) return false;
+        if (get().save.forgePending) return false;
+        const cost = FORGE_COSTS[current];
+        if (!get().spendCurrency("ouro", cost)) return false;
+        const now = new Date();
+        const endTime = new Date(now.getTime() + durationSeconds * 1000);
+        set((s) => {
+          s.save.forgePending = { equipId, startTime: now.toISOString(), endTime: endTime.toISOString() };
+        });
+        return true;
+      },
+
+      resolveForgePending() {
+        const pending = get().save.forgePending;
+        if (!pending) return null;
+        if (new Date() < new Date(pending.endTime)) return null;
+        set((s) => {
+          const entry = s.save.forge.find((f) => f.equipId === pending.equipId);
+          if (entry) entry.level++;
+          else s.save.forge.push({ equipId: pending.equipId, level: 1 });
+          s.save.forgePending = null;
+        });
+        return pending;
+      },
+
+      cancelForgePending() {
+        const pending = get().save.forgePending;
+        if (!pending) return;
+        // Refund cost
+        const FORGE_COSTS = [200, 400, 800, 1500, 2500, 4000, 6000, 9000, 13000, 18000];
+        const current = get().getForgeLevel(pending.equipId);
+        if (current < 10) get().addCurrency("ouro", FORGE_COSTS[current]);
+        set((s) => { s.save.forgePending = null; });
       },
 
       // ── Profession ───────────────────────────────────────────────────────────

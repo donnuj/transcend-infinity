@@ -1,6 +1,6 @@
-﻿"use client";
+"use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGameStore } from "@/lib/game/store";
 import { EQUIP_MAP } from "@/lib/game/data/items";
@@ -23,13 +23,49 @@ const ENHANCE_BONUSES = [
   "ATQ +15%", "VEL +5%", "ATQ +20%", "CRÍTICO +3%", "TODOS +10%",
 ];
 
+const FORGE_DURATION_SECONDS = 90;
+
+function formatCountdown(endTime: string): string {
+  const ms = new Date(endTime).getTime() - Date.now();
+  if (ms <= 0) return "Pronto!";
+  const s = Math.ceil(ms / 1000);
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return m > 0 ? `${m}m ${sec}s` : `${sec}s`;
+}
+
 type SortMode = "rarity" | "level" | "name";
 
 export default function ForgeModal({ onClose }: { onClose: () => void }) {
-  const { save, getForgeLevel, forgeEnhance, incrementDailyProgress } = useGameStore();
+  const { save, getForgeLevel, incrementDailyProgress, startForgePending, resolveForgePending, cancelForgePending } = useGameStore();
   const [selected, setSelected] = useState<string | null>(null);
   const [sort, setSort] = useState<SortMode>("rarity");
   const [toast, setToast] = useState("");
+  const [, setTick] = useState(0);
+
+  const pending = save.forgePending;
+
+  // Tick every second to refresh countdown
+  useEffect(() => {
+    if (!pending) return;
+    const id = setInterval(() => setTick((t) => t + 1), 1000);
+    return () => clearInterval(id);
+  }, [pending]);
+
+  // Auto-resolve when timer expires
+  useEffect(() => {
+    if (!pending) return;
+    if (new Date() >= new Date(pending.endTime)) {
+      const resolved = resolveForgePending();
+      if (resolved) {
+        const lvl = getForgeLevel(resolved.equipId);
+        setToast(`Forja completa! +${lvl} — ${ENHANCE_BONUSES[lvl - 1]}`);
+        setTimeout(() => setToast(""), 3000);
+        incrementDailyProgress("forge_today");
+        scheduleSave();
+      }
+    }
+  });
 
   const equipment = save.equipmentInventory
     .filter((id) => EQUIP_MAP[id])
@@ -47,17 +83,23 @@ export default function ForgeModal({ onClose }: { onClose: () => void }) {
   const canAfford = nextCost !== null && save.wallet.ouro >= nextCost;
   const maxed = sel ? sel.forgeLevel >= 10 : false;
 
-  function handleEnhance() {
+  const handleStartForge = useCallback(() => {
     if (!selected) return;
-    const ok = forgeEnhance(selected);
-    if (ok) {
-      incrementDailyProgress("forge_today");
+    const ok = startForgePending(selected, FORGE_DURATION_SECONDS);
+    if (!ok) {
+      setToast("Ouro insuficiente");
+      setTimeout(() => setToast(""), 2000);
+    } else {
       scheduleSave();
-      const lvl = getForgeLevel(selected);
-      setToast(`+${lvl} Forja — ${ENHANCE_BONUSES[lvl - 1]}`);
-      setTimeout(() => setToast(""), 2200);
     }
-  }
+  }, [selected, startForgePending]);
+
+  const handleCancel = useCallback(() => {
+    cancelForgePending();
+    scheduleSave();
+    setToast("Forja cancelada — ouro devolvido");
+    setTimeout(() => setToast(""), 2000);
+  }, [cancelForgePending]);
 
   return (
     <motion.div
@@ -71,12 +113,12 @@ export default function ForgeModal({ onClose }: { onClose: () => void }) {
       {/* Header */}
       <div className="flex items-center gap-3 border-b border-amber/12 px-4 py-3">
         <motion.button
-          onClick={selected ? () => setSelected(null) : onClose}
+          onClick={selected && !pending ? () => setSelected(null) : onClose}
           whileTap={{ scale: 0.94 }}
           transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
           className="text-[10px] font-bold tracking-widest text-violet/60"
         >
-          ← {selected ? "Voltar" : "Fechar"}
+          ← {selected && !pending ? "Voltar" : "Fechar"}
         </motion.button>
         <span className="h-4 w-[1px] bg-violet/20" />
         <span className="text-[11px] font-bold tracking-widest text-cream/70">FORJA</span>
@@ -84,6 +126,56 @@ export default function ForgeModal({ onClose }: { onClose: () => void }) {
           <span>◆</span><span>{save.wallet.ouro.toLocaleString("pt-BR")}</span>
         </div>
       </div>
+
+      {/* Pending forge banner */}
+      {pending && (
+        <motion.div
+          className="border-b border-amber/15 px-4 py-4"
+          style={{ background: "rgba(200,155,60,0.06)" }}
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25, ease }}
+        >
+          <div className="mb-3 flex items-center justify-between">
+            <p className="text-[11px] font-bold tracking-wider text-amber-400">FORJANDO...</p>
+            <p className="text-[13px] font-black text-amber-400 tabular-nums">{formatCountdown(pending.endTime)}</p>
+          </div>
+          {/* Animated progress bar */}
+          {(() => {
+            const total = new Date(pending.endTime).getTime() - new Date(pending.startTime).getTime();
+            const elapsed = Date.now() - new Date(pending.startTime).getTime();
+            const pct = Math.min(100, (elapsed / total) * 100);
+            const equipDef = EQUIP_MAP[pending.equipId];
+            return (
+              <>
+                <div className="mb-2 flex items-center gap-2">
+                  <span className="text-lg">⚒</span>
+                  <span className="text-[11px] font-bold text-cream/80">{equipDef?.name ?? pending.equipId}</span>
+                </div>
+                <div className="h-2 w-full overflow-hidden rounded-full bg-void">
+                  <motion.div
+                    className="h-full rounded-full"
+                    style={{
+                      width: `${pct}%`,
+                      background: "linear-gradient(90deg, rgba(200,155,60,0.6) 0%, rgba(200,155,60,1) 100%)",
+                      boxShadow: "0 0 8px rgba(200,155,60,0.5)",
+                    }}
+                    animate={{ width: `${pct}%` }}
+                    transition={{ duration: 0.8, ease: "linear" }}
+                  />
+                </div>
+                <motion.button
+                  onClick={handleCancel}
+                  whileTap={{ scale: 0.96 }}
+                  className="mt-3 w-full rounded-lg border border-red-500/20 py-1.5 text-[10px] font-bold text-red-400/50"
+                >
+                  Cancelar (ouro devolvido)
+                </motion.button>
+              </>
+            );
+          })()}
+        </motion.div>
+      )}
 
       <AnimatePresence mode="wait">
         {!selected ? (
@@ -122,23 +214,27 @@ export default function ForgeModal({ onClose }: { onClose: () => void }) {
             <div className="flex flex-col gap-2">
               {sorted.map(({ id, def, forgeLevel }) => {
                 const color = RARITY_COLOR[def.rarity] ?? "rgb(180,180,210)";
+                const isPending = pending?.equipId === id;
                 return (
                   <motion.button
                     key={id}
-                    onClick={() => setSelected(id)}
-                    whileTap={{ scale: 0.97 }}
+                    onClick={() => !pending && setSelected(id)}
+                    whileTap={!pending ? { scale: 0.97 } : undefined}
                     transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
                     className="flex items-center gap-4 rounded-xl border px-4 py-3.5 text-left"
                     style={{
-                      borderColor: `${color}25`,
-                      background: `linear-gradient(135deg, ${color}08 0%, rgba(10,10,22,0.9) 100%)`,
+                      borderColor: isPending ? "rgba(200,155,60,0.5)" : `${color}25`,
+                      background: isPending
+                        ? "rgba(200,155,60,0.08)"
+                        : `linear-gradient(135deg, ${color}08 0%, rgba(10,10,22,0.9) 100%)`,
+                      opacity: pending && !isPending ? 0.45 : 1,
                     }}
                   >
                     <div
                       className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-lg"
                       style={{ background: `${color}15`, border: `1px solid ${color}30` }}
                     >
-                      ⚔
+                      {isPending ? "⏳" : "⚔"}
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
@@ -146,6 +242,11 @@ export default function ForgeModal({ onClose }: { onClose: () => void }) {
                         {forgeLevel > 0 && (
                           <span className="rounded px-1.5 py-0.5 text-[10px] font-bold" style={{ background: "rgba(200,155,60,0.15)", color: "rgb(200,155,60)" }}>
                             +{forgeLevel}
+                          </span>
+                        )}
+                        {isPending && (
+                          <span className="rounded px-1.5 py-0.5 text-[10px] font-bold" style={{ background: "rgba(200,155,60,0.2)", color: "rgb(200,155,60)" }}>
+                            {formatCountdown(pending.endTime)}
                           </span>
                         )}
                       </div>
@@ -274,42 +375,50 @@ export default function ForgeModal({ onClose }: { onClose: () => void }) {
                     >
                       {bonus}
                     </span>
-                    {isCurrent && (
-                      <span className="text-[10px] font-bold text-amber-400/60">PRÓXIMO</span>
-                    )}
-                    {unlocked && (
-                      <span className="text-[10px] font-bold text-green-400/60">ATIVO</span>
-                    )}
+                    {isCurrent && <span className="text-[10px] font-bold text-amber-400/60">PRÓXIMO</span>}
+                    {unlocked && <span className="text-[10px] font-bold text-green-400/60">ATIVO</span>}
                   </div>
                 );
               })}
             </div>
 
-            {/* Enhance button */}
-            {maxed ? (
+            {/* Forge action */}
+            {pending ? (
+              <div className="rounded-xl border border-amber/20 py-4 text-center">
+                <p className="text-[11px] font-bold text-amber-400">FORJA EM ANDAMENTO</p>
+                <p className="mt-1 text-[11px] text-violet/60">Outro item já está sendo forjado</p>
+              </div>
+            ) : maxed ? (
               <div className="rounded-xl border border-amber/20 py-4 text-center">
                 <p className="text-[11px] font-bold tracking-wider text-amber-400">FORJA MÁXIMA</p>
                 <p className="mt-1 text-[11px] text-violet/60">Todos os bônus estão ativos</p>
               </div>
             ) : (
-              <motion.button
-                onClick={handleEnhance}
-                disabled={!canAfford}
-                whileTap={canAfford ? { scale: 0.97 } : undefined}
-                transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
-                className="w-full rounded-xl border py-4 text-[12px] font-bold tracking-[0.15em]"
-                style={{
-                  borderColor: canAfford ? "rgba(200,155,60,0.4)" : "rgba(122,111,160,0.15)",
-                  background: canAfford ? "rgba(200,155,60,0.1)" : "rgba(122,111,160,0.05)",
-                  color: canAfford ? "rgb(200,155,60)" : "rgba(122,111,160,0.35)",
-                  cursor: canAfford ? "pointer" : "default",
-                }}
-              >
-                FORJAR +{(sel.forgeLevel) + 1}
-                <span className="ml-2 text-[10px] font-normal opacity-70">
-                  {nextCost?.toLocaleString("pt-BR")} ouro
-                </span>
-              </motion.button>
+              <div className="flex flex-col gap-2">
+                <div className="rounded-xl border border-violet/12 px-4 py-3" style={{ background: "rgba(122,111,160,0.04)" }}>
+                  <p className="text-[10px] text-violet/50">
+                    O processo de forja leva <span className="font-bold text-amber-400">{FORGE_DURATION_SECONDS}s</span>. O resultado é revelado ao final.
+                  </p>
+                </div>
+                <motion.button
+                  onClick={handleStartForge}
+                  disabled={!canAfford}
+                  whileTap={canAfford ? { scale: 0.97 } : undefined}
+                  transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
+                  className="w-full rounded-xl border py-4 text-[12px] font-bold tracking-[0.15em]"
+                  style={{
+                    borderColor: canAfford ? "rgba(200,155,60,0.4)" : "rgba(122,111,160,0.15)",
+                    background: canAfford ? "rgba(200,155,60,0.1)" : "rgba(122,111,160,0.05)",
+                    color: canAfford ? "rgb(200,155,60)" : "rgba(122,111,160,0.35)",
+                    cursor: canAfford ? "pointer" : "default",
+                  }}
+                >
+                  INICIAR FORJA +{sel.forgeLevel + 1}
+                  <span className="ml-2 text-[10px] font-normal opacity-70">
+                    {nextCost?.toLocaleString("pt-BR")} ouro
+                  </span>
+                </motion.button>
+              </div>
             )}
           </motion.div>
         ) : null}

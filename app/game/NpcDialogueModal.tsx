@@ -131,58 +131,59 @@ export default function NpcDialogueModal({ onClose }: { onClose: () => void }) {
               </AnimatePresence>
 
               <p className="mb-3 text-[11px] uppercase tracking-[0.2em] text-violet/60">
-                NPCs na sua região
+                Personagens do Mundo
               </p>
 
-              {visibleNpcs.length === 0 ? (
-                <p className="mt-8 text-center text-[11px] text-violet/35">
-                  Explore regiões para encontrar NPCs.
-                </p>
-              ) : (
-                <div className="flex flex-col gap-2.5">
-                  {visibleNpcs.map((npc) => {
-                    const hasSeenRoot = seenDialogues.includes(npc.dialogueRootId);
-                    return (
-                      <motion.button
-                        key={npc.npcId}
-                        onClick={() => startDialogue(npc.npcId)}
-                        whileTap={{ scale: 0.97 }}
-                        transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
-                        className="flex items-center gap-4 rounded-xl border px-4 py-3.5 text-left"
+              <div className="flex flex-col gap-2.5">
+                {NPCS.map((npc) => {
+                  const isAccessible = discoveredRegions.includes(npc.regionId);
+                  const hasSeenRoot = seenDialogues.includes(npc.dialogueRootId);
+                  return (
+                    <motion.button
+                      key={npc.npcId}
+                      onClick={isAccessible ? () => startDialogue(npc.npcId) : undefined}
+                      whileTap={isAccessible ? { scale: 0.97 } : undefined}
+                      transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
+                      className="flex items-center gap-4 rounded-xl border px-4 py-3.5 text-left"
+                      style={{
+                        borderColor: !isAccessible
+                          ? "rgba(122,111,160,0.08)"
+                          : hasSeenRoot
+                          ? "rgba(122,111,160,0.15)"
+                          : "rgba(200,155,60,0.3)",
+                        background: !isAccessible
+                          ? "transparent"
+                          : hasSeenRoot
+                          ? "rgba(122,111,160,0.04)"
+                          : "rgba(200,155,60,0.06)",
+                        opacity: isAccessible ? 1 : 0.45,
+                      }}
+                    >
+                      <div
+                        className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full border text-xl"
                         style={{
-                          borderColor: hasSeenRoot ? "rgba(122,111,160,0.15)" : "rgba(200,155,60,0.3)",
-                          background: hasSeenRoot ? "rgba(122,111,160,0.04)" : "rgba(200,155,60,0.06)",
+                          borderColor: isAccessible ? "rgba(122,111,160,0.2)" : "rgba(122,111,160,0.1)",
+                          background: isAccessible ? "rgba(122,111,160,0.06)" : "transparent",
+                          filter: isAccessible ? "none" : "grayscale(1)",
                         }}
                       >
-                        <div
-                          className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full border text-xl"
-                          style={{
-                            borderColor: "rgba(122,111,160,0.2)",
-                            background: "rgba(122,111,160,0.06)",
-                          }}
-                        >
-                          {npc.portraitEmoji}
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-[12px] font-bold text-cream/85">{npc.name}</p>
-                          <p className="text-[11px] text-violet/65">{npc.role}</p>
-                        </div>
-                        {!hasSeenRoot && (
-                          <div className="h-2 w-2 rounded-full bg-amber" style={{ boxShadow: "0 0 6px rgba(200,155,60,0.5)" }} />
+                        {npc.portraitEmoji}
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-[12px] font-bold text-cream/85">{npc.name}</p>
+                        <p className="text-[11px] text-violet/65">{npc.role}</p>
+                        {!isAccessible && (
+                          <p className="mt-0.5 text-[10px] text-violet/35">Explorar para encontrar</p>
                         )}
-                        <span className="text-[11px] text-violet/30">→</span>
-                      </motion.button>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* Locked NPCs hint */}
-              {NPCS.length > visibleNpcs.length && (
-                <p className="mt-4 text-center text-[11px] text-violet/25">
-                  {NPCS.length - visibleNpcs.length} NPC(s) em regiões não descobertas
-                </p>
-              )}
+                      </div>
+                      {isAccessible && !hasSeenRoot && (
+                        <div className="h-2 w-2 rounded-full bg-amber" style={{ boxShadow: "0 0 6px rgba(200,155,60,0.5)" }} />
+                      )}
+                      {isAccessible && <span className="text-[11px] text-violet/30">→</span>}
+                    </motion.button>
+                  );
+                })}
+              </div>
             </motion.div>
           ) : (
             <motion.div

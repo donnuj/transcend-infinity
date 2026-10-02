@@ -170,6 +170,7 @@ export default function CompanionsModal({ onClose }: { onClose: () => void }) {
                 def={selectedDef}
                 saved={selectedSave ?? null}
                 isActive={activeId === selectedDef.id}
+                unlockMet={selectedDef.unlockCondition.check(save)}
                 onCollect={() => handleCollect(selectedDef.id)}
                 onBond={() => handleBond(selectedDef.id)}
                 onEvolve={() => handleEvolve(selectedDef.id)}
@@ -187,6 +188,7 @@ function CompanionDetail({
   def,
   saved,
   isActive,
+  unlockMet,
   onCollect,
   onBond,
   onEvolve,
@@ -195,6 +197,7 @@ function CompanionDetail({
   def: CompanionDef;
   saved: { companionId: string; bond: number; form: number; isActive: boolean } | null;
   isActive: boolean;
+  unlockMet: boolean;
   onCollect: () => void;
   onBond: () => void;
   onEvolve: () => void;
@@ -276,14 +279,25 @@ function CompanionDetail({
 
       {/* Actions */}
       {!saved ? (
+        <div className="mb-4 rounded-xl border border-violet/12 px-4 py-3.5" style={{ background: "rgba(122,111,160,0.04)" }}>
+          <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.18em] text-violet/60">Condição de obtenção</p>
+          <p className="text-[11px] text-cream/70">{def.unlockCondition.label}</p>
+        </div>
+      ) : null}
+      {!saved ? (
         <motion.button
-          onClick={onCollect}
-          whileTap={{ scale: 0.97 }}
+          onClick={unlockMet ? onCollect : undefined}
+          whileTap={unlockMet ? { scale: 0.97 } : undefined}
           transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
           className="mb-2 w-full rounded-xl border py-3.5 text-[12px] font-bold tracking-[0.15em]"
-          style={{ borderColor: `${color}40`, background: `${color}12`, color }}
+          style={{
+            borderColor: unlockMet ? `${color}40` : "rgba(122,111,160,0.15)",
+            background: unlockMet ? `${color}12` : "rgba(122,111,160,0.04)",
+            color: unlockMet ? color : "rgba(122,111,160,0.35)",
+            cursor: unlockMet ? "pointer" : "default",
+          }}
         >
-          COLETAR
+          {unlockMet ? "COLETAR" : "BLOQUEADO"}
         </motion.button>
       ) : (
         <>

@@ -1,3 +1,5 @@
+import type { SaveData } from "@/lib/game/types";
+
 export type CompanionDef = {
   id: string;
   name: string;
@@ -7,6 +9,10 @@ export type CompanionDef = {
   bonus: string;
   maxBond: number;
   forms: { form: number; label: string; bondRequired: number; bonus: string }[];
+  unlockCondition: {
+    label: string;
+    check: (save: SaveData) => boolean;
+  };
 };
 
 export const COMPANIONS: CompanionDef[] = [
@@ -23,6 +29,10 @@ export const COMPANIONS: CompanionDef[] = [
       { form: 1, label: "Borboleta",  bondRequired: 30,  bonus: "+10% EXP herói" },
       { form: 2, label: "Serafim",    bondRequired: 80,  bonus: "+15% EXP herói" },
     ],
+    unlockCondition: {
+      label: "Alcance o nível 3 de Invocador",
+      check: (save) => save.invocador.level >= 3,
+    },
   },
   {
     id: "comp_ryuk",
@@ -37,6 +47,10 @@ export const COMPANIONS: CompanionDef[] = [
       { form: 1, label: "Sombra",     bondRequired: 40,  bonus: "+15% ATQ" },
       { form: 2, label: "Alfa Negro", bondRequired: 85,  bonus: "+25% ATQ" },
     ],
+    unlockCondition: {
+      label: "Complete ao menos 1 masmorra",
+      check: (save) => save.dungeon.some((d) => d.totalRuns >= 1),
+    },
   },
   {
     id: "comp_stella",
@@ -51,6 +65,10 @@ export const COMPANIONS: CompanionDef[] = [
       { form: 1, label: "Estrela",    bondRequired: 50,  bonus: "+20% drops cristais" },
       { form: 2, label: "Supernova",  bondRequired: 90,  bonus: "+35% drops cristais" },
     ],
+    unlockCondition: {
+      label: "Realize 50 invocações",
+      check: (save) => save.invocador.totalPulls >= 50,
+    },
   },
   {
     id: "comp_goro",
@@ -64,6 +82,10 @@ export const COMPANIONS: CompanionDef[] = [
       { form: 0, label: "Girino",     bondRequired: 0,   bonus: "+3% drop rate" },
       { form: 1, label: "Sapo",       bondRequired: 25,  bonus: "+6% drop rate" },
     ],
+    unlockCondition: {
+      label: "Colete 3 heróis distintos",
+      check: (save) => new Set(save.collectedHeroIds.map((k) => k.split("|")[1])).size >= 3,
+    },
   },
   {
     id: "comp_ash",
@@ -78,6 +100,10 @@ export const COMPANIONS: CompanionDef[] = [
       { form: 1, label: "Fênix",      bondRequired: 45,  bonus: "+20% ouro" },
       { form: 2, label: "Inferno",    bondRequired: 88,  bonus: "+35% ouro" },
     ],
+    unlockCondition: {
+      label: "Derrote 1 Boss Hunt",
+      check: (save) => save.bossHunt.allTimeKills.length >= 1,
+    },
   },
 ];
 

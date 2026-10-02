@@ -6,6 +6,7 @@ import { useGameStore } from "@/lib/game/store";
 import { HEROES, HERO_MAP } from "@/lib/game/data/heroes";
 import { ITEM_MAP, EQUIP_MAP, RUNE_MAP } from "@/lib/game/data/items";
 import { SKILL_MAP } from "@/lib/game/data/skills";
+import { scheduleSave } from "@/lib/game/save";
 
 const ease = [0.23, 1, 0.32, 1] as const;
 
@@ -29,10 +30,21 @@ const RARITY_COLORS: Record<string, string> = {
   Comum: "rgba(200,200,200,0.6)",
 };
 
+type EquipSlot = "weaponId" | "armorId" | "accessoryId" | "reliquiaId";
+type EquipPanelMode = { heroId: string; slot: EquipSlot } | null;
+
+const SLOT_LABELS: Record<EquipSlot, string> = {
+  weaponId: "Arma", armorId: "Armadura", accessoryId: "Acessório", reliquiaId: "Relíquia",
+};
+const SLOT_TYPES: Record<EquipSlot, string> = {
+  weaponId: "weapon", armorId: "armor", accessoryId: "accessory", reliquiaId: "reliquia",
+};
+
 export default function CodexModal({ onClose }: { onClose: () => void }) {
   const [section, setSection] = useState<Section>("herois");
   const [selectedHeroId, setSelectedHeroId] = useState<string | null>(null);
-  const { save } = useGameStore();
+  const [equipPanel, setEquipPanel] = useState<EquipPanelMode>(null);
+  const { save, equipItem, unequipItem, getHeroEquipment } = useGameStore();
 
   const discoveredIds = save.codex.discoveredIds;
   const collectedHeroIds = new Set(save.collectedHeroIds.map((k) => k.split("|")[1]));
@@ -59,12 +71,16 @@ export default function CodexModal({ onClose }: { onClose: () => void }) {
       <div className="flex items-center justify-between border-b border-amber/12 px-4 py-3">
         <div className="flex items-center gap-3">
           <motion.button
-            onClick={selectedHeroId ? () => setSelectedHeroId(null) : onClose}
+            onClick={() => {
+              if (equipPanel) { setEquipPanel(null); return; }
+              if (selectedHeroId) { setSelectedHeroId(null); return; }
+              onClose();
+            }}
             whileTap={{ scale: 0.94 }}
             transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
             className="text-[10px] font-bold tracking-widest text-violet/60"
           >
-            ← {selectedHeroId ? "Voltar" : "Fechar"}
+            ← {equipPanel ? SLOT_LABELS[equipPanel.slot] : selectedHeroId ? "Voltar" : "Fechar"}
           </motion.button>
           <span className="h-4 w-[1px] bg-violet/20" />
           <span className="text-[11px] font-bold tracking-widest text-cream/70">CODEX</span>
@@ -226,74 +242,195 @@ export default function CodexModal({ onClose }: { onClose: () => void }) {
         </>
       ) : (
         /* Hero detail */
-        selectedHero && (
-          <motion.div
-            key="hero-detail"
-            className="flex flex-1 flex-col overflow-y-auto px-5 py-5"
-            initial={{ opacity: 0, x: 10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.2, ease }}
-          >
-            <div className="mb-5 flex items-center gap-4">
-              <div
-                className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-xl border text-4xl"
-                style={{
-                  borderColor: `${RARITY_COLORS[selectedHero.rarity] ?? "rgba(122,111,160,0.2)"}50`,
-                  background: `${RARITY_COLORS[selectedHero.rarity] ?? "rgba(122,111,160,0.04)"}10`,
-                }}
+        selectedHero && (() => {
+          const isCollected = save.collectedHeroIds.some((k) => k.split("|")[1] === selectedHero.heroId);
+          const heroEquip = isCollected ? getHeroEquipment(selectedHero.heroId) : null;
+
+          if (equipPanel && equipPanel.heroId === selectedHero.heroId) {
+            const slot = equipPanel.slot;
+            const slotType = SLOT_TYPES[slot];
+            const available = save.equipmentInventory.filter((id) => EQUIP_MAP[id]?.slot === slotType);
+            const currentEquipId = heroEquip ? (heroEquip as Record<string, string | undefined>)[slot] : undefined;
+
+            return (
+              <motion.div
+                key="equip-panel"
+                className="flex flex-1 flex-col overflow-y-auto px-5 py-5"
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.2, ease }}
               >
-                {selectedHero.portrait}
-              </div>
-              <div>
-                <p className="text-xl font-black tracking-wide text-cream" style={{ fontFamily: "var(--font-cinzel)" }}>
-                  {selectedHero.name.split(",")[0]}
+                <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.2em] text-violet/60">
+                  {SLOT_LABELS[slot]}
                 </p>
-                <p className="text-[10px]" style={{ color: ELEMENT_COLORS[selectedHero.element] ?? "rgba(122,111,160,0.5)" }}>
-                  {selectedHero.element} · {selectedHero.role}
-                </p>
-                <p className="text-[10px] font-bold" style={{ color: RARITY_COLORS[selectedHero.rarity] ?? "rgba(122,111,160,0.4)" }}>
-                  {selectedHero.rarity}
-                </p>
-              </div>
-            </div>
-
-            <div className="mb-4 rounded-xl border border-violet/12 px-4 py-3" style={{ background: "rgba(122,111,160,0.04)" }}>
-              <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.2em] text-violet/60">Atributos Base</p>
-              <div className="grid grid-cols-2 gap-x-4">
-                {Object.entries(selectedHero.baseStats).map(([k, v]) => (
-                  <div key={k} className="flex items-center justify-between border-b border-violet/8 py-1.5">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-violet/60">{k}</span>
-                    <span className="text-[10px] font-bold text-cream/70">{v}</span>
+                {currentEquipId && EQUIP_MAP[currentEquipId] && (
+                  <div className="mb-4 rounded-xl border border-amber/20 px-4 py-3" style={{ background: "rgba(200,155,60,0.06)" }}>
+                    <p className="mb-1 text-[10px] uppercase tracking-[0.18em] text-violet/50">Equipado</p>
+                    <div className="flex items-center justify-between">
+                      <p className="text-[12px] font-bold text-cream/85">{EQUIP_MAP[currentEquipId].name}</p>
+                      <motion.button
+                        onClick={() => {
+                          unequipItem(selectedHero.heroId, slot);
+                          scheduleSave();
+                          setEquipPanel(null);
+                        }}
+                        whileTap={{ scale: 0.94 }}
+                        className="rounded-lg border border-red-500/25 px-3 py-1.5 text-[10px] font-bold text-red-400/70"
+                      >
+                        Desequipar
+                      </motion.button>
+                    </div>
                   </div>
-                ))}
-              </div>
-            </div>
+                )}
+                {available.length === 0 && !currentEquipId && (
+                  <p className="mt-4 text-center text-[11px] text-violet/30">Nenhum item deste tipo no inventário</p>
+                )}
+                {available.length > 0 && (
+                  <>
+                    <p className="mb-2 text-[10px] uppercase tracking-[0.18em] text-violet/50">Inventário disponivel</p>
+                    <div className="flex flex-col gap-2">
+                      {Array.from(new Set(available)).map((equipId) => {
+                        const def = EQUIP_MAP[equipId];
+                        const count = available.filter((e) => e === equipId).length;
+                        const isEquipped = currentEquipId === equipId;
+                        return (
+                          <motion.button
+                            key={equipId}
+                            onClick={() => {
+                              if (isEquipped) return;
+                              equipItem(selectedHero.heroId, slot, equipId);
+                              scheduleSave();
+                              setEquipPanel(null);
+                            }}
+                            whileTap={!isEquipped ? { scale: 0.97 } : undefined}
+                            className="flex items-center justify-between rounded-xl border px-4 py-3 text-left"
+                            style={{
+                              borderColor: isEquipped ? "rgba(200,155,60,0.3)" : "rgba(122,111,160,0.12)",
+                              background: isEquipped ? "rgba(200,155,60,0.06)" : "rgba(122,111,160,0.03)",
+                            }}
+                          >
+                            <div>
+                              <p className="text-[11px] font-bold text-cream/80">{def.name}</p>
+                              <p className="text-[10px] text-violet/50">
+                                {Object.entries(def.statBonus).map(([k,v]) => `+${v} ${k}`).join(" · ")}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {count > 1 && <span className="text-[10px] text-violet/50">×{count}</span>}
+                              {isEquipped
+                                ? <span className="text-[10px] font-bold text-amber-400">Equipado</span>
+                                : <span className="text-[10px] text-violet/40">Equipar →</span>
+                              }
+                            </div>
+                          </motion.button>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
+              </motion.div>
+            );
+          }
 
-            <div className="mb-4 rounded-xl border border-violet/12 px-4 py-3" style={{ background: "rgba(122,111,160,0.04)" }}>
-              <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.2em] text-violet/60">Habilidades</p>
-              {selectedHero.skillIds.map((skillId) => {
-                const skill = SKILL_MAP[skillId];
-                if (!skill) return null;
-                return (
-                  <div key={skillId} className="mb-2 last:mb-0 border-b border-violet/8 pb-2 last:border-0 last:pb-0">
-                    <p className="text-[11px] font-bold text-cream/80">{skill.name}</p>
-                    <p className="text-[11px] text-violet/50">{skill.description}</p>
-                    <p className="mt-0.5 text-[10px] text-violet/35">
-                      CD: {skill.cooldown} · Custo: {skill.manaCost} mana
-                    </p>
+          return (
+            <motion.div
+              key="hero-detail"
+              className="flex flex-1 flex-col overflow-y-auto px-5 py-5"
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.2, ease }}
+            >
+              <div className="mb-5 flex items-center gap-4">
+                <div
+                  className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-xl border text-4xl"
+                  style={{
+                    borderColor: `${RARITY_COLORS[selectedHero.rarity] ?? "rgba(122,111,160,0.2)"}50`,
+                    background: `${RARITY_COLORS[selectedHero.rarity] ?? "rgba(122,111,160,0.04)"}10`,
+                  }}
+                >
+                  {selectedHero.portrait}
+                </div>
+                <div>
+                  <p className="text-xl font-black tracking-wide text-cream" style={{ fontFamily: "var(--font-cinzel)" }}>
+                    {selectedHero.name.split(",")[0]}
+                  </p>
+                  <p className="text-[10px]" style={{ color: ELEMENT_COLORS[selectedHero.element] ?? "rgba(122,111,160,0.5)" }}>
+                    {selectedHero.element} · {selectedHero.role}
+                  </p>
+                  <p className="text-[10px] font-bold" style={{ color: RARITY_COLORS[selectedHero.rarity] ?? "rgba(122,111,160,0.4)" }}>
+                    {selectedHero.rarity}
+                  </p>
+                </div>
+              </div>
+
+              {/* Equipment slots (only for collected heroes) */}
+              {isCollected && (
+                <div className="mb-4 rounded-xl border border-violet/12 px-4 py-3" style={{ background: "rgba(122,111,160,0.04)" }}>
+                  <p className="mb-2.5 text-[11px] font-bold uppercase tracking-[0.2em] text-violet/60">Equipamento</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {(["weaponId","armorId","accessoryId","reliquiaId"] as EquipSlot[]).map((slot) => {
+                      const equipId = heroEquip ? (heroEquip as Record<string, string | undefined>)[slot] : undefined;
+                      const def = equipId ? EQUIP_MAP[equipId] : undefined;
+                      return (
+                        <motion.button
+                          key={slot}
+                          onClick={() => setEquipPanel({ heroId: selectedHero.heroId, slot })}
+                          whileTap={{ scale: 0.96 }}
+                          className="flex flex-col items-start rounded-lg border px-3 py-2.5 text-left"
+                          style={{
+                            borderColor: def ? "rgba(200,155,60,0.25)" : "rgba(122,111,160,0.1)",
+                            background: def ? "rgba(200,155,60,0.05)" : "transparent",
+                          }}
+                        >
+                          <span className="mb-0.5 text-[9px] uppercase tracking-[0.2em] text-violet/45">{SLOT_LABELS[slot]}</span>
+                          <span className="text-[10px] font-bold" style={{ color: def ? "rgba(255,255,255,0.8)" : "rgba(122,111,160,0.35)" }}>
+                            {def ? def.name : "Vazio"}
+                          </span>
+                        </motion.button>
+                      );
+                    })}
                   </div>
-                );
-              })}
-            </div>
+                </div>
+              )}
 
-            {selectedHero.lore && (
-              <div className="rounded-xl border border-violet/12 px-4 py-3" style={{ background: "rgba(122,111,160,0.04)" }}>
-                <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.2em] text-violet/60">Lore</p>
-                <p className="text-[10px] leading-relaxed text-violet/60 italic">&ldquo;{selectedHero.lore}&rdquo;</p>
+              <div className="mb-4 rounded-xl border border-violet/12 px-4 py-3" style={{ background: "rgba(122,111,160,0.04)" }}>
+                <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.2em] text-violet/60">Atributos Base</p>
+                <div className="grid grid-cols-2 gap-x-4">
+                  {Object.entries(selectedHero.baseStats).map(([k, v]) => (
+                    <div key={k} className="flex items-center justify-between border-b border-violet/8 py-1.5">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-violet/60">{k}</span>
+                      <span className="text-[10px] font-bold text-cream/70">{v}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            )}
-          </motion.div>
-        )
+
+              <div className="mb-4 rounded-xl border border-violet/12 px-4 py-3" style={{ background: "rgba(122,111,160,0.04)" }}>
+                <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.2em] text-violet/60">Habilidades</p>
+                {selectedHero.skillIds.map((skillId) => {
+                  const skill = SKILL_MAP[skillId];
+                  if (!skill) return null;
+                  return (
+                    <div key={skillId} className="mb-2 last:mb-0 border-b border-violet/8 pb-2 last:border-0 last:pb-0">
+                      <p className="text-[11px] font-bold text-cream/80">{skill.name}</p>
+                      <p className="text-[11px] text-violet/50">{skill.description}</p>
+                      <p className="mt-0.5 text-[10px] text-violet/35">
+                        CD: {skill.cooldown} · Custo: {skill.manaCost} mana
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {selectedHero.lore && (
+                <div className="rounded-xl border border-violet/12 px-4 py-3" style={{ background: "rgba(122,111,160,0.04)" }}>
+                  <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.2em] text-violet/60">Lore</p>
+                  <p className="text-[10px] leading-relaxed text-violet/60 italic">&ldquo;{selectedHero.lore}&rdquo;</p>
+                </div>
+              )}
+            </motion.div>
+          );
+        })()
       )}
     </motion.div>
   );

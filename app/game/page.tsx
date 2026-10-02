@@ -37,6 +37,7 @@ const SettingsModal      = dynamic(() => import("./SettingsModal"),      { ssr: 
 const ProfessionModal    = dynamic(() => import("./ProfessionModal"),    { ssr: false });
 const ForgeModal         = dynamic(() => import("./ForgeModal"),         { ssr: false });
 const WikiModal          = dynamic(() => import("./WikiModal"),          { ssr: false });
+const AmbientPlayer      = dynamic(() => import("./AmbientPlayer"),      { ssr: false });
 
 export type Profile = {
   id: number;
@@ -212,6 +213,7 @@ export default function GamePage() {
 
   return (
     <div className="bg-atmosphere flex h-full">
+    <AmbientPlayer />
     <div className="relative flex h-full w-full flex-col">
       {/* Top bar */}
       <header

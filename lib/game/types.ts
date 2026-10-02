@@ -485,6 +485,12 @@ export type ForgeEnhancement = {
   level: number; // 1–10
 };
 
+export type ForgePending = {
+  equipId: string;
+  startTime: string;
+  endTime: string;
+};
+
 export type ProfessionTaskSave = {
   lastReset: string;
   completedToday: string[];
@@ -542,4 +548,5 @@ export type SaveData = {
   offline: OfflineSave;
   pendingTower: PendingTowerClimb | null;
   pendingDungeons: PendingDungeonRun[];
+  forgePending: ForgePending | null;
 };

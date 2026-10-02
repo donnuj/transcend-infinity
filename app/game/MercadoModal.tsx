@@ -200,24 +200,28 @@ export default function MercadoModal({ onClose }: { onClose: () => void }) {
                 Cristais Astra são a moeda premium do jogo. Use para invocar heróis lendários.
               </p>
               {PREMIUM_BUNDLES.map((b) => (
-                <div
+                <motion.button
                   key={b.id}
-                  className="flex items-center justify-between rounded-xl border border-violet/15 px-4 py-4"
+                  onClick={() => showFeedback("Pagamentos em breve — integração Stripe em desenvolvimento")}
+                  whileTap={{ scale: 0.97 }}
+                  transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
+                  className="flex w-full items-center justify-between rounded-xl border border-violet/15 px-4 py-4 text-left"
                   style={{ background: "rgba(170,130,255,0.05)" }}
                 >
                   <div>
                     <p className="text-[12px] font-bold text-cream/85">{b.label}</p>
                     <p className="text-[11px] text-violet/50">{b.description}</p>
                   </div>
-                  <div
-                    className="rounded-lg border border-violet/20 px-3 py-2 text-[10px] font-bold text-violet/50"
-                  >
-                    {b.usd}
+                  <div className="flex flex-col items-end gap-1">
+                    <div className="rounded-lg border border-violet/30 bg-violet/10 px-3 py-2 text-[10px] font-bold text-violet/70">
+                      {b.usd}
+                    </div>
+                    <span className="text-[9px] text-violet/30">Em breve</span>
                   </div>
-                </div>
+                </motion.button>
               ))}
               <p className="mt-2 text-center text-[11px] text-violet/30">
-                Compras reais em breve via Stripe
+                Pagamentos via Stripe em desenvolvimento
               </p>
             </motion.div>
           )}
