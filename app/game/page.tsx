@@ -262,7 +262,7 @@ export default function GamePage() {
       </div>
       </header>
 
-      {/* Content */}
+      {/* Content + Modals — modals are inside main so nav stays visible */}
       <main className="relative flex-1 overflow-hidden">
         <AnimatePresence mode="wait">
           {tab === "mundo"   && <WorldTab   key="mundo"   profile={profile} onInvocar={openInvocar} onDungeon={openDungeon} onArena={openArena} onMercado={openMercado} onBattlePass={openBattlePass} onTorre={openTorre} onDailyChallenges={openDaily} onBossHunt={openBossHunt} onWorldMap={openWorldMap} onNpcDialogue={openNpcDialogue} onCaravana={openCaravana} />}
@@ -271,32 +271,32 @@ export default function GamePage() {
           {tab === "guilda"  && <GuildaTab  key="guilda" onFortress={openFortress} />}
           {tab === "perfil"  && <PerfilTab  key="perfil" profile={profile} onLogout={handleLogout} onAchievements={openAchievements} onCodex={openCodex} onSeason={openSeason} onHousing={openHousing} onCompanions={openCompanions} onAlchemy={openAlchemy} onSettings={openSettings} onProfession={openProfession} onForge={openForge} onWiki={openWiki} />}
         </AnimatePresence>
-      </main>
 
-      {/* Modals */}
-      <AnimatePresence>
-        {showDungeon    && <DungeonModal        key="dungeon"    onClose={closeDungeon} />}
-        {showArena      && <ArenaModal          key="arena"      onClose={closeArena} />}
-        {showMercado    && <MercadoModal        key="mercado"    onClose={closeMercado} />}
-        {showBattlePass && <BattlePassModal     key="battlepass" onClose={closeBattlePass} />}
-        {showTorre      && <TorreModal          key="torre"      onClose={closeTorre} />}
-        {showAchievements && <AchievementsModal key="achievements" onClose={closeAchievements} />}
-        {showDailyChallenges && <DailyChallengesModal key="daily" onClose={closeDaily} />}
-        {showCodex      && <CodexModal          key="codex"      onClose={closeCodex} />}
-        {showFortress   && <FortressModal       key="fortress"   onClose={closeFortress} />}
-        {showBossHunt   && <BossHuntModal       key="bosshunt"   onClose={closeBossHunt} />}
-        {showSeason     && <SeasonModal         key="season"     onClose={closeSeason} />}
-        {showHousing    && <HousingModal        key="housing"    onClose={closeHousing} />}
-        {showCompanions && <CompanionsModal     key="companions" onClose={closeCompanions} />}
-        {showAlchemy    && <AlchemyModal        key="alchemy"    onClose={closeAlchemy} />}
-        {showWorldMap   && <WorldMapModal       key="worldmap"   onClose={closeWorldMap} />}
-        {showNpcDialogue && <NpcDialogueModal   key="npcdialogue" onClose={closeNpcDialogue} />}
-        {showCaravana   && <CaravanaModal       key="caravana"   onClose={closeCaravana} />}
-        {showSettings   && <SettingsModal       key="settings"   onClose={closeSettings} />}
-        {showProfession && <ProfessionModal     key="profession" onClose={closeProfession} />}
-        {showForge      && <ForgeModal          key="forge"      onClose={closeForge} />}
-        {showWiki       && <WikiModal           key="wiki"       onClose={closeWiki} />}
-      </AnimatePresence>
+        {/* Modals */}
+        <AnimatePresence>
+          {showDungeon    && <DungeonModal        key="dungeon"    onClose={closeDungeon} />}
+          {showArena      && <ArenaModal          key="arena"      onClose={closeArena} />}
+          {showMercado    && <MercadoModal        key="mercado"    onClose={closeMercado} />}
+          {showBattlePass && <BattlePassModal     key="battlepass" onClose={closeBattlePass} />}
+          {showTorre      && <TorreModal          key="torre"      onClose={closeTorre} />}
+          {showAchievements && <AchievementsModal key="achievements" onClose={closeAchievements} />}
+          {showDailyChallenges && <DailyChallengesModal key="daily" onClose={closeDaily} />}
+          {showCodex      && <CodexModal          key="codex"      onClose={closeCodex} />}
+          {showFortress   && <FortressModal       key="fortress"   onClose={closeFortress} />}
+          {showBossHunt   && <BossHuntModal       key="bosshunt"   onClose={closeBossHunt} />}
+          {showSeason     && <SeasonModal         key="season"     onClose={closeSeason} />}
+          {showHousing    && <HousingModal        key="housing"    onClose={closeHousing} />}
+          {showCompanions && <CompanionsModal     key="companions" onClose={closeCompanions} />}
+          {showAlchemy    && <AlchemyModal        key="alchemy"    onClose={closeAlchemy} />}
+          {showWorldMap   && <WorldMapModal       key="worldmap"   onClose={closeWorldMap} />}
+          {showNpcDialogue && <NpcDialogueModal   key="npcdialogue" onClose={closeNpcDialogue} />}
+          {showCaravana   && <CaravanaModal       key="caravana"   onClose={closeCaravana} />}
+          {showSettings   && <SettingsModal       key="settings"   onClose={closeSettings} />}
+          {showProfession && <ProfessionModal     key="profession" onClose={closeProfession} />}
+          {showForge      && <ForgeModal          key="forge"      onClose={closeForge} />}
+          {showWiki       && <WikiModal           key="wiki"       onClose={closeWiki} />}
+        </AnimatePresence>
+      </main>
 
       {/* Retorno de pagamento */}
       <Suspense fallback={null}>

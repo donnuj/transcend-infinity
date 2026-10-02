@@ -365,6 +365,7 @@ export type PendingDungeonRun = {
   difficulty: DungeonDifficulty;
   startTime: string;
   endTime: string;
+  successChance?: number;
 };
 
 export type ArenaSave = {

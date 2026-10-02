@@ -7,7 +7,7 @@ import { HERO_MAP } from "@/lib/game/data/heroes";
 import { DUNGEONS } from "@/lib/game/data/world";
 import { scheduleSave } from "@/lib/game/save";
 import { DUNGEON_DURATIONS, DUNGEON_REWARDS, rollDungeonLoot } from "@/lib/game/data/towerData";
-import type { DungeonDef, DungeonDifficulty, PendingDungeonRun } from "@/lib/game/types";
+import type { DungeonDef, DungeonDifficulty, HeroLevelSave, PendingDungeonRun } from "@/lib/game/types";
 
 const ease = [0.23, 1, 0.32, 1] as const;
 
@@ -15,6 +15,29 @@ const RANK_COLOR: Record<string, string> = {
   SS: "rgb(255,255,200)", S: "rgb(255,200,50)", A: "rgb(200,155,60)",
   B: "rgb(90,150,255)", C: "rgb(100,210,130)", D: "rgb(180,180,210)", "": "rgba(122,111,160,0.4)"
 };
+
+const DIFFICULTY_MULT: Record<DungeonDifficulty, number> = {
+  easy: 0.5, normal: 1.0, hard: 1.5, epic: 2.0, legendary: 3.0,
+};
+
+const COUNT_MULT: Record<number, number> = { 1: 0.6, 2: 0.8, 3: 1.0 };
+
+function calcSuccessChance(
+  heroIds: string[],
+  heroLevels: HeroLevelSave[],
+  dungeon: DungeonDef,
+  difficulty: DungeonDifficulty,
+): number {
+  if (heroIds.length === 0) return 0;
+  const requiredLevel = dungeon.recommendedLevel * DIFFICULTY_MULT[difficulty];
+  const avgLevel =
+    heroIds.reduce((sum, id) => {
+      const h = heroLevels.find((hl) => hl.heroId === id);
+      return sum + (h?.level ?? 1);
+    }, 0) / heroIds.length;
+  const countMult = COUNT_MULT[heroIds.length] ?? 1.0;
+  return Math.max(0.05, Math.min(1.0, (avgLevel / Math.max(1, requiredLevel)) * countMult));
+}
 
 const DIFFICULTY_LABELS: Record<DungeonDifficulty, string> = {
   easy: "Fácil", normal: "Normal", hard: "Difícil", epic: "Épico", legendary: "Lendário"
@@ -53,6 +76,7 @@ export default function DungeonModal({ onClose }: { onClose: () => void }) {
   const [team, setTeam] = useState<string[]>([]);
   const [resolvedRun, setResolvedRun] = useState<PendingDungeonRun | null>(null);
   const [droppedItem, setDroppedItem] = useState<{ itemId: string; qty: number } | null>(null);
+  const [runSuccess, setRunSuccess] = useState(true);
   const [now, setNow] = useState(() => Date.now());
 
   const {
@@ -86,7 +110,8 @@ export default function DungeonModal({ onClose }: { onClose: () => void }) {
 
   function handleDispatch() {
     if (!dungeon || team.length === 0) return;
-    const runId = dispatchDungeonRun(dungeon.dungeonId, team, difficulty);
+    const chance = calcSuccessChance(team, save.heroLevels, dungeon, difficulty);
+    const runId = dispatchDungeonRun(dungeon.dungeonId, team, difficulty, chance);
     if (runId) {
       setScreen("list");
       scheduleSave();
@@ -99,17 +124,26 @@ export default function DungeonModal({ onClose }: { onClose: () => void }) {
     const resolved = resolveDungeonRun(runId);
     if (!resolved) return;
 
-    const rewards = DUNGEON_REWARDS[resolved.difficulty];
-    const hb = getHousingBonuses();
-    addCurrency("ouro", rewards.gold);
-    addCurrency("cristaisAstra", rewards.crystals);
-    const loot = rollDungeonLoot(resolved.difficulty, hb.dropMult);
-    if (loot) addItem(loot.itemId, loot.qty, "dungeon");
-    updateDungeonProgress(resolved.dungeonId, "A", DUNGEON_DURATIONS[resolved.difficulty]);
-    incrementDailyProgress("dungeons_today");
-    useGameStore.getState().addReputation("fac_ordem_imperial", 3);
+    const chance = resolved.successChance ?? 1.0;
+    const success = Math.random() < chance;
+
+    if (success) {
+      const rewards = DUNGEON_REWARDS[resolved.difficulty];
+      const hb = getHousingBonuses();
+      addCurrency("ouro", rewards.gold);
+      addCurrency("cristaisAstra", rewards.crystals);
+      const loot = rollDungeonLoot(resolved.difficulty, hb.dropMult);
+      if (loot) addItem(loot.itemId, loot.qty, "dungeon");
+      updateDungeonProgress(resolved.dungeonId, "A", DUNGEON_DURATIONS[resolved.difficulty]);
+      incrementDailyProgress("dungeons_today");
+      useGameStore.getState().addReputation("fac_ordem_imperial", 3);
+      setDroppedItem(loot);
+    } else {
+      setDroppedItem(null);
+    }
+
     scheduleSave();
-    setDroppedItem(loot);
+    setRunSuccess(success);
     setResolvedRun(resolved);
     setScreen("result");
   }
@@ -186,6 +220,7 @@ export default function DungeonModal({ onClose }: { onClose: () => void }) {
             run={resolvedRun}
             dungeon={DUNGEONS.find((d) => d.dungeonId === resolvedRun.dungeonId)!}
             droppedItem={droppedItem}
+            success={runSuccess}
             onClose={onClose}
             onRetry={() => {
               const d = DUNGEONS.find((d) => d.dungeonId === resolvedRun.dungeonId);
@@ -403,7 +438,7 @@ function DifficultyPicker({ dungeon, selected, onSelect, onNext }: {
 
 // ── Team Picker ─────────────────────────────────────────────────────────────────
 
-function TeamPicker({ difficulty, team, busyIds, onTeamChange, onDispatch }: {
+function TeamPicker({ dungeon, difficulty, team, busyIds, onTeamChange, onDispatch }: {
   dungeon: DungeonDef;
   difficulty: DungeonDifficulty;
   team: string[];
@@ -414,6 +449,16 @@ function TeamPicker({ difficulty, team, busyIds, onTeamChange, onDispatch }: {
   const { save } = useGameStore();
   const MAX_TEAM = 3;
   const diffColor = DIFFICULTY_COLOR[difficulty];
+
+  const successChance = team.length > 0
+    ? calcSuccessChance(team, save.heroLevels, dungeon, difficulty)
+    : 0;
+  const chancePct = Math.round(successChance * 100);
+  const chanceColor =
+    chancePct >= 80 ? "rgb(100,220,140)"
+    : chancePct >= 50 ? "rgb(200,155,60)"
+    : chancePct >= 30 ? "rgb(255,140,60)"
+    : "rgb(255,80,80)";
 
   const heroes = useMemo(() => {
     const ids = new Set(save.collectedHeroIds.map((k) => k.split("|")[1]));
@@ -464,6 +509,23 @@ function TeamPicker({ difficulty, team, busyIds, onTeamChange, onDispatch }: {
             );
           })}
         </div>
+
+        {team.length > 0 && (
+          <div className="mb-3">
+            <div className="mb-1 flex items-center justify-between">
+              <span className="text-[10px] uppercase tracking-[0.2em] text-violet/50">Chance de sucesso</span>
+              <span className="text-[11px] font-black" style={{ color: chanceColor }}>{chancePct}%</span>
+            </div>
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-void/80">
+              <motion.div
+                className="h-full rounded-full"
+                style={{ background: chanceColor }}
+                animate={{ width: `${chancePct}%` }}
+                transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       {heroes.length === 0 ? (
@@ -523,10 +585,11 @@ function TeamPicker({ difficulty, team, busyIds, onTeamChange, onDispatch }: {
 
 // ── Result Screen ──────────────────────────────────────────────────────────────
 
-function ResultScreen({ run, dungeon, droppedItem, onClose, onRetry }: {
+function ResultScreen({ run, dungeon, droppedItem, success, onClose, onRetry }: {
   run: PendingDungeonRun;
   dungeon: DungeonDef;
   droppedItem: { itemId: string; qty: number } | null;
+  success: boolean;
   onClose: () => void;
   onRetry: () => void;
 }) {
@@ -547,32 +610,47 @@ function ResultScreen({ run, dungeon, droppedItem, onClose, onRetry }: {
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
       >
-        🏆
+        {success ? "🏆" : "💀"}
       </motion.div>
 
       <div className="text-center">
-        <p className="mb-1 text-2xl font-black tracking-[0.2em] text-cream" style={{ fontFamily: "var(--font-cinzel)" }}>
-          VITÓRIA
+        <p
+          className="mb-1 text-2xl font-black tracking-[0.2em]"
+          style={{ fontFamily: "var(--font-cinzel)", color: success ? "rgb(232,217,160)" : "rgb(255,80,80)" }}
+        >
+          {success ? "VITÓRIA" : "DERROTA"}
         </p>
         <p className="text-[11px]" style={{ color: diffColor }}>{dungeon.name} — {DIFFICULTY_LABELS[run.difficulty]}</p>
+        {!success && (
+          <p className="mt-1 text-[10px] text-violet/50">Os heróis não estavam preparados para este desafio</p>
+        )}
       </div>
 
-      <div
-        className="w-full rounded-xl border px-4 py-4"
-        style={{ borderColor: `${diffColor}30`, background: `${diffColor}06` }}
-      >
-        <p className="mb-3 text-[11px] uppercase tracking-[0.2em] text-violet/60">Recompensas</p>
-        <div className="flex flex-col gap-1.5">
-          <RewardRow label="Ouro" value={`+${rewards.gold.toLocaleString("pt-BR")}`} color="rgb(200,155,60)" />
-          <RewardRow label="Cristais Astra" value={`+${rewards.crystals}`} color="rgb(170,130,255)" />
-          <RewardRow label="XP" value={`+${rewards.xp.toLocaleString("pt-BR")}`} color="rgb(100,220,140)" />
-          <RewardRow
-            label="Item"
-            value={droppedItem ? `${droppedItem.itemId} ×${droppedItem.qty}` : "Nenhum"}
-            color={droppedItem ? "rgb(232,217,160)" : "rgba(122,111,160,0.4)"}
-          />
+      {success && (
+        <div
+          className="w-full rounded-xl border px-4 py-4"
+          style={{ borderColor: `${diffColor}30`, background: `${diffColor}06` }}
+        >
+          <p className="mb-3 text-[11px] uppercase tracking-[0.2em] text-violet/60">Recompensas</p>
+          <div className="flex flex-col gap-1.5">
+            <RewardRow label="Ouro" value={`+${rewards.gold.toLocaleString("pt-BR")}`} color="rgb(200,155,60)" />
+            <RewardRow label="Cristais Astra" value={`+${rewards.crystals}`} color="rgb(170,130,255)" />
+            <RewardRow label="XP" value={`+${rewards.xp.toLocaleString("pt-BR")}`} color="rgb(100,220,140)" />
+            <RewardRow
+              label="Item"
+              value={droppedItem ? `${droppedItem.itemId} ×${droppedItem.qty}` : "Nenhum"}
+              color={droppedItem ? "rgb(232,217,160)" : "rgba(122,111,160,0.4)"}
+            />
+          </div>
         </div>
-      </div>
+      )}
+
+      {!success && (
+        <div className="w-full rounded-xl border border-red-500/15 px-4 py-4" style={{ background: "rgba(255,80,80,0.04)" }}>
+          <p className="mb-1 text-[11px] uppercase tracking-[0.2em] text-red-400/60">Missão falhou</p>
+          <p className="text-[10px] text-violet/45">Nível insuficiente ou equipe reduzida. Fortaleça seus heróis e tente novamente.</p>
+        </div>
+      )}
 
       <div className="flex w-full gap-3">
         <motion.button
@@ -588,7 +666,11 @@ function ResultScreen({ run, dungeon, droppedItem, onClose, onRetry }: {
           whileTap={{ scale: 0.97 }}
           transition={{ duration: 0.08, ease: [0.23, 1, 0.32, 1] }}
           className="flex-1 rounded-xl border py-3.5 text-[11px] font-bold tracking-wider"
-          style={{ borderColor: `${diffColor}40`, background: `${diffColor}10`, color: diffColor }}
+          style={{
+            borderColor: success ? `${diffColor}40` : "rgba(255,80,80,0.3)",
+            background: success ? `${diffColor}10` : "rgba(255,80,80,0.06)",
+            color: success ? diffColor : "rgb(255,100,100)",
+          }}
         >
           SAIR
         </motion.button>

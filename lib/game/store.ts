@@ -176,7 +176,7 @@ type GameStore = {
   cancelTowerClimb: () => void;
 
   // Dungeon dispatch
-  dispatchDungeonRun: (dungeonId: string, heroIds: string[], difficulty: DungeonDifficulty) => string | null;
+  dispatchDungeonRun: (dungeonId: string, heroIds: string[], difficulty: DungeonDifficulty, successChance?: number) => string | null;
   resolveDungeonRun: (runId: string) => PendingDungeonRun | null;
   cancelDungeonRun: (runId: string) => void;
 
@@ -673,7 +673,7 @@ export const useGameStore = create<GameStore>()(
         set((s) => { s.save.pendingTower = null; });
       },
 
-      dispatchDungeonRun(dungeonId, heroIds, difficulty) {
+      dispatchDungeonRun(dungeonId, heroIds, difficulty, successChance) {
         const state = get();
         const busy = state.getBusyHeroIds();
         if (heroIds.some((id) => busy.includes(id))) return null;
@@ -689,6 +689,7 @@ export const useGameStore = create<GameStore>()(
             difficulty,
             startTime: now.toISOString(),
             endTime: endTime.toISOString(),
+            successChance,
           });
         });
         return runId;
