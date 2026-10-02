@@ -78,7 +78,7 @@ export default function GuildaTab({ onFortress }: { onFortress: () => void }) {
   const [foundingName, setFoundingName] = useState("");
   const [foundingFaction, setFoundingFaction] = useState("");
   const [showFoundingForm, setShowFoundingForm] = useState(false);
-  const { save, getReputation, addReputation } = useGameStore();
+  const { save, getReputation } = useGameStore();
 
   const playerLevel = save.playerLevel?.level ?? save.invocador?.level ?? 1;
   const totalInfluence = FACTIONS.reduce((sum, f) => sum + getReputation(f.factionId), 0);

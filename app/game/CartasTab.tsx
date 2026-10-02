@@ -18,6 +18,7 @@ function HeroImg({ heroId }: { heroId: string }) {
   const [err, setErr] = useState(false);
   if (err) return null;
   return (
+    // eslint-disable-next-line @next/next/no-img-element
     <img
       src={`/heroes/${heroId}.png`}
       alt=""
@@ -581,7 +582,7 @@ function ProgressionTab({ hero, progression, levelData, s }: {
   levelData: SaveData["heroLevels"][0];
   s: { color: string; glow: string; border: string };
 }) {
-  const { rankUpHero, upgradeHeroStars, awakenHero, getFragmentos, useXpItem, ascendHero, getItemQty } = useGameStore();
+  const { rankUpHero, upgradeHeroStars, awakenHero, getFragmentos, ascendHero, getItemQty } = useGameStore();
   const frags = getFragmentos(hero.heroId);
   const xpItems = getItemQty("cristal_evolucao");
   const pedras = getItemQty("pedra_ascensao");

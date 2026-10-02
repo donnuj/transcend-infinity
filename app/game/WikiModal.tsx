@@ -4,8 +4,8 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X, BookOpen, Star, Sword, Coins, Calendar, ArrowRight,
-  CheckCircle, Warning, Info, Trophy, Sparkle, Shield,
-  Lightning, Crown, ListChecks, ArrowsClockwise, Lock,
+  CheckCircle, Warning, Info,
+  Lightning, Crown, Lock,
   type Icon as PhosphorIcon,
 } from "@phosphor-icons/react";
 

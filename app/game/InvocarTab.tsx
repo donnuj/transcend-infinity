@@ -494,6 +494,7 @@ function HeroPortrait({ heroId, emoji, single }: { heroId: string; emoji: string
     <span className={single ? "mb-3 text-4xl" : "mb-1 text-xl"}>{emoji}</span>
   );
   return (
+    // eslint-disable-next-line @next/next/no-img-element
     <img
       src={`/heroes/${heroId}.png`}
       alt=""
