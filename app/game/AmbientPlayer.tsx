@@ -37,7 +37,7 @@ export default function AmbientPlayer() {
       audio.pause();
       audio.src = "";
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   // Sync volume changes from settings
   useEffect(() => {

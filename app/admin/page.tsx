@@ -314,7 +314,10 @@ function PlayerPanel({
     }
   }, [email]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    load();
+  }, [load]);
 
   async function toggleBan() {
     if (!detail) return;
@@ -606,6 +609,7 @@ export default function AdminPage() {
     const user = getUser();
     if (!user || user.email !== ADMIN_EMAIL) { router.replace("/game"); return; }
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadPlayers();
   }, [loadPlayers, router]);
 
@@ -617,7 +621,6 @@ export default function AdminPage() {
 
   const premiumCount = players.filter((p) => p.saveStats?.isPremium).length;
   const bannedCount = players.filter((p) => p.isBanned).length;
-  const revenue = 0; // filled from purchases tab
 
   return (
     <div className="min-h-screen bg-[rgb(6,7,15)] text-[rgb(232,217,160)]">
