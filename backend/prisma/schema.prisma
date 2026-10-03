@@ -23,6 +23,7 @@ model Account {
   player        Player?
   refreshTokens RefreshToken[]
   resetTokens   PasswordResetToken[]
+  purchases     Purchase[]
 }
 
 model Player {
@@ -75,6 +76,19 @@ model SaveAudit {
   @@unique([playerId, revision])
   @@index([playerId])
   @@index([createdAt])
+}
+
+model Purchase {
+  id        Int      @id @default(autoincrement())
+  accountId Int
+  account   Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  type      String
+  paymentId String   @unique
+  amount    Float
+  status    String   @default("approved")
+  createdAt DateTime @default(now())
+
+  @@index([accountId])
 }
 
 model PasswordResetToken {

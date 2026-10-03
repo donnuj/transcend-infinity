@@ -73,10 +73,21 @@ export class PaymentService {
     const accountId = parseInt(accountIdStr ?? '', 10);
     if (isNaN(accountId)) return { ok: true };
 
-    await this.activatePremium(
-      accountId,
-      (type as 'monthly' | 'season') ?? 'season',
-    );
+    const premiumType = (type as 'monthly' | 'season') ?? 'season';
+    await this.activatePremium(accountId, premiumType);
+
+    try {
+      await this.prisma.purchase.create({
+        data: {
+          accountId,
+          type: premiumType,
+          paymentId: String(paymentId),
+          amount: premiumType === 'monthly' ? 14.99 : 29.99,
+          status: 'approved',
+        },
+      });
+    } catch { /* idempotência: ignora duplicate se webhook for repetido */ }
+
     return { ok: true };
   }
 
