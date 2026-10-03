@@ -8,6 +8,7 @@ import { BANNERS, BANNER_MAP } from "@/lib/game/data/banners";
 import { HERO_MAP } from "@/lib/game/data/heroes";
 import type { BannerDef, GachaRarity, HeroDef } from "@/lib/game/types";
 import { sfx } from "@/lib/game/sfx";
+import { RARITY_CARD } from "@/lib/game/animation";
 
 const ease = [0.23, 1, 0.32, 1] as const;
 
@@ -394,21 +395,29 @@ function PullBtn({ label, cost, selos, loading, onClick, highlight }: {
 
 // ── Result screen ──────────────────────────────────────────────────────────────
 
+const RESULT_SCREEN_GLOW: Partial<Record<string, string>> = {
+  Divino:   "radial-gradient(ellipse 100% 55% at 50% 0%, rgba(255,255,200,0.09) 0%, transparent 100%)",
+  Mítico:   "radial-gradient(ellipse 100% 50% at 50% 0%, rgba(255,60,60,0.07) 0%, transparent 100%)",
+  Lendário: "radial-gradient(ellipse 100% 45% at 50% 0%, rgba(200,155,60,0.07) 0%, transparent 100%)",
+};
+
 function ResultScreen({ results, onClose }: { results: PullResult[]; onClose: () => void }) {
   const best = results.reduce((a, b) =>
     RANK_ORDER.indexOf(b.rarity) > RANK_ORDER.indexOf(a.rarity) ? b : a
   );
   const bestStyle = RARITY_STYLE[best.rarity];
   const single = results.length === 1;
+  const screenGlow = RESULT_SCREEN_GLOW[best.rarity] ?? null;
 
   return (
     <motion.div
       key="result"
-      className="flex flex-col items-center overflow-y-auto px-4 pb-6 pt-5"
+      className="relative flex flex-col items-center overflow-y-auto px-4 pb-6 pt-5"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
+      style={screenGlow ? { background: screenGlow } : undefined}
     >
       <p className="mb-4 text-[10px] font-bold tracking-[0.3em] uppercase" style={{ color: bestStyle.color }}>
         {single ? "Invocação" : `${results.length}× Invocações`}
@@ -450,44 +459,63 @@ function ResultScreen({ results, onClose }: { results: PullResult[]; onClose: ()
 
 function PullCard({ result, index, single }: { result: PullResult; index: number; single: boolean }) {
   const s = RARITY_STYLE[result.rarity];
+  const v = RARITY_CARD[result.rarity];
+  const delay = index * 0.06;
+
   return (
-    <motion.div
-      className={`flex flex-col items-center overflow-hidden rounded-xl border ${single ? "w-44" : ""}`}
-      style={{
-        borderColor: s.border,
-        background: `linear-gradient(160deg, ${s.glow} 0%, rgba(10,10,22,0.96) 100%)`,
-        boxShadow: `0 0 20px ${s.glow}`,
-        padding: single ? "24px 16px 20px" : "10px 8px 8px",
-      }}
-      initial={{ opacity: 0, scale: 0.8, y: 10 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1], delay: index * 0.06 }}
-    >
-      <HeroPortrait heroId={result.hero.heroId} emoji={result.hero.portrait} single={single} />
-      {single && (
-        <p className="mb-1.5 px-2 text-center text-[13px] font-black tracking-wide" style={{ color: s.color, fontFamily: "var(--font-cinzel)" }}>
-          {result.hero.name.split(",")[0]}
-        </p>
-      )}
-      <span className={`font-bold tracking-wider ${single ? "text-[10px]" : "text-[7px]"}`} style={{ color: s.color }}>
-        {result.wasPity ? "★ PITY — " : ""}{s.label.toUpperCase()}
-      </span>
-      {!single && (
-        <p className="mt-0.5 px-1 text-center text-[7px] leading-tight text-cream/45">
-          {result.hero.name.split(",")[0]}
-        </p>
-      )}
-      {result.fragmentsAwarded > 0 && (
-        <span className={`mt-1 rounded-full border border-violet/20 px-1.5 font-bold text-violet/60 ${single ? "text-[11px]" : "text-[6px]"}`}>
-          +{result.fragmentsAwarded} fragmento
+    <div className={`relative ${single ? "w-44" : ""}`}>
+      <motion.div
+        className="flex flex-col items-center overflow-hidden rounded-xl border"
+        style={{
+          borderColor: s.border,
+          background: `linear-gradient(160deg, ${s.glow} 0%, rgba(10,10,22,0.96) 100%)`,
+          boxShadow: v.hasGlow ? "none" : `0 0 20px ${s.glow}`,
+          padding: single ? "24px 16px 20px" : "10px 8px 8px",
+        }}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        initial={v.initial as any}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        animate={v.animate as any}
+        transition={{ duration: v.duration, ease, delay }}
+      >
+        <HeroPortrait heroId={result.hero.heroId} emoji={result.hero.portrait} single={single} />
+        {single && (
+          <p className="mb-1.5 px-2 text-center text-[13px] font-black tracking-wide" style={{ color: s.color, fontFamily: "var(--font-cinzel)" }}>
+            {result.hero.name.split(",")[0]}
+          </p>
+        )}
+        <span className={`font-bold tracking-wider ${single ? "text-[10px]" : "text-[7px]"}`} style={{ color: s.color }}>
+          {result.wasPity ? "★ PITY — " : ""}{s.label.toUpperCase()}
         </span>
+        {!single && (
+          <p className="mt-0.5 px-1 text-center text-[7px] leading-tight text-cream/45">
+            {result.hero.name.split(",")[0]}
+          </p>
+        )}
+        {result.fragmentsAwarded > 0 && (
+          <span className={`mt-1 rounded-full border border-violet/20 px-1.5 font-bold text-violet/60 ${single ? "text-[11px]" : "text-[6px]"}`}>
+            +{result.fragmentsAwarded} fragmento
+          </span>
+        )}
+        {result.isNew && (
+          <span className={`mt-0.5 font-bold text-green-400/70 ${single ? "text-[11px]" : "text-[6px]"}`}>
+            NOVO
+          </span>
+        )}
+      </motion.div>
+      {v.hasGlow && v.glowColor && (
+        <motion.div
+          className="pointer-events-none absolute -inset-px rounded-xl animate-rarity-glow"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: delay + v.duration + 0.05, duration: 0.35 }}
+          style={{
+            boxShadow: `0 0 28px ${v.glowColor}, 0 0 56px ${v.glowColor.replace(/[\d.]+\)$/, "0.12)")}`,
+            border: `1px solid ${s.color}40`,
+          }}
+        />
       )}
-      {result.isNew && (
-        <span className={`mt-0.5 font-bold text-green-400/70 ${single ? "text-[11px]" : "text-[6px]"}`}>
-          NOVO
-        </span>
-      )}
-    </motion.div>
+    </div>
   );
 }
 

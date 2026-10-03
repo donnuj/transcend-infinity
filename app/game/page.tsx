@@ -38,6 +38,7 @@ const ProfessionModal    = dynamic(() => import("./ProfessionModal"),    { ssr: 
 const ForgeModal         = dynamic(() => import("./ForgeModal"),         { ssr: false });
 const WikiModal          = dynamic(() => import("./WikiModal"),          { ssr: false });
 const AmbientPlayer      = dynamic(() => import("./AmbientPlayer"),      { ssr: false });
+import AnimatedNumber from "./AnimatedNumber";
 
 export type Profile = {
   id: number;
@@ -468,7 +469,7 @@ function Chip({ icon, value, color }: { icon: string; value: number; color: stri
       }}
     >
       <span className="text-[10px]">{icon}</span>
-      <span>{value.toLocaleString("pt-BR")}</span>
+      <AnimatedNumber value={value} />
     </div>
   );
 }

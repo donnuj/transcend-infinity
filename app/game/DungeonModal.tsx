@@ -633,13 +633,14 @@ function ResultScreen({ run, dungeon, droppedItem, success, onClose, onRetry }: 
         >
           <p className="mb-3 text-[11px] uppercase tracking-[0.2em] text-violet/60">Recompensas</p>
           <div className="flex flex-col gap-1.5">
-            <RewardRow label="Ouro" value={`+${rewards.gold.toLocaleString("pt-BR")}`} color="rgb(200,155,60)" />
-            <RewardRow label="Cristais Astra" value={`+${rewards.crystals}`} color="rgb(170,130,255)" />
-            <RewardRow label="XP" value={`+${rewards.xp.toLocaleString("pt-BR")}`} color="rgb(100,220,140)" />
+            <RewardRow label="Ouro" value={`+${rewards.gold.toLocaleString("pt-BR")}`} color="rgb(200,155,60)" index={0} />
+            <RewardRow label="Cristais Astra" value={`+${rewards.crystals}`} color="rgb(170,130,255)" index={1} />
+            <RewardRow label="XP" value={`+${rewards.xp.toLocaleString("pt-BR")}`} color="rgb(100,220,140)" index={2} />
             <RewardRow
               label="Item"
               value={droppedItem ? `${droppedItem.itemId} ×${droppedItem.qty}` : "Nenhum"}
               color={droppedItem ? "rgb(232,217,160)" : "rgba(122,111,160,0.4)"}
+              index={3}
             />
           </div>
         </div>
@@ -679,11 +680,16 @@ function ResultScreen({ run, dungeon, droppedItem, success, onClose, onRetry }: 
   );
 }
 
-function RewardRow({ label, value, color }: { label: string; value: string; color: string }) {
+function RewardRow({ label, value, color, index = 0 }: { label: string; value: string; color: string; index?: number }) {
   return (
-    <div className="flex items-center justify-between">
+    <motion.div
+      className="flex items-center justify-between"
+      initial={{ opacity: 0, x: -8 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.24, ease: [0.23, 1, 0.32, 1], delay: 0.35 + index * 0.055 }}
+    >
       <span className="text-[10px] text-violet/50">{label}</span>
       <span className="text-[10px] font-bold" style={{ color }}>{value}</span>
-    </div>
+    </motion.div>
   );
 }
