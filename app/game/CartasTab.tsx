@@ -11,6 +11,8 @@ import { RUNE_MAP } from "@/lib/game/data/items";
 import { HERO_IDENTITY, CLASS_ICON, ELEMENT_RA, RARITY_STARS } from "@/lib/game/data/heroIdentity";
 import { deriveStats, getStatsAtLevel } from "@/lib/game/calc";
 import type { GachaRarity, HeroDef, SaveData } from "@/lib/game/types";
+import { ParticleEffect } from "@/src/components/game/effects/ParticleEffect";
+import { IdleBreathing } from "@/src/components/game/ui/IdleBreathing";
 
 const ease = [0.23, 1, 0.32, 1] as const;
 
@@ -192,11 +194,17 @@ function ArtDecoHeroCard({ hero, copies, progression, index, onClick }: {
   const stars = Math.max(1, progression.stars || RARITY_STARS[hero.rarity] || 1);
   const shortName = hero.name.split(",")[0].toUpperCase();
   const isHighRarity = hero.rarity === "Lendário" || hero.rarity === "Mítico" || hero.rarity === "Divino";
+  const isEpicPlus = hero.rarity === "Épico" || isHighRarity;
   const frameColor = s.color;
+  const [tapParticle, setTapParticle] = useState(false);
+  const particleType = hero.rarity === "Mítico" ? "fire" as const : hero.rarity === "Divino" ? "star" as const : hero.rarity === "Lendário" ? "star" as const : "magic" as const;
 
   return (
     <motion.button
-      onClick={onClick}
+      onClick={() => {
+        onClick();
+        if (isEpicPlus) { setTapParticle(true); setTimeout(() => setTapParticle(false), 700); }
+      }}
       whileTap={{ scale: 0.94, transition: { type: "spring", stiffness: 500, damping: 25 } }}
       className="relative w-full overflow-hidden"
       style={{
@@ -325,6 +333,28 @@ function ArtDecoHeroCard({ hero, copies, progression, index, onClick }: {
         <div
           className="pointer-events-none absolute inset-0"
           style={{ background: `radial-gradient(ellipse at 50% 25%, ${frameColor}10 0%, transparent 65%)` }}
+        />
+      )}
+
+      {/* Shimmer sweep for high-rarity cards */}
+      {isHighRarity && (
+        <motion.div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background: `linear-gradient(105deg, transparent 35%, ${s.glow} 50%, transparent 65%)`,
+            borderRadius: "0.875rem",
+          }}
+          animate={{ x: ["-120%", "220%"] }}
+          transition={{ duration: 2.6, ease: "linear", repeat: Infinity, repeatDelay: 4 + index * 0.3 }}
+        />
+      )}
+
+      {/* Particle burst on tap */}
+      {tapParticle && (
+        <ParticleEffect
+          type={particleType}
+          style={{ position: "absolute", left: "50%", top: "40%", transform: "translate(-50%,-50%)" }}
+          onDone={() => setTapParticle(false)}
         />
       )}
     </motion.button>

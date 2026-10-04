@@ -10,6 +10,8 @@ import { HERO_MAP } from "@/lib/game/data/heroes";
 import type { BannerDef, GachaRarity, HeroDef } from "@/lib/game/types";
 import { sfx } from "@/lib/game/sfx";
 import { RARITY_CARD } from "@/lib/game/animation";
+import { ParticleEffect } from "@/src/components/game/effects/ParticleEffect";
+import { SpellEffect } from "@/src/components/game/effects/SpellEffect";
 
 const ease = [0.23, 1, 0.32, 1] as const;
 
@@ -432,6 +434,9 @@ function PullCard({ result, index, single }: { result: PullResult; index: number
   const s = RARITY_STYLE[result.rarity];
   const v = RARITY_CARD[result.rarity];
   const delay = index * 0.06;
+  const isHighRarity = result.rarity === "Lendário" || result.rarity === "Mítico" || result.rarity === "Divino" || result.rarity === "Épico";
+  const particleType = result.rarity === "Mítico" ? "fire" as const : result.rarity === "Divino" ? "star" as const : result.rarity === "Lendário" ? "star" as const : "magic" as const;
+  const spellType = result.rarity === "Mítico" ? "fire" as const : result.rarity === "Divino" ? "holy" as const : result.rarity === "Lendário" ? "holy" as const : "magic" as const;
 
   return (
     <div className={`relative ${single ? "w-44" : ""}`}>
@@ -485,6 +490,22 @@ function PullCard({ result, index, single }: { result: PullResult; index: number
             border: `1px solid ${s.color}40`,
           }}
         />
+      )}
+
+      {/* Particle burst on reveal for epic+ */}
+      {isHighRarity && (
+        <motion.div
+          style={{ position: "absolute", inset: 0, pointerEvents: "none" }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: delay + v.duration }}
+        >
+          <ParticleEffect
+            type={particleType}
+            style={{ position: "absolute", left: "50%", top: "40%", transform: "translate(-50%,-50%)" }}
+          />
+          <SpellEffect type={spellType} show size={single ? 60 : 36} />
+        </motion.div>
       )}
     </div>
   );
