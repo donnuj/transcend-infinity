@@ -14,7 +14,10 @@ import {
   saveDownloadSchema,
   saveUploadResponseSchema,
   type SaveUpload,
+  type SummonInput,
 } from './player.schemas';
+import { BANNER_MAP } from './banners.data';
+import { rollBanner } from './gacha.engine';
 
 @Injectable()
 export class PlayerService {
@@ -487,6 +490,120 @@ export class PlayerService {
       rating: r,
       defenderHeroId,
     }));
+  }
+
+  async summon(accountId: number, input: SummonInput) {
+    const banner = BANNER_MAP[input.bannerId];
+    if (!banner) throw new NotFoundException('Banner não encontrado.');
+
+    const player = await this.prisma.player.findUnique({
+      where: { accountId },
+      include: { saveData: true },
+    });
+    if (!player) throw new NotFoundException('Jogador não encontrado.');
+    if (!player.saveData) throw new NotFoundException('Save não encontrado.');
+
+    let save: Record<string, unknown>;
+    try {
+      save = JSON.parse(player.saveData.data) as Record<string, unknown>;
+    } catch {
+      throw new InternalServerErrorException('Save corrompido.');
+    }
+
+    const wallet = (save['wallet'] ?? {}) as Record<string, number>;
+    const selosLivres = (wallet['selosLivres'] as number) ?? 0;
+    const selosDeInvocacao = (wallet['selosDeInvocacao'] as number) ?? 0;
+    const totalSeals = selosLivres + selosDeInvocacao;
+    if (totalSeals < input.count)
+      throw new ConflictException('Selos insuficientes.');
+
+    const bannerPity = (save['bannerPity'] as Array<{ bannerId: string; pullCount: number }>) ?? [];
+    const collectedHeroIds = (save['collectedHeroIds'] as string[]) ?? [];
+    const fragmentos = (save['fragmentos'] as Array<{ heroId: string; count: number }>) ?? [];
+    const invocador = (save['invocador'] as { level: number; experience: number; totalPulls: number }) ?? { level: 1, experience: 0, totalPulls: 0 };
+
+    const pityEntry = bannerPity.find((p) => p.bannerId === input.bannerId);
+    let currentPity = pityEntry?.pullCount ?? 0;
+
+    let selosLivresSpent = 0;
+    let selosDeInvocacaoSpent = 0;
+    const results: Array<{ heroId: string; rarity: string; isNew: boolean; wasPity: boolean; fragmentsAwarded: number }> = [];
+    const newHeroKeys: string[] = [];
+    const fragMap = new Map<string, number>();
+
+    for (let i = 0; i < input.count; i++) {
+      const { heroId, rarity, wasPity } = rollBanner(banner, currentPity);
+      const isLegend = rarity === 'Lendário' || rarity === 'Mítico' || rarity === 'Divino';
+      const key = `${input.bannerId}|${heroId}`;
+      const isNew = !collectedHeroIds.includes(key) && !newHeroKeys.includes(key);
+
+      if (isLegend) currentPity = 0;
+      else currentPity++;
+
+      const fragmentsAwarded = isNew ? 0 : 1;
+      results.push({ heroId, rarity, isNew, wasPity, fragmentsAwarded });
+
+      if (isNew) {
+        newHeroKeys.push(key);
+      } else {
+        fragMap.set(heroId, (fragMap.get(heroId) ?? 0) + 1);
+      }
+
+      // spend seals: free first
+      const remainingFree = selosLivres - selosLivresSpent;
+      if (remainingFree > 0) selosLivresSpent++;
+      else selosDeInvocacaoSpent++;
+
+      // invocador XP
+      invocador.totalPulls++;
+      invocador.experience += 10;
+      const threshold = 100 * invocador.level;
+      while (invocador.experience >= threshold) {
+        invocador.experience -= threshold;
+        invocador.level++;
+      }
+    }
+
+    // Apply changes to save
+    wallet['selosLivres'] = selosLivres - selosLivresSpent;
+    wallet['selosDeInvocacao'] = selosDeInvocacao - selosDeInvocacaoSpent;
+    save['wallet'] = wallet;
+
+    if (pityEntry) pityEntry.pullCount = currentPity;
+    else bannerPity.push({ bannerId: input.bannerId, pullCount: currentPity });
+    save['bannerPity'] = bannerPity;
+
+    const mergedCollected = [...collectedHeroIds, ...newHeroKeys];
+    save['collectedHeroIds'] = mergedCollected;
+
+    const mergedFrags = [...fragmentos];
+    for (const [heroId, count] of fragMap) {
+      const idx = mergedFrags.findIndex((f) => f.heroId === heroId);
+      if (idx >= 0) mergedFrags[idx]!.count += count;
+      else mergedFrags.push({ heroId, count });
+    }
+    save['fragmentos'] = mergedFrags;
+    save['invocador'] = invocador;
+
+    const newData = JSON.stringify(save);
+    const newChecksum = createHash('sha256').update(newData, 'utf8').digest('hex');
+    const newRevision = player.saveData.revision + 1;
+
+    await this.prisma.saveData.update({
+      where: { playerId: player.id },
+      data: { data: newData, checksum: newChecksum, revision: newRevision, schemaVersion: player.saveData.schemaVersion },
+    });
+
+    return {
+      results,
+      revision: newRevision,
+      newPity: currentPity,
+      selosLivresSpent,
+      selosDeInvocacaoSpent,
+      newHeroKeys,
+      fragmentosAdded: Array.from(fragMap.entries()).map(([heroId, count]) => ({ heroId, count })),
+      invocador,
+    };
   }
 
   async downloadSave(accountId: number) {

@@ -10,7 +10,7 @@ import {
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PlayerService } from './player.service';
 import type { Request as ExpressRequest } from 'express';
-import { saveUploadSchema, type SaveUpload } from './player.schemas';
+import { saveUploadSchema, summonSchema, type SaveUpload, type SummonInput } from './player.schemas';
 import { ZodValidationPipe } from '../common/validation/zod-validation.pipe';
 
 interface AuthenticatedRequest extends ExpressRequest {
@@ -41,6 +41,14 @@ export class PlayerController {
   @Get('save')
   downloadSave(@Request() req: AuthenticatedRequest) {
     return this.playerService.downloadSave(req.user.accountId);
+  }
+
+  @Post('summon')
+  summon(
+    @Request() req: AuthenticatedRequest,
+    @Body(new ZodValidationPipe(summonSchema)) body: SummonInput,
+  ) {
+    return this.playerService.summon(req.user.accountId, body);
   }
 
   @Get('arena-opponents')

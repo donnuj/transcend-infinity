@@ -97,6 +97,11 @@ export async function uploadCloudSave(retrying = false): Promise<void> {
   }
 }
 
+// Atualiza a revisão local sem disparar upload — usado após summon server-side.
+export function updateRevision(newRevision: number): void {
+  _revision = newRevision;
+}
+
 // Debounced auto-save: chama depois de mudanças no store.
 export function scheduleSave(delayMs = 3000): void {
   if (_syncTimer) clearTimeout(_syncTimer);

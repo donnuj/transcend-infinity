@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGameStore } from "@/lib/game/store";
-import { scheduleSave } from "@/lib/game/save";
+import { updateRevision } from "@/lib/game/save";
+import { api } from "@/lib/api";
 import { BANNERS, BANNER_MAP } from "@/lib/game/data/banners";
 import { HERO_MAP } from "@/lib/game/data/heroes";
 import type { BannerDef, GachaRarity, HeroDef } from "@/lib/game/types";
@@ -30,42 +31,16 @@ type PullResult = {
   fragmentsAwarded: number;
 };
 
-// ── Gacha engine pura ─────────────────────────────────────────────────────────
-
-function rollBanner(banner: BannerDef, pityCount: number): { heroId: string; rarity: GachaRarity; wasPity: boolean } {
-  const forcedPity = pityCount >= banner.pityThreshold;
-
-  // Soft pity: multiplicador crescente a partir de softPityStart
-  const softMult = pityCount >= banner.softPityStart
-    ? 1 + (pityCount - banner.softPityStart) * 0.05
-    : 1;
-
-  if (forcedPity) {
-    const legendPool = banner.pool.filter(
-      (e) => e.rarity === "Lendário" || e.rarity === "Mítico" || e.rarity === "Divino"
-    );
-    if (legendPool.length) {
-      const picked = legendPool[Math.floor(Math.random() * legendPool.length)];
-      return { heroId: picked.heroId, rarity: picked.rarity, wasPity: true };
-    }
-  }
-
-  let totalWeight = 0;
-  for (const e of banner.pool) {
-    const isLegend = e.rarity === "Lendário" || e.rarity === "Mítico" || e.rarity === "Divino";
-    totalWeight += isLegend ? e.weight * softMult : e.weight;
-  }
-
-  let roll = Math.random() * totalWeight;
-  for (const e of banner.pool) {
-    const isLegend = e.rarity === "Lendário" || e.rarity === "Mítico" || e.rarity === "Divino";
-    const w = isLegend ? e.weight * softMult : e.weight;
-    roll -= w;
-    if (roll <= 0) return { heroId: e.heroId, rarity: e.rarity, wasPity: false };
-  }
-  const last = banner.pool[banner.pool.length - 1];
-  return { heroId: last.heroId, rarity: last.rarity, wasPity: false };
-}
+type SummonApiResponse = {
+  results: Array<{ heroId: string; rarity: string; isNew: boolean; wasPity: boolean; fragmentsAwarded: number }>;
+  revision: number;
+  newPity: number;
+  selosLivresSpent: number;
+  selosDeInvocacaoSpent: number;
+  newHeroKeys: string[];
+  fragmentosAdded: Array<{ heroId: string; count: number }>;
+  invocador: { level: number; experience: number; totalPulls: number };
+};
 
 const RANK_ORDER: GachaRarity[] = ["Comum", "Incomum", "Raro", "Épico", "Lendário", "Mítico", "Divino"];
 
@@ -83,50 +58,46 @@ export default function InvocarTab() {
   const banner = BANNER_MAP[activeBannerId];
   const pity = store.getPity(activeBannerId);
 
-  function executePull(count: 1 | 10) {
+  async function executePull(count: 1 | 10) {
     if (selos < count) return;
     sfx.click();
     setPulling(true);
 
-    setTimeout(() => {
-      const pullResults: PullResult[] = [];
-      let currentPity = pity;
+    try {
+      const res = await api.post<SummonApiResponse>("/player/summon", {
+        bannerId: activeBannerId,
+        count,
+      });
 
-      for (let i = 0; i < count; i++) {
-        const { heroId, rarity, wasPity } = rollBanner(banner, currentPity);
-        const hero = HERO_MAP[heroId];
-        if (!hero) continue;
+      const pullResults: PullResult[] = res.results.flatMap(
+        ({ heroId, rarity, isNew, wasPity, fragmentsAwarded }) => {
+          const hero = HERO_MAP[heroId];
+          if (!hero) return [];
+          return [{ hero, rarity: rarity as GachaRarity, isNew, wasPity, fragmentsAwarded }];
+        }
+      );
 
-        const isLegend = rarity === "Lendário" || rarity === "Mítico" || rarity === "Divino";
-        const isNew = !store.hasHero(activeBannerId, heroId);
-
-        // Atualizar pity
-        if (isLegend) currentPity = 0;
-        else currentPity++;
-
-        // Fragmentos em duplicatas
-        const fragments = isNew ? 0 : 1;
-
-        pullResults.push({ hero, rarity, isNew, wasPity, fragmentsAwarded: fragments });
-
-        // Atualizar store
-        store.addCollectedHero(activeBannerId, heroId);
-        if (!isNew) store.addFragmento(heroId, 1);
-        store.registerPull();
-
-        // Gastar selo (Livres primeiro)
-        if (wallet.selosLivres > 0) store.spendCurrency("selosLivres", 1);
-        else store.spendCurrency("selosDeInvocacao", 1);
+      for (const key of res.newHeroKeys) {
+        const sep = key.indexOf("|");
+        store.addCollectedHero(key.slice(0, sep), key.slice(sep + 1));
       }
-
-      store.setPity(activeBannerId, currentPity);
+      for (const { heroId, count: cnt } of res.fragmentosAdded) {
+        store.addFragmento(heroId, cnt);
+      }
+      store.setPity(activeBannerId, res.newPity);
+      if (res.selosLivresSpent > 0) store.spendCurrency("selosLivres", res.selosLivresSpent);
+      if (res.selosDeInvocacaoSpent > 0) store.spendCurrency("selosDeInvocacao", res.selosDeInvocacaoSpent);
+      useGameStore.setState((s) => ({ ...s, save: { ...s.save, invocador: res.invocador } }));
       store.incrementDailyProgress("pulls_today", count);
-      scheduleSave();
+      updateRevision(res.revision);
 
       sfx.victory();
       setResults(pullResults);
+    } catch (err) {
+      console.error("[summon] failed", err);
+    } finally {
       setPulling(false);
-    }, 400);
+    }
   }
 
   return (

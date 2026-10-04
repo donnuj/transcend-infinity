@@ -123,3 +123,12 @@ export const saveDownloadSchema = saveUploadSchema.extend({
 });
 
 export type SaveUpload = z.infer<typeof saveUploadSchema>;
+
+export const summonSchema = z
+  .object({
+    bannerId: z.string().min(1).max(64),
+    count: z.union([z.literal(1), z.literal(10)]),
+  })
+  .strict();
+
+export type SummonInput = z.infer<typeof summonSchema>;
