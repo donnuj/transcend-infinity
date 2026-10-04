@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGameStore } from "@/lib/game/store";
+import { BattleScene } from "@/src/components/game/battle/BattleScene";
 import { HERO_MAP } from "@/lib/game/data/heroes";
 import { scheduleSave } from "@/lib/game/save";
 import { buildHeroCombatant, simulateBattle, type CombatantSnapshot } from "@/lib/game/combat";
@@ -419,6 +420,15 @@ export default function BossHuntModal({ onClose }: { onClose: () => void }) {
               </div>
             </div>
             <div className="px-4 pt-4">
+              <div className="mb-3">
+                <BattleScene
+                  variant="boss"
+                  heroCount={Math.max(1, team.length)}
+                  enemyName={activeBoss.name}
+                  progressPct={0.5}
+                  diffColor="rgb(255,100,60)"
+                />
+              </div>
               <p className="mb-3 text-[11px] uppercase tracking-[0.2em] text-violet/60">
                 Selecione seu time (máx. 3) — {team.length}/3
               </p>

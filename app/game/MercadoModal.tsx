@@ -125,6 +125,37 @@ export default function MercadoModal({ onClose }: { onClose: () => void }) {
         )}
       </AnimatePresence>
 
+      {/* Shop animation banner */}
+      <div style={{ position: "relative", height: 60, overflow: "hidden", background: "linear-gradient(180deg, rgba(200,155,60,0.06) 0%, transparent 100%)", borderBottom: "1px solid rgba(200,155,60,0.08)" }}>
+        {[
+          { icon: "◆", x: 8,  delay: 0,    color: "rgba(200,155,60,0.7)",  size: 14 },
+          { icon: "✦", x: 22, delay: 0.5,  color: "rgba(255,255,200,0.5)", size: 10 },
+          { icon: "◆", x: 38, delay: 1.2,  color: "rgba(200,155,60,0.6)",  size: 12 },
+          { icon: "✦", x: 55, delay: 0.3,  color: "rgba(170,130,255,0.6)", size: 10 },
+          { icon: "◆", x: 68, delay: 0.8,  color: "rgba(200,155,60,0.7)",  size: 14 },
+          { icon: "✦", x: 82, delay: 1.6,  color: "rgba(100,210,130,0.6)", size: 11 },
+          { icon: "◆", x: 92, delay: 0.4,  color: "rgba(200,155,60,0.5)",  size: 12 },
+        ].map((p, i) => (
+          <motion.div
+            key={i}
+            animate={{ y: [60, -10], opacity: [0, 1, 1, 0] }}
+            transition={{ duration: 2.5, delay: p.delay, repeat: Infinity, ease: "easeOut", times: [0, 0.2, 0.8, 1] }}
+            style={{ position: "absolute", left: `${p.x}%`, bottom: 0, fontSize: p.size, color: p.color, pointerEvents: "none" }}
+          >
+            {p.icon}
+          </motion.div>
+        ))}
+        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
+          <motion.span
+            animate={{ opacity: [0.3, 0.7, 0.3], scale: [0.97, 1.03, 0.97] }}
+            transition={{ duration: 2, repeat: Infinity }}
+            style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.3em", color: "rgba(200,155,60,0.4)" }}
+          >
+            MERCADO DE VALDRIS
+          </motion.span>
+        </div>
+      </div>
+
       {/* Content */}
       <div className="flex-1 overflow-y-auto px-4 pb-6 pt-4">
         <AnimatePresence mode="wait">

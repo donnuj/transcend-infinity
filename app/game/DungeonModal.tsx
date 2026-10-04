@@ -11,6 +11,7 @@ import type { DungeonDef, DungeonDifficulty, HeroLevelSave, PendingDungeonRun } 
 import { DamageNumber } from "@/src/components/game/effects/DamageNumber";
 import { LevelUpEffect } from "@/src/components/game/effects/LevelUpEffect";
 import { ScreenShake } from "@/src/components/game/effects/ScreenShake";
+import { BattleScene } from "@/src/components/game/battle/BattleScene";
 
 const ease = [0.23, 1, 0.32, 1] as const;
 
@@ -284,6 +285,19 @@ function DungeonList({ pendingDungeons, now, onSelect, onCollect, onCancel }: {
                       </p>
                     )}
                   </div>
+                  {/* Battle animation */}
+                  {!isReady && (
+                    <div className="mb-2">
+                      <BattleScene
+                        variant="dungeon"
+                        heroCount={run.heroIds.length}
+                        enemyName={d?.name ?? "Inimigo"}
+                        progressPct={Math.min(1, 1 - remaining / (new Date(run.endTime).getTime() - new Date(run.startTime).getTime()))}
+                        timeLabel={fmtCountdown(remaining)}
+                        diffColor={diffColor}
+                      />
+                    </div>
+                  )}
                   {/* Progress bar */}
                   <div className="mb-2 h-1 w-full overflow-hidden rounded-full bg-void/80">
                     <motion.div

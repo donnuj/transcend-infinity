@@ -197,10 +197,59 @@ function BannerScreen({
         <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse 80% 70% at 50% 20%, rgba(200,155,60,0.13) 0%, transparent 70%)" }} />
         {/* Corner shine */}
         <div className="pointer-events-none absolute -left-10 -top-10 h-40 w-40 rounded-full opacity-30" style={{ background: "radial-gradient(circle, rgba(200,155,60,0.2) 0%, transparent 70%)" }} />
-        {/* Decorative stars */}
-        <div className="pointer-events-none absolute right-6 top-8 text-[10px] text-amber/20 animate-pulse-glow">✦</div>
-        <div className="pointer-events-none absolute right-16 top-5 text-[5px] text-amber/15 animate-pulse-glow" style={{ animationDelay: "0.8s" }}>✦</div>
-        <div className="pointer-events-none absolute left-6 top-12 text-[6px] text-violet/20 animate-pulse-glow" style={{ animationDelay: "1.3s" }}>✦</div>
+
+        {/* Magical portal — orbiting runes */}
+        <div className="pointer-events-none absolute" style={{ right: 16, top: "50%", transform: "translateY(-50%)", width: 80, height: 80 }}>
+          {/* Pulsing core */}
+          <motion.div
+            animate={{ scale: [0.8, 1.1, 0.8], opacity: [0.3, 0.7, 0.3] }}
+            transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+            style={{ position: "absolute", inset: 12, borderRadius: "50%", background: "radial-gradient(circle, rgba(200,155,60,0.4) 0%, rgba(180,110,255,0.2) 50%, transparent 70%)" }}
+          />
+          {/* Outer ring */}
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+            style={{ position: "absolute", inset: 0, borderRadius: "50%", border: "1px solid rgba(200,155,60,0.2)" }}
+          >
+            {[0, 60, 120, 180, 240, 300].map((deg, i) => (
+              <div key={i} style={{
+                position: "absolute", top: "50%", left: "50%",
+                width: 4, height: 4, borderRadius: "50%",
+                background: i % 2 === 0 ? "rgba(200,155,60,0.8)" : "rgba(170,130,255,0.8)",
+                transform: `rotate(${deg}deg) translateX(38px) translate(-50%, -50%)`,
+                boxShadow: `0 0 6px ${i % 2 === 0 ? "rgba(200,155,60,0.6)" : "rgba(170,130,255,0.6)"}`,
+              }} />
+            ))}
+          </motion.div>
+          {/* Inner ring counter-rotating */}
+          <motion.div
+            animate={{ rotate: -360 }}
+            transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
+            style={{ position: "absolute", inset: 10, borderRadius: "50%", border: "1px solid rgba(170,130,255,0.15)" }}
+          >
+            {[0, 90, 180, 270].map((deg, i) => (
+              <div key={i} style={{
+                position: "absolute", top: "50%", left: "50%",
+                width: 3, height: 3, borderRadius: "50%",
+                background: "rgba(255,255,200,0.9)",
+                transform: `rotate(${deg}deg) translateX(28px) translate(-50%, -50%)`,
+                boxShadow: "0 0 5px rgba(255,255,200,0.7)",
+              }} />
+            ))}
+          </motion.div>
+          {/* Rune glyphs */}
+          {["✦","⚡","✦","⚡"].map((g, i) => (
+            <motion.div key={i}
+              animate={{ opacity: [0.1, 0.5, 0.1], scale: [0.8, 1.2, 0.8] }}
+              transition={{ duration: 1.5 + i * 0.4, repeat: Infinity, delay: i * 0.5 }}
+              style={{ position: "absolute", fontSize: 8, color: i % 2 === 0 ? "rgba(200,155,60,0.7)" : "rgba(170,130,255,0.7)",
+                top: `${[15, 65, 75, 10][i]}%`, left: `${[70, 75, 20, 15][i]}%` }}
+            >
+              {g}
+            </motion.div>
+          ))}
+        </div>
 
         {banner.isLimited && (
           <div

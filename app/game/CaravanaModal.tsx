@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGameStore } from "@/lib/game/store";
+import { CaravanScene } from "@/src/components/game/travel/CaravanScene";
 import { HERO_MAP } from "@/lib/game/data/heroes";
 import { scheduleSave } from "@/lib/game/save";
 
@@ -291,6 +292,19 @@ export default function CaravanaModal({ onClose }: { onClose: () => void }) {
                   <p className="text-[11px] text-violet/65">{activeRoute.from} → {activeRoute.to}</p>
                 </div>
               </div>
+
+              {/* Caravan travel animation */}
+              {timeLeft > 0 && (
+                <div className="mb-3">
+                  <CaravanScene
+                    routeName={activeRoute.name}
+                    from={activeRoute.from}
+                    to={activeRoute.to}
+                    progressPct={activeProgress}
+                    timeLabel={formatCountdown(timeLeft)}
+                  />
+                </div>
+              )}
 
               <div className="mb-3 rounded-lg border border-violet/10 px-3 py-2 text-[10px] text-violet/55" style={{ background: "rgba(122,111,160,0.04)" }}>
                 {activeRoute.quest}

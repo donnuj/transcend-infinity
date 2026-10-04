@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGameStore } from "@/lib/game/store";
+import { BattleScene } from "@/src/components/game/battle/BattleScene";
 import { HERO_MAP } from "@/lib/game/data/heroes";
 import { scheduleSave } from "@/lib/game/save";
 import { buildHeroCombatant, simulateBattle } from "@/lib/game/combat";
@@ -175,6 +176,18 @@ export default function ArenaModal({ onClose }: { onClose: () => void }) {
               </p>
               <p className="mt-1 text-xl font-black text-cream">{arena.rating} pts</p>
               <p className="text-[10px] text-violet/50">{arena.wins}V · {arena.losses}D</p>
+            </div>
+
+            {/* Arena duel preview */}
+            <div className="mb-4">
+              <BattleScene
+                variant="dungeon"
+                heroCount={1}
+                heroColor={tier.color}
+                enemyName="Oponente"
+                progressPct={0.5}
+                diffColor={tier.color}
+              />
             </div>
 
             {/* Defender slot */}

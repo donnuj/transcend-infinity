@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGameStore } from "@/lib/game/store";
+import { CaravanScene } from "@/src/components/game/travel/CaravanScene";
 import { scheduleSave } from "@/lib/game/save";
 import { REGIONS, REGION_MAP } from "@/lib/game/data/world";
 import { HERO_MAP } from "@/lib/game/data/heroes";
@@ -249,6 +250,15 @@ export default function WorldMapModal({ onClose }: { onClose: () => void }) {
                   )}
                 </div>
                 {!explorationReady && (
+                  <>
+                  <div className="mb-2">
+                    <CaravanScene
+                      from="Base"
+                      to={explorationRegion?.name ?? "Região"}
+                      progressPct={Math.min(1, 1 - explorationLeft / getExplorationDuration(explorationRegion?.level ?? 1))}
+                      timeLabel={formatCountdown(explorationLeft)}
+                    />
+                  </div>
                   <div className="h-1.5 w-full overflow-hidden rounded-full bg-violet/10">
                     <div
                       className="h-full rounded-full bg-amber"
@@ -258,6 +268,7 @@ export default function WorldMapModal({ onClose }: { onClose: () => void }) {
                       }}
                     />
                   </div>
+                  </>
                 )}
               </div>
             )}

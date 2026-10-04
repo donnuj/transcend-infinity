@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useGameStore } from "@/lib/game/store";
 import { scheduleSave } from "@/lib/game/save";
 import { api } from "@/lib/api";
@@ -126,6 +126,37 @@ export default function BattlePassModal({ onClose }: { onClose: () => void }) {
         <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${bp.isPremium ? "border-amber/40 text-amber-400" : "border-violet/20 text-violet/60"}`}>
           {bp.isPremium ? "PREMIUM" : "GRATUITO"}
         </span>
+      </div>
+
+      {/* Seasonal banner */}
+      <div style={{ position: "relative", height: 50, overflow: "hidden", background: "linear-gradient(180deg, rgba(200,155,60,0.07) 0%, transparent 100%)" }}>
+        {[
+          { icon: "★", x: 5,  delay: 0,    color: "rgba(200,155,60,0.8)"  },
+          { icon: "✦", x: 18, delay: 0.6,  color: "rgba(255,255,200,0.6)" },
+          { icon: "★", x: 32, delay: 1.1,  color: "rgba(200,155,60,0.7)"  },
+          { icon: "✦", x: 48, delay: 0.3,  color: "rgba(170,130,255,0.6)" },
+          { icon: "★", x: 62, delay: 0.9,  color: "rgba(200,155,60,0.8)"  },
+          { icon: "✦", x: 76, delay: 1.5,  color: "rgba(255,255,200,0.5)" },
+          { icon: "★", x: 90, delay: 0.2,  color: "rgba(200,155,60,0.7)"  },
+        ].map((p, i) => (
+          <motion.div
+            key={i}
+            animate={{ y: [50, -5], opacity: [0, 1, 1, 0] }}
+            transition={{ duration: 2.8, delay: p.delay, repeat: Infinity, ease: "easeOut", times: [0, 0.25, 0.75, 1] }}
+            style={{ position: "absolute", left: `${p.x}%`, bottom: 0, fontSize: 11, color: p.color, pointerEvents: "none" }}
+          >
+            {p.icon}
+          </motion.div>
+        ))}
+        <motion.div
+          animate={{ opacity: [0.25, 0.6, 0.25] }}
+          transition={{ duration: 2.5, repeat: Infinity }}
+          style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}
+        >
+          <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.3em", color: "rgba(200,155,60,0.5)" }}>
+            TEMPORADA ATUAL
+          </span>
+        </motion.div>
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 pb-6">

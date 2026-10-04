@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGameStore } from "@/lib/game/store";
+import { BattleScene } from "@/src/components/game/battle/BattleScene";
 import { HERO_MAP } from "@/lib/game/data/heroes";
 import { scheduleSave } from "@/lib/game/save";
 import {
@@ -204,6 +205,19 @@ export default function TorreModal({ onClose }: { onClose: () => void }) {
                   )}
                 </div>
 
+                {/* Battle animation */}
+                {!isReady && (
+                  <div className="mb-3">
+                    <BattleScene
+                      variant="tower"
+                      heroCount={pending.heroIds.length}
+                      enemyName={`Andar ${pending.targetFloor}`}
+                      progressPct={progress}
+                      timeLabel={fmtCountdown(remainingMs)}
+                      diffColor="rgb(200,155,60)"
+                    />
+                  </div>
+                )}
                 {/* Progress bar */}
                 <div className="mb-3 h-1.5 w-full overflow-hidden rounded-full bg-void/80">
                   <motion.div

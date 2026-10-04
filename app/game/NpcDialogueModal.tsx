@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGameStore } from "@/lib/game/store";
+import { NpcScene } from "@/src/components/game/npc/NpcScene";
 import { scheduleSave } from "@/lib/game/save";
 import { NPCS, NPC_MAP } from "@/lib/game/data/world";
 import { DIALOGUE_MAP, type DialogueNode } from "@/lib/game/data/dialogues";
@@ -129,6 +130,11 @@ export default function NpcDialogueModal({ onClose }: { onClose: () => void }) {
                   </motion.div>
                 )}
               </AnimatePresence>
+
+              {/* NPC dialogue scene preview */}
+              <div className="mb-3">
+                <NpcScene npcName={currentNpc?.name ?? undefined} />
+              </div>
 
               <p className="mb-3 text-[11px] uppercase tracking-[0.2em] text-violet/60">
                 Personagens do Mundo
