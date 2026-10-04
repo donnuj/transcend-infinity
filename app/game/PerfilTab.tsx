@@ -1,10 +1,22 @@
 ﻿"use client";
 
-import { motion } from "framer-motion";
+import { useState, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useGameStore } from "@/lib/game/store";
 import { ITEM_MAP, EQUIP_MAP, RUNE_MAP } from "@/lib/game/data/items";
 import { useSave } from "@/lib/game/save";
 import type { Profile } from "./page";
+import { StatusBar } from "@/src/components/game/ui/StatusBar";
+import { LevelUpEffect } from "@/src/components/game/effects/LevelUpEffect";
+import { FloatingIcon, PulseGlow } from "@/src/components/game/effects/FloatingIcon";
+import { CharacterSprite } from "@/src/components/game/sprites/CharacterSprite";
+import { DamageNumber } from "@/src/components/game/effects/DamageNumber";
+
+const RPG_META = { frameWidth: 64, frameHeight: 64, columns: 4, rows: 4, scale: 2 };
+const RPG_ANIMS = {
+  idle: { row: 0, frames: 1, fps: 1, loop: true as const },
+  walk: { row: 0, frames: 4, fps: 8, loop: true as const },
+};
 
 const ease = [0.23, 1, 0.32, 1] as const;
 
@@ -41,11 +53,19 @@ export default function PerfilTab({
   const wallet = save.wallet;
   const playerLevel = save.playerLevel;
   const invocador = save.invocador;
-  const initial = (profile?.characterName ?? profile?.username ?? "?")[0].toUpperCase();
   const joined = profile?.registeredAt
     ? new Date(profile.registeredAt).toLocaleDateString("pt-BR", { month: "long", year: "numeric" })
     : null;
-  const xpPct = Math.min(100, (playerLevel.xp / (200 * playerLevel.level)) * 100);
+  const xpMax = 200 * playerLevel.level;
+  const [showLevelUp, setShowLevelUp] = useState(false);
+  const [dmgNums, setDmgNums] = useState<{ id: number; value: number; type: "heal" | "magic" | "xp" }[]>([]);
+  const fireEffect = useCallback(() => {
+    setShowLevelUp(true);
+    setDmgNums((prev) => [
+      ...prev,
+      { id: Date.now(), value: playerLevel.level, type: "magic" },
+    ]);
+  }, [playerLevel.level]);
 
   return (
     <motion.div
@@ -57,15 +77,38 @@ export default function PerfilTab({
     >
       {/* Avatar */}
       <div className="mb-5 flex flex-col items-center">
-        <div
-          className="mb-3 flex h-20 w-20 items-center justify-center rounded-full border-2 border-amber/40 text-3xl font-black text-cream"
-          style={{
-            background: "linear-gradient(135deg, rgba(200,155,60,0.2) 0%, rgba(10,10,22,0.95) 100%)",
-            fontFamily: "var(--font-cinzel)",
-            boxShadow: "0 0 30px rgba(200,155,60,0.15)",
-          }}
-        >
-          {initial}
+        <div className="relative mb-3" style={{ width: 88, height: 88 }}>
+          <PulseGlow color="rgba(200,155,60,0.3)" scale={1.05} duration={2.5}>
+            <FloatingIcon amplitude={3} period={3.5}>
+              <div
+                className="flex items-center justify-center rounded-full border-2 border-amber/50 overflow-hidden"
+                style={{
+                  width: 88, height: 88,
+                  background: "linear-gradient(135deg, rgba(200,155,60,0.15) 0%, rgba(10,10,22,0.95) 100%)",
+                  boxShadow: "0 0 30px rgba(200,155,60,0.2)",
+                }}
+              >
+                <CharacterSprite
+                  src="/assets/game/characters/rpg-walk/rpg_sprite_walk.png"
+                  meta={RPG_META}
+                  animations={RPG_ANIMS}
+                  state="idle"
+                  style={{ width: 64, height: 64 }}
+                />
+              </div>
+            </FloatingIcon>
+          </PulseGlow>
+          <LevelUpEffect show={showLevelUp} onDone={() => setShowLevelUp(false)} />
+          {dmgNums.map((d) => (
+            <DamageNumber
+              key={d.id}
+              value={`Nv.${d.value}`}
+              type="magic"
+              x={44}
+              y={20}
+              onDone={() => setDmgNums((prev) => prev.filter((n) => n.id !== d.id))}
+            />
+          ))}
         </div>
         <h2
           className="text-xl font-black tracking-[0.15em] text-cream"
@@ -94,20 +137,25 @@ export default function PerfilTab({
         </div>
       </div>
 
-      {/* Player level */}
+      {/* Player level + status bars */}
       <div className="mb-4 rounded-xl border border-amber/18 px-5 py-4" style={{ background: "rgba(200,155,60,0.05)" }}>
-        <div className="mb-2 flex items-center justify-between">
-          <span className="text-[11px] font-bold tracking-wider text-cream/70">NÍVEL {playerLevel.level}</span>
-          <span className="text-[10px] text-violet/50">{playerLevel.xp} / {200 * playerLevel.level} EXP</span>
-        </div>
-        <div className="h-2 w-full overflow-hidden rounded-full bg-violet/12">
-          <motion.div
-            className="h-full rounded-full bg-amber"
-            initial={{ width: 0 }}
-            animate={{ width: `${xpPct}%` }}
-            transition={{ duration: 0.7, ease, delay: 0.15 }}
-            style={{ boxShadow: "0 0 8px rgba(200,155,60,0.5)" }}
-          />
+        <motion.button
+          className="mb-3 flex w-full items-center justify-between"
+          onClick={fireEffect}
+          whileTap={{ scale: 0.97 }}
+          transition={{ duration: 0.08 }}
+        >
+          <PulseGlow color="rgba(200,155,60,0.4)" scale={1.03} duration={2.2}>
+            <span className="text-[13px] font-black tracking-wider text-amber-300">
+              NÍVEL {playerLevel.level}
+            </span>
+          </PulseGlow>
+          <span className="text-[10px] text-violet/50">{playerLevel.xp.toLocaleString("pt-BR")} / {xpMax.toLocaleString("pt-BR")} EXP</span>
+        </motion.button>
+        <StatusBar type="xp" value={playerLevel.xp} max={xpMax} showLabel showValue />
+        <div className="mt-2 flex gap-3">
+          <StatusBar type="hp" value={playerLevel.level * 50} max={playerLevel.level * 50} showLabel style={{ flex: 1 }} />
+          <StatusBar type="mp" value={Math.round(playerLevel.level * 30 * 0.8)} max={playerLevel.level * 30} showLabel style={{ flex: 1 }} />
         </div>
       </div>
 

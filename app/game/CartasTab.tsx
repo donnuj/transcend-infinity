@@ -219,7 +219,10 @@ function ArtDecoHeroCard({ hero, copies, progression, index, onClick }: {
       transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1], delay: index * 0.04 }}
     >
       {/* Portrait area */}
-      <div
+      <IdleBreathing
+        active={isEpicPlus}
+        intensity={0.018}
+        period={3.2}
         className="absolute inset-0"
         style={{
           bottom: "36%",
@@ -254,7 +257,7 @@ function ArtDecoHeroCard({ hero, copies, progression, index, onClick }: {
           className="absolute bottom-0 left-0 right-0 h-12"
           style={{ background: "linear-gradient(to bottom, transparent, rgb(6,7,15))" }}
         />
-      </div>
+      </IdleBreathing>
 
       {/* Art Deco frame corners */}
       <div className="absolute left-2 top-2 h-5 w-5" style={{ borderTop: `1.5px solid ${frameColor}60`, borderLeft: `1.5px solid ${frameColor}60` }} />
@@ -341,11 +344,11 @@ function ArtDecoHeroCard({ hero, copies, progression, index, onClick }: {
         <motion.div
           className="pointer-events-none absolute inset-0"
           style={{
-            background: `linear-gradient(105deg, transparent 35%, ${s.glow} 50%, transparent 65%)`,
+            background: `linear-gradient(105deg, transparent 30%, ${s.color}30 48%, ${s.color}55 50%, ${s.color}30 52%, transparent 70%)`,
             borderRadius: "0.875rem",
           }}
-          animate={{ x: ["-120%", "220%"] }}
-          transition={{ duration: 2.6, ease: "linear", repeat: Infinity, repeatDelay: 4 + index * 0.3 }}
+          animate={{ x: ["-130%", "230%"] }}
+          transition={{ duration: 2.2, ease: "linear", repeat: Infinity, repeatDelay: 3 + index * 0.25 }}
         />
       )}
 

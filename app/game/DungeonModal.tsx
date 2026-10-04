@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGameStore } from "@/lib/game/store";
 import { HERO_MAP } from "@/lib/game/data/heroes";
@@ -8,6 +8,9 @@ import { DUNGEONS } from "@/lib/game/data/world";
 import { scheduleSave } from "@/lib/game/save";
 import { DUNGEON_DURATIONS, DUNGEON_REWARDS, rollDungeonLoot } from "@/lib/game/data/towerData";
 import type { DungeonDef, DungeonDifficulty, HeroLevelSave, PendingDungeonRun } from "@/lib/game/types";
+import { DamageNumber } from "@/src/components/game/effects/DamageNumber";
+import { LevelUpEffect } from "@/src/components/game/effects/LevelUpEffect";
+import { ScreenShake } from "@/src/components/game/effects/ScreenShake";
 
 const ease = [0.23, 1, 0.32, 1] as const;
 
@@ -595,23 +598,52 @@ function ResultScreen({ run, dungeon, droppedItem, success, onClose, onRetry }: 
 }) {
   const rewards = DUNGEON_REWARDS[run.difficulty];
   const diffColor = DIFFICULTY_COLOR[run.difficulty];
+  const [showLevelUp, setShowLevelUp] = useState(success);
+  const [shake, setShake] = useState(success);
+  const [dmgNums, setDmgNums] = useState<{ id: number; value: number; type: "heal" | "magic" | "physical" }[]>(() =>
+    success ? [
+      { id: 1, value: rewards.xp,   type: "heal"    },
+      { id: 2, value: rewards.gold, type: "physical" },
+    ] : []
+  );
+
+  useEffect(() => {
+    if (success) {
+      const t = setTimeout(() => setShake(false), 400);
+      return () => clearTimeout(t);
+    }
+  }, [success]);
 
   return (
+    <ScreenShake active={shake} intensity={5}>
     <motion.div
-      className="flex flex-1 flex-col items-center justify-center gap-5 px-6"
+      className="relative flex flex-1 flex-col items-center justify-center gap-5 px-6"
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3, ease }}
     >
-      <motion.div
-        className="text-6xl"
-        initial={{ scale: 0.5, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-      >
-        {success ? "🏆" : "💀"}
-      </motion.div>
+      <div className="relative">
+        <LevelUpEffect show={showLevelUp} onDone={() => setShowLevelUp(false)} />
+        {dmgNums.map((d, i) => (
+          <DamageNumber
+            key={d.id}
+            value={d.type === "heal" ? `+${d.value.toLocaleString("pt-BR")} XP` : `+${d.value.toLocaleString("pt-BR")} ouro`}
+            type={d.type}
+            x={i === 0 ? -40 : 40}
+            y={i === 0 ? -20 : -10}
+            onDone={() => setDmgNums((prev) => prev.filter((n) => n.id !== d.id))}
+          />
+        ))}
+        <motion.div
+          className="text-6xl"
+          initial={{ scale: 0.5, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+        >
+          {success ? "🏆" : "💀"}
+        </motion.div>
+      </div>
 
       <div className="text-center">
         <p
@@ -677,6 +709,7 @@ function ResultScreen({ run, dungeon, droppedItem, success, onClose, onRetry }: 
         </motion.button>
       </div>
     </motion.div>
+    </ScreenShake>
   );
 }
 
