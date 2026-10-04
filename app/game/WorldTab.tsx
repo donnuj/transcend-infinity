@@ -493,6 +493,7 @@ function GameCard({
   return (
     <motion.button
       onClick={onClick}
+      whileHover={{ scale: 1.03, y: -2, boxShadow: `0 8px 28px ${color}22`, transition: { type: "spring", stiffness: 380, damping: 20 } }}
       whileTap={{ scale: 0.95 }}
       transition={spring}
       className="relative w-full text-left"

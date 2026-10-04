@@ -206,6 +206,7 @@ function ArtDecoHeroCard({ hero, copies, progression, index, onClick }: {
         onClick();
         if (isEpicPlus) { setTapParticle(true); setTimeout(() => setTapParticle(false), 700); }
       }}
+      whileHover={{ scale: 1.04, y: -3, transition: { type: "spring", stiffness: 400, damping: 22 } }}
       whileTap={{ scale: 0.94, transition: { type: "spring", stiffness: 500, damping: 25 } }}
       className="relative w-full overflow-hidden"
       style={{
@@ -213,7 +214,8 @@ function ArtDecoHeroCard({ hero, copies, progression, index, onClick }: {
         background: "rgb(6,7,15)",
         border: `1px solid ${frameColor}40`,
         borderRadius: "0.875rem",
-        boxShadow: `0 6px 28px rgba(0,0,0,0.7), 0 0 0 0.5px rgba(0,0,0,0.5), 0 0 22px ${frameColor}05`,
+        boxShadow: `0 6px 28px rgba(0,0,0,0.7), 0 0 0 0.5px rgba(0,0,0,0.5), 0 0 22px ${frameColor}08`,
+        transition: "box-shadow 0.2s ease",
       }}
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}

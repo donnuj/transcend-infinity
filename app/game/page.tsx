@@ -10,6 +10,7 @@ import type { StoredUser } from "@/lib/auth";
 import { useGameStore } from "@/lib/game/store";
 import { loadCloudSave, uploadCloudSave } from "@/lib/game/save";
 import dynamic from "next/dynamic";
+import { AmbientParticles } from "@/src/components/game/effects/AmbientParticles";
 import WorldTab from "./WorldTab";
 import CartasTab from "./CartasTab";
 import InvocarTab from "./InvocarTab";
@@ -216,6 +217,7 @@ export default function GamePage() {
     <div className="bg-atmosphere flex h-full">
     <AmbientPlayer />
     <div className="relative flex h-full w-full flex-col">
+      <AmbientParticles />
       {/* Top bar */}
       <header
         className="relative"
