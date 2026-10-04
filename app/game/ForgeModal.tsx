@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useGameStore } from "@/lib/game/store";
 import { EQUIP_MAP } from "@/lib/game/data/items";
 import { scheduleSave } from "@/lib/game/save";
+import { ForgeScene } from "@/src/components/game/scenes/ForgeScene";
 
 const ease = [0.23, 1, 0.32, 1] as const;
 
@@ -152,9 +153,8 @@ export default function ForgeModal({ onClose }: { onClose: () => void }) {
             const equipDef = EQUIP_MAP[pending.equipId];
             return (
               <>
-                <div className="mb-2 flex items-center gap-2">
-                  <span className="text-lg">⚒</span>
-                  <span className="text-[11px] font-bold text-cream/80">{equipDef?.name ?? pending.equipId}</span>
+                <div className="mb-3">
+                  <ForgeScene itemName={equipDef?.name ?? pending.equipId} progressPct={pct / 100} timeLabel={formatCountdown(pending.endTime, now)} />
                 </div>
                 <div className="h-2 w-full overflow-hidden rounded-full bg-void">
                   <motion.div

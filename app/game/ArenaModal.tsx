@@ -183,7 +183,6 @@ export default function ArenaModal({ onClose }: { onClose: () => void }) {
               <BattleScene
                 variant="dungeon"
                 heroCount={1}
-                heroColor={tier.color}
                 enemyName="Oponente"
                 progressPct={0.5}
                 diffColor={tier.color}

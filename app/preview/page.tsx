@@ -3,6 +3,9 @@
 import { BattleScene } from "@/src/components/game/battle/BattleScene";
 import { CaravanScene } from "@/src/components/game/travel/CaravanScene";
 import { NpcScene } from "@/src/components/game/npc/NpcScene";
+import { ForgeScene } from "@/src/components/game/scenes/ForgeScene";
+import { ConstructionScene } from "@/src/components/game/scenes/ConstructionScene";
+import { ExplorationScene } from "@/src/components/game/scenes/ExplorationScene";
 
 export default function PreviewPage() {
   return (
@@ -18,6 +21,15 @@ export default function PreviewPage() {
 
       <p style={{ color: "rgba(180,160,220,0.5)", fontSize: 10, letterSpacing: "0.2em", fontWeight: 700 }}>CARAVANA</p>
       <CaravanScene from="Valdris" to="Picos Eternos" progressPct={0.55} timeLabel="1h 20min" />
+
+      <p style={{ color: "rgba(180,160,220,0.5)", fontSize: 10, letterSpacing: "0.2em", fontWeight: 700 }}>FORJA</p>
+      <ForgeScene itemName="Espada de Aço" progressPct={0.65} timeLabel="8min 20s" />
+
+      <p style={{ color: "rgba(180,160,220,0.5)", fontSize: 10, letterSpacing: "0.2em", fontWeight: 700 }}>CONSTRUCAO</p>
+      <ConstructionScene buildingName="Torre de Vigia" progressPct={0.4} timeLabel="45min" />
+
+      <p style={{ color: "rgba(180,160,220,0.5)", fontSize: 10, letterSpacing: "0.2em", fontWeight: 700 }}>EXPLORACAO</p>
+      <ExplorationScene regionName="Picos Eternos" progressPct={0.3} timeLabel="2h 10min" />
 
       <p style={{ color: "rgba(180,160,220,0.5)", fontSize: 10, letterSpacing: "0.2em", fontWeight: 700 }}>NPC DIALOGUE</p>
       <NpcScene npcName="Lyra" />

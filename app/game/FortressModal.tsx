@@ -7,6 +7,7 @@ import { BUILDINGS, BUILDING_MAP } from "@/lib/game/data/world";
 import { HERO_MAP } from "@/lib/game/data/heroes";
 import { scheduleSave } from "@/lib/game/save";
 import type { BuildingDef } from "@/lib/game/types";
+import { ConstructionScene } from "@/src/components/game/scenes/ConstructionScene";
 
 const ease = [0.23, 1, 0.32, 1] as const;
 
@@ -277,6 +278,15 @@ export default function FortressModal({ onClose }: { onClose: () => void }) {
             </div>
 
             {/* Pending construction banner */}
+            {pending && pendingDef && !isConstructionDone && (
+              <div className="mb-3">
+                <ConstructionScene
+                  buildingName={pendingDef.name}
+                  progressPct={0.5}
+                  timeLabel={formatTimeRemaining(pending.endTime)}
+                />
+              </div>
+            )}
             {pending && pendingDef && (
               <div className="mb-4 flex items-center justify-between rounded-xl border px-4 py-3"
                 style={{
