@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Cinzel, Inter } from "next/font/google";
+import { headers } from "next/headers";
 import "./globals.css";
 
 const cinzel = Cinzel({
@@ -28,9 +29,10 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
   return (
-    <html lang="pt-BR" className={`${cinzel.variable} ${inter.variable} h-full`}>
+    <html lang="pt-BR" className={`${cinzel.variable} ${inter.variable} h-full`} nonce={nonce}>
       <body className="h-full overflow-hidden">{children}</body>
     </html>
   );
