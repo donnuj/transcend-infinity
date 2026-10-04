@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { MercadoPagoConfig, Preference, Payment } from 'mercadopago';
 import { PrismaService } from '../prisma/prisma.service';
-import { createHash } from 'node:crypto';
+import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 
 @Injectable()
 export class PaymentService {
@@ -50,11 +50,45 @@ export class PaymentService {
     return { init_point: result.init_point, preference_id: result.id };
   }
 
-  async handleWebhook(body: Record<string, unknown>) {
+  private verifyWebhookSignature(
+    paymentId: string,
+    requestId: string | undefined,
+    signature: string | undefined,
+  ): void {
+    const secret = process.env.MP_WEBHOOK_SECRET;
+    if (!secret) return; // sem secret configurado: não valida (dev/staging sem webhook secret)
+
+    if (!signature) throw new UnauthorizedException('Assinatura ausente.');
+
+    // x-signature formato: ts=TIMESTAMP,v1=HMAC
+    const tsMatch = signature.match(/ts=(\d+)/);
+    const v1Match = signature.match(/v1=([0-9a-f]+)/);
+    if (!tsMatch || !v1Match) throw new UnauthorizedException('Assinatura inválida.');
+
+    const ts = tsMatch[1] as string;
+    const receivedHmac = v1Match[1] as string;
+
+    const manifest = `id:${paymentId};request-id:${requestId ?? ''};ts:${ts};`;
+    const expected = createHmac('sha256', secret).update(manifest).digest('hex');
+
+    const expectedBuf = Buffer.from(expected, 'hex');
+    const receivedBuf = Buffer.from(receivedHmac, 'hex');
+    if (expectedBuf.length !== receivedBuf.length || !timingSafeEqual(expectedBuf, receivedBuf)) {
+      throw new UnauthorizedException('Assinatura inválida.');
+    }
+  }
+
+  async handleWebhook(
+    body: Record<string, unknown>,
+    signature: string | undefined,
+    requestId: string | undefined,
+  ) {
     if (body['type'] !== 'payment') return { ok: true };
 
     const paymentId = (body['data'] as Record<string, unknown>)?.['id'];
     if (!paymentId) return { ok: true };
+
+    this.verifyWebhookSignature(String(paymentId), requestId, signature);
 
     const paymentApi = new Payment(this.mpClient);
     let paymentData: Awaited<ReturnType<typeof paymentApi.get>>;

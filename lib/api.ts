@@ -1,3 +1,5 @@
+import { getToken, setToken, clearSession } from "./auth";
+
 const BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "https://api.transcendinfinity.com.br/api/v1";
 
@@ -20,7 +22,7 @@ async function refreshAccessToken(): Promise<string | null> {
       if (!res.ok) return null;
 
       const data = await res.json() as { accessToken?: string };
-      if (data.accessToken) localStorage.setItem("ti_token", data.accessToken);
+      if (data.accessToken) setToken(data.accessToken);
       return data.accessToken ?? null;
     } catch {
       return null;
@@ -33,7 +35,7 @@ async function refreshAccessToken(): Promise<string | null> {
 }
 
 async function request<T>(path: string, options: RequestOptions = {}, isRetry = false): Promise<T> {
-  const token = typeof window !== "undefined" ? localStorage.getItem("ti_token") : null;
+  const token = getToken();
 
   const res = await fetch(`${BASE_URL}${path}`, {
     ...options,
@@ -53,8 +55,7 @@ async function request<T>(path: string, options: RequestOptions = {}, isRetry = 
     if (newToken) return request<T>(path, options, true);
 
     // Refresh falhou: encerra sessão
-    localStorage.removeItem("ti_token");
-    localStorage.removeItem("ti_user");
+    clearSession();
     window.location.replace("/login");
     throw new Error("Sessão expirada");
   }

@@ -1,7 +1,8 @@
 "use client";
 
-const TOKEN_KEY = "ti_token";
-const USER_KEY  = "ti_user";
+const USER_KEY = "ti_user";
+const SESSION_COOKIE = "ti_session";
+const SESSION_MAX_AGE = 30 * 24 * 60 * 60; // 30 dias
 
 export type StoredUser = {
   id: string;
@@ -10,25 +11,30 @@ export type StoredUser = {
   level: number;
 };
 
-const SESSION_COOKIE = "ti_session";
-const SESSION_MAX_AGE = 30 * 24 * 60 * 60; // 30 dias
+// Access token kept in memory only — not persisted to localStorage or cookies.
+// On page reload the token starts as null; the first 401 triggers a refresh via
+// the httpOnly refresh_token cookie, which repopulates it transparently.
+let _accessToken: string | null = null;
 
 export function saveSession(token: string, user: StoredUser) {
-  localStorage.setItem(TOKEN_KEY, token);
+  _accessToken = token;
   localStorage.setItem(USER_KEY, JSON.stringify(user));
   document.cookie = `${SESSION_COOKIE}=1; path=/; max-age=${SESSION_MAX_AGE}; secure; samesite=strict`;
 }
 
+export function setToken(token: string) {
+  _accessToken = token;
+}
+
 export function clearSession() {
-  localStorage.removeItem(TOKEN_KEY);
+  _accessToken = null;
   localStorage.removeItem(USER_KEY);
   document.cookie = `${SESSION_COOKIE}=; path=/; max-age=0`;
   // refresh_token é httpOnly — não acessível aqui; o backend limpa via /auth/logout
 }
 
 export function getToken(): string | null {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem(TOKEN_KEY);
+  return _accessToken;
 }
 
 export function getUser(): StoredUser | null {
@@ -43,5 +49,6 @@ export function getUser(): StoredUser | null {
 }
 
 export function isAuthenticated(): boolean {
-  return !!getToken();
+  if (typeof document === "undefined") return false;
+  return document.cookie.includes(`${SESSION_COOKIE}=1`);
 }

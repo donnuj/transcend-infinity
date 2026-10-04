@@ -27,16 +27,20 @@ model Account {
 }
 
 model Player {
-  id              Int       @id @default(autoincrement())
-  accountId       Int       @unique
-  account         Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  level           Int       @default(1)
-  experience      Int       @default(0)
-  gold            Int       @default(1000)
-  premiumCurrency Int       @default(100)
-  characterName   String
-  saveData        SaveData?
-  saveAudits      SaveAudit[]
+  id                  Int       @id @default(autoincrement())
+  accountId           Int       @unique
+  account             Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  level               Int       @default(1)
+  experience          Int       @default(0)
+  gold                Int       @default(1000)
+  premiumCurrency     Int       @default(100)
+  characterName       String
+  arenaRating         Int       @default(1000)
+  arenaDefenderHeroId String?
+  saveData            SaveData?
+  saveAudits          SaveAudit[]
+
+  @@index([arenaRating])
 }
 
 model RefreshToken {
@@ -84,7 +88,7 @@ model Purchase {
   account   Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
   type      String
   paymentId String   @unique
-  amount    Float
+  amount    Decimal  @db.Decimal(10, 2)
   status    String   @default("approved")
   createdAt DateTime @default(now())
 

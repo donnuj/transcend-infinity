@@ -3,13 +3,13 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { createHash } from 'node:crypto';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   MONOTONIC_PATHS,
+  SAVE_CAPS,
   playerProfileSchema,
   saveDownloadSchema,
   saveUploadResponseSchema,
@@ -87,6 +87,20 @@ export class PlayerService {
     const checksum = createHash('sha256').update(data, 'utf8').digest('hex');
     const nextRevision = saveJson.revision + 1;
 
+    const saveData = saveJson.data as Record<string, unknown>;
+
+    const arena = saveData['arena'] as Record<string, unknown> | undefined;
+    const arenaRating = typeof arena?.['rating'] === 'number' ? (arena['rating'] as number) : undefined;
+    const arenaDefenderHeroId = typeof arena?.['defenderHeroId'] === 'string' ? (arena['defenderHeroId'] as string) : undefined;
+
+    // Sync denormalized columns so profile queries don't depend on parsing the JSON blob
+    const playerLevel = saveData['playerLevel'] as Record<string, unknown> | undefined;
+    const wallet = saveData['wallet'] as Record<string, unknown> | undefined;
+    const syncedLevel = typeof playerLevel?.['level'] === 'number' ? (playerLevel['level'] as number) : undefined;
+    const syncedXp    = typeof playerLevel?.['xp'] === 'number'    ? (playerLevel['xp'] as number)    : undefined;
+    const syncedGold  = typeof wallet?.['ouro'] === 'number'        ? (wallet['ouro'] as number)        : undefined;
+    const syncedPrem  = typeof wallet?.['cristaisAstra'] === 'number' ? (wallet['cristaisAstra'] as number) : undefined;
+
     try {
       const saved = await this.prisma.$transaction(async (transaction: import('@prisma/client').Prisma.TransactionClient) => {
         if (saveJson.revision === 0) {
@@ -115,13 +129,35 @@ export class PlayerService {
           if (updated.count !== 1) return false;
         }
 
+        const playerSync = {
+          ...(arenaRating !== undefined        && { arenaRating }),
+          ...(arenaDefenderHeroId !== undefined && { arenaDefenderHeroId }),
+          ...(syncedLevel !== undefined         && { level: syncedLevel }),
+          ...(syncedXp    !== undefined         && { experience: syncedXp }),
+          ...(syncedGold  !== undefined         && { gold: syncedGold }),
+          ...(syncedPrem  !== undefined         && { premiumCurrency: syncedPrem }),
+        };
+        if (Object.keys(playerSync).length > 0) {
+          await transaction.player.update({ where: { id: player.id }, data: playerSync });
+        }
+
         await transaction.saveAudit.create({
-          data: {
-            playerId: player.id,
-            revision: nextRevision,
-            checksum,
-          },
+          data: { playerId: player.id, revision: nextRevision, checksum },
         });
+
+        // Keep at most the 20 most recent audit entries per player
+        const oldest = await transaction.saveAudit.findMany({
+          where: { playerId: player.id },
+          orderBy: { revision: 'desc' },
+          skip: 20,
+          select: { id: true },
+        });
+        if (oldest.length > 0) {
+          await transaction.saveAudit.deleteMany({
+            where: { id: { in: oldest.map((r) => r.id) } },
+          });
+        }
+
         return true;
       });
 
@@ -143,16 +179,21 @@ export class PlayerService {
     });
   }
 
-  async adminListPlayers() {
-    const accounts = await this.prisma.account.findMany({
-      include: {
-        player: { include: { saveData: true } },
-        purchases: { orderBy: { createdAt: 'desc' }, take: 1 },
-      },
-      orderBy: { lastLogin: 'desc' },
-    });
+  async adminListPlayers(page = 1, limit = 50) {
+    const [total, accounts] = await this.prisma.$transaction([
+      this.prisma.account.count(),
+      this.prisma.account.findMany({
+        include: {
+          player: { include: { saveData: true } },
+          purchases: { orderBy: { createdAt: 'desc' }, take: 1 },
+        },
+        orderBy: { lastLogin: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+    ]);
 
-    return accounts.map((account) => {
+    const rows = accounts.map((account) => {
       let saveStats: Record<string, unknown> | null = null;
       if (account.player?.saveData) {
         try {
@@ -187,9 +228,11 @@ export class PlayerService {
         lastLogin: account.lastLogin,
         hasSave: !!account.player?.saveData,
         saveStats,
-        lastPurchase: (account.purchases as { type: string; amount: number; createdAt: Date }[])[0] ?? null,
+        lastPurchase: account.purchases[0] ?? null,
       };
     });
+
+    return { data: rows, total, page, limit, totalPages: Math.ceil(total / limit) };
   }
 
   async adminGetPlayerDetail(email: string) {
@@ -259,10 +302,14 @@ export class PlayerService {
     catch { throw new InternalServerErrorException('Save corrompido.'); }
 
     const wallet = (saveData['wallet'] as Record<string, unknown>) ?? {};
-    if (grants.ouro) wallet['ouro'] = ((wallet['ouro'] as number) || 0) + grants.ouro;
-    if (grants.cristaisAstra) wallet['cristaisAstra'] = ((wallet['cristaisAstra'] as number) || 0) + grants.cristaisAstra;
-    if (grants.selosDeInvocacao) wallet['selosDeInvocacao'] = ((wallet['selosDeInvocacao'] as number) || 0) + grants.selosDeInvocacao;
-    if (grants.selosLivres) wallet['selosLivres'] = ((wallet['selosLivres'] as number) || 0) + grants.selosLivres;
+    const addCapped = (key: string, amount: number) => {
+      const current = typeof wallet[key] === 'number' ? (wallet[key] as number) : 0;
+      wallet[key] = Math.min(current + amount, SAVE_CAPS[key] ?? Infinity);
+    };
+    if (grants.ouro)             addCapped('ouro', grants.ouro);
+    if (grants.cristaisAstra)    addCapped('cristaisAstra', grants.cristaisAstra);
+    if (grants.selosDeInvocacao) addCapped('selosDeInvocacao', grants.selosDeInvocacao);
+    if (grants.selosLivres)      addCapped('selosLivres', grants.selosLivres);
     saveData['wallet'] = wallet;
 
     if (grants.premium) {
@@ -302,18 +349,22 @@ export class PlayerService {
   async adminBanAccount(email: string, isBanned: boolean, banReason?: string) {
     const account = await this.prisma.account.findUnique({ where: { email } });
     if (!account) throw new NotFoundException('Conta não encontrada.');
-    return this.prisma.account.update({
-      where: { email },
-      data: { isBanned, banReason: isBanned ? (banReason ?? '') : null },
-      select: { id: true, email: true, isBanned: true, banReason: true },
+    return this.prisma.$transaction(async (tx) => {
+      if (isBanned) {
+        await tx.refreshToken.updateMany({
+          where: { accountId: account.id },
+          data: { revokedAt: new Date() },
+        });
+      }
+      return tx.account.update({
+        where: { email },
+        data: { isBanned, banReason: isBanned ? (banReason ?? '') : null },
+        select: { id: true, email: true, isBanned: true, banReason: true },
+      });
     });
   }
 
-  async adminPatchSave(secret: string, email: string, patches: Record<string, unknown>) {
-    if (!process.env.ADMIN_SECRET || secret !== process.env.ADMIN_SECRET) {
-      throw new UnauthorizedException('Acesso negado.');
-    }
-
+  async adminPatchSave(email: string, patches: Record<string, unknown>) {
     const account = await this.prisma.account.findUnique({
       where: { email },
       include: { player: { include: { saveData: true } } },
@@ -351,16 +402,14 @@ export class PlayerService {
     return { success: true, revision: nextRevision };
   }
 
-  async adminRevokePremiumAll(secret: string, exceptEmail: string) {
-    if (!process.env.ADMIN_SECRET || secret !== process.env.ADMIN_SECRET) {
-      throw new UnauthorizedException('Acesso negado.');
-    }
-
+  async adminRevokePremiumAll(exceptEmail: string) {
     const players = await this.prisma.player.findMany({
       include: { saveData: true, account: true },
     });
 
-    let patched = 0;
+    type SaveUpdate = { playerId: number; data: string; checksum: string; revision: number };
+    const updates: SaveUpdate[] = [];
+
     for (const p of players) {
       if (!p.saveData || p.account?.email === exceptEmail) continue;
 
@@ -377,56 +426,54 @@ export class PlayerService {
 
       const data = JSON.stringify(saveData);
       const checksum = createHash('sha256').update(data, 'utf8').digest('hex');
-
-      await this.prisma.saveData.update({
-        where: { playerId: p.id },
-        data: { data, checksum, revision: p.saveData.revision + 1 },
-      });
-      patched++;
+      updates.push({ playerId: p.id, data, checksum, revision: p.saveData.revision + 1 });
     }
 
-    return { success: true, patched };
+    if (updates.length > 0) {
+      await this.prisma.$transaction(
+        updates.map(({ playerId, data, checksum, revision }) =>
+          this.prisma.saveData.update({
+            where: { playerId },
+            data: { data, checksum, revision },
+          }),
+        ),
+      );
+    }
+
+    return { success: true, patched: updates.length };
   }
 
   async getArenaOpponents(
     accountId: number,
     rating: number,
   ): Promise<{ username: string; characterName: string; rating: number; defenderHeroId: string }[]> {
-    const players = await this.prisma.player.findMany({
-      include: { saveData: true, account: true },
+    const MARGIN = 2000;
+    const candidates = await this.prisma.player.findMany({
+      where: {
+        accountId: { not: accountId },
+        arenaDefenderHeroId: { not: null },
+        arenaRating: { gte: rating - MARGIN, lte: rating + MARGIN },
+      },
+      select: {
+        arenaRating: true,
+        arenaDefenderHeroId: true,
+        characterName: true,
+        account: { select: { username: true } },
+      },
+      take: 100,
     });
 
-    const results: { username: string; characterName: string; rating: number; defenderHeroId: string; diff: number }[] = [];
-
-    for (const p of players) {
-      if (p.accountId === accountId) continue;
-      if (!p.saveData) continue;
-
-      let parsed: Record<string, unknown>;
-      try { parsed = JSON.parse(p.saveData.data) as Record<string, unknown>; }
-      catch { continue; }
-
-      const arena = parsed['arena'] as Record<string, unknown> | undefined;
-      if (!arena) continue;
-
-      const opponentRating = typeof arena['rating'] === 'number' ? arena['rating'] : null;
-      const defenderHeroId = typeof arena['defenderHeroId'] === 'string' ? arena['defenderHeroId'] : null;
-      if (opponentRating === null || defenderHeroId === null) continue;
-
-      const diff = Math.abs(opponentRating - rating);
-      if (diff > 2000) continue;
-
-      results.push({
+    const pool = candidates
+      .map((p) => ({
         username: p.account.username,
         characterName: p.characterName,
-        rating: opponentRating,
-        defenderHeroId,
-        diff,
-      });
-    }
+        rating: p.arenaRating,
+        defenderHeroId: p.arenaDefenderHeroId as string,
+        diff: Math.abs(p.arenaRating - rating),
+      }))
+      .sort((a, b) => a.diff - b.diff)
+      .slice(0, 20);
 
-    results.sort((a, b) => a.diff - b.diff);
-    const pool = results.slice(0, 20);
     for (let i = pool.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       const tmp = pool[i]!;

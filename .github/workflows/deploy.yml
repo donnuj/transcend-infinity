@@ -24,7 +24,7 @@ jobs:
       - name: Build
         env:
           NEXT_PUBLIC_API_URL: https://api.transcendinfinity.com.br/api/v1
-          NEXT_PUBLIC_SENTRY_DSN: https://20c03f9fcfd357430e5b8e7b601f5e9e@o4512166791217152.ingest.us.sentry.io/4512166801571840
+          NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
         run: npx @cloudflare/next-on-pages
 
       - name: Deploy

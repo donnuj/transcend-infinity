@@ -4,7 +4,7 @@ const MAX_SAVE_BYTES = 200 * 1024;
 const MAX_SAVE_DEPTH = 20;
 
 // Hard caps: prevent absurd values regardless of progression
-const SAVE_CAPS: Record<string, number> = {
+export const SAVE_CAPS: Record<string, number> = {
   ouro:              10_000_000,
   cristaisAstra:     500_000,
   selosDeInvocacao:  10_000,

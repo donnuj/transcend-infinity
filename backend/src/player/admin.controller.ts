@@ -2,9 +2,9 @@ import {
   Body,
   Controller,
   Get,
-  Headers,
   Param,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { AdminGuard } from '../auth/guards/admin.guard';
@@ -18,8 +18,14 @@ export class AdminController {
 
   @UseGuards(AdminGuard)
   @Get('players')
-  listPlayers() {
-    return this.playerService.adminListPlayers();
+  listPlayers(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.playerService.adminListPlayers(
+      Math.max(1, parseInt(page ?? '1', 10) || 1),
+      Math.min(100, Math.max(1, parseInt(limit ?? '50', 10) || 50)),
+    );
   }
 
   @UseGuards(AdminGuard)
@@ -60,21 +66,21 @@ export class AdminController {
     return this.playerService.adminBanAccount(body.email, body.isBanned, body.banReason);
   }
 
-  // ── Legacy secret-based endpoints ────────────────────────────────────────
+  // ── Legacy endpoints (now protected by AdminGuard) ───────────────────────
 
+  @UseGuards(AdminGuard)
   @Post('patch-save')
   patchSave(
-    @Headers('x-admin-secret') secret: string,
     @Body() body: { email: string; patches: Record<string, unknown> },
   ) {
-    return this.playerService.adminPatchSave(secret ?? '', body.email, body.patches);
+    return this.playerService.adminPatchSave(body.email, body.patches);
   }
 
+  @UseGuards(AdminGuard)
   @Post('revoke-premium-all')
   revokePremiumAll(
-    @Headers('x-admin-secret') secret: string,
     @Body() body: { exceptEmail: string },
   ) {
-    return this.playerService.adminRevokePremiumAll(secret ?? '', body.exceptEmail);
+    return this.playerService.adminRevokePremiumAll(body.exceptEmail);
   }
 }

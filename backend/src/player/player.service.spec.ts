@@ -11,6 +11,9 @@ describe('PlayerService save integrity', () => {
   const saveCreate = jest.fn();
   const saveUpdateMany = jest.fn();
   const auditCreate = jest.fn();
+  const auditFindMany = jest.fn().mockResolvedValue([]);
+  const auditDeleteMany = jest.fn().mockResolvedValue({ count: 0 });
+  const playerUpdate = jest.fn().mockResolvedValue({});
   const transactionClient = {
     saveData: {
       create: saveCreate,
@@ -18,6 +21,11 @@ describe('PlayerService save integrity', () => {
     },
     saveAudit: {
       create: auditCreate,
+      findMany: auditFindMany,
+      deleteMany: auditDeleteMany,
+    },
+    player: {
+      update: playerUpdate,
     },
   };
   const playerFindUnique = jest.fn();

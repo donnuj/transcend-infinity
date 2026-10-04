@@ -592,8 +592,8 @@ export default function AdminPage() {
 
   const loadPlayers = useCallback(async () => {
     try {
-      const data = await api.get<PlayerRow[]>("/admin/players");
-      setPlayers(data);
+      const res = await api.get<{ data: PlayerRow[] } | PlayerRow[]>("/admin/players");
+      setPlayers(Array.isArray(res) ? res : res.data);
     } catch {
       router.replace("/game");
     } finally {

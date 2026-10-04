@@ -73,6 +73,7 @@ export const environmentSchema = z.object({
   GOOGLE_CLIENT_SECRET: z.string().min(1),
   GOOGLE_CALLBACK_URL: z.string().url(),
   MP_ACCESS_TOKEN: z.string().min(1).optional(),
+  MP_WEBHOOK_SECRET: z.string().min(16).optional(),
   BACKEND_URL: z.string().url().default('https://api.transcendinfinity.com.br'),
   ADMIN_SECRET: z.string().min(16).optional(),
   SENTRY_DSN: z.string().url().optional(),

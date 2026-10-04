@@ -32,6 +32,8 @@ services:
         value: https://api.transcendinfinity.com.br/api/v1/auth/google/callback
       - key: MP_ACCESS_TOKEN
         sync: false
+      - key: MP_WEBHOOK_SECRET
+        sync: false
       - key: BACKEND_URL
         value: https://api.transcendinfinity.com.br
       - key: ADMIN_SECRET
