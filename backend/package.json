@@ -98,6 +98,9 @@
         "statements": 80
       }
     },
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "transformIgnorePatterns": [
+      "/node_modules/(?!@nestjs/terminus)"
+    ]
   }
 }

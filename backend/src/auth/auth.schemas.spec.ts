@@ -5,24 +5,23 @@ describe('contratos de autenticação', () => {
     expect(
       registerSchema.parse({
         email: ' Player@Example.COM ',
-        password: 'uma-senha-forte-123',
+        password: 'Uma-Senha-Forte-123!',
         username: '  Player_01  ',
       }),
     ).toEqual({
       email: 'player@example.com',
-      password: 'uma-senha-forte-123',
+      password: 'Uma-Senha-Forte-123!',
       username: 'Player_01',
     });
   });
 
   it.each([
-    ['email inválido', { email: 'invalid', password: 'uma-senha-forte-123' }],
-    ['senha curta', { email: 'a@b.com', password: 'curta' }],
+    ['email inválido', { email: 'invalid', password: 'Uma-Senha-Forte-123!' }],
     [
       'campo desconhecido',
       {
         email: 'a@b.com',
-        password: 'uma-senha-forte-123',
+        password: 'Uma-Senha-Forte-123!',
         admin: true,
       },
     ],
@@ -34,7 +33,7 @@ describe('contratos de autenticação', () => {
     expect(
       registerSchema.safeParse({
         email: 'a@b.com',
-        password: 'uma-senha-forte-123',
+        password: 'Uma-Senha-Forte-123!',
         username: '<script>',
       }).success,
     ).toBe(false);

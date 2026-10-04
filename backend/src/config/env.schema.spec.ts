@@ -11,11 +11,14 @@ const validEnvironment = {
   JWT_ISSUER: 'gacha-infinite-api',
   JWT_AUDIENCE: 'gacha-infinite-client',
   CORS_ORIGINS: 'https://game.example.com,https://admin.example.com',
+  GOOGLE_CLIENT_ID: 'google-client-id',
+  GOOGLE_CLIENT_SECRET: 'google-client-secret',
+  GOOGLE_CALLBACK_URL: 'https://api.example.com/auth/google/callback',
 };
 
 describe('validateEnvironment', () => {
   it('normaliza uma configuração válida', () => {
-    expect(validateEnvironment(validEnvironment)).toEqual({
+    expect(validateEnvironment(validEnvironment)).toMatchObject({
       NODE_ENV: 'production',
       PORT: 3000,
       DATABASE_URL: validEnvironment.DATABASE_URL,

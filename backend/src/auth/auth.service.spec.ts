@@ -74,10 +74,12 @@ describe('AuthService refresh lifecycle', () => {
   const config = {
     getOrThrow: jest.fn().mockReturnValue('7d'),
   } as unknown as ConfigService;
+  const email = { sendPasswordReset: jest.fn() } as unknown as any;
   const service = new AuthService(
     prisma,
     jwt,
     new AuthAttemptLimiter(),
+    email,
     config,
   );
 

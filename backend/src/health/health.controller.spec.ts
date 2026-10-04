@@ -1,3 +1,12 @@
+jest.mock('@nestjs/terminus', () => ({
+  HealthCheckService: class {},
+  HealthCheck: () => () => {},
+  HealthCheckResult: class {},
+}));
+jest.mock('@nestjs/throttler', () => ({
+  SkipThrottle: () => () => {},
+  ThrottlerGuard: class {},
+}));
 import { HealthCheckService } from '@nestjs/terminus';
 import { HealthController } from './health.controller';
 import { PrismaService } from '../prisma/prisma.service';
