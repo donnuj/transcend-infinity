@@ -1,5 +1,7 @@
 "use client";
 
+export const runtime = 'edge';
+
 import { BattleScene } from "@/src/components/game/battle/BattleScene";
 import { CaravanScene } from "@/src/components/game/travel/CaravanScene";
 import { NpcScene } from "@/src/components/game/npc/NpcScene";
