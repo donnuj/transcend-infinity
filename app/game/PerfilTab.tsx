@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGameStore } from "@/lib/game/store";
 import { ITEM_MAP, EQUIP_MAP, RUNE_MAP } from "@/lib/game/data/items";
@@ -59,6 +59,12 @@ export default function PerfilTab({
   const xpMax = 200 * playerLevel.level;
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [dmgNums, setDmgNums] = useState<{ id: number; value: number; type: "heal" | "magic" | "xp" }[]>([]);
+
+  useEffect(() => {
+    const t = setTimeout(() => setShowLevelUp(true), 600);
+    return () => clearTimeout(t);
+  }, []);
+
   const fireEffect = useCallback(() => {
     setShowLevelUp(true);
     setDmgNums((prev) => [
@@ -92,7 +98,7 @@ export default function PerfilTab({
                   src="/assets/game/characters/rpg-walk/rpg_sprite_walk.png"
                   meta={RPG_META}
                   animations={RPG_ANIMS}
-                  state="idle"
+                  state="walk"
                   style={{ width: 64, height: 64 }}
                 />
               </div>

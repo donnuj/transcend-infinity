@@ -195,6 +195,7 @@ function ArtDecoHeroCard({ hero, copies, progression, index, onClick }: {
   const shortName = hero.name.split(",")[0].toUpperCase();
   const isHighRarity = hero.rarity === "Lendário" || hero.rarity === "Mítico" || hero.rarity === "Divino";
   const isEpicPlus = hero.rarity === "Épico" || isHighRarity;
+  const isRaroPlus = hero.rarity === "Raro" || isEpicPlus;
   const frameColor = s.color;
   const [tapParticle, setTapParticle] = useState(false);
   const particleType = hero.rarity === "Mítico" ? "fire" as const : hero.rarity === "Divino" ? "star" as const : hero.rarity === "Lendário" ? "star" as const : "magic" as const;
@@ -220,9 +221,9 @@ function ArtDecoHeroCard({ hero, copies, progression, index, onClick }: {
     >
       {/* Portrait area */}
       <IdleBreathing
-        active={isEpicPlus}
-        intensity={0.018}
-        period={3.2}
+        active={isRaroPlus}
+        intensity={isHighRarity ? 0.03 : isEpicPlus ? 0.022 : 0.013}
+        period={isHighRarity ? 2.8 : 3.4}
         className="absolute inset-0"
         style={{
           bottom: "36%",
@@ -339,8 +340,8 @@ function ArtDecoHeroCard({ hero, copies, progression, index, onClick }: {
         />
       )}
 
-      {/* Shimmer sweep for high-rarity cards */}
-      {isHighRarity && (
+      {/* Shimmer sweep for raro+ cards */}
+      {isRaroPlus && (
         <motion.div
           className="pointer-events-none absolute inset-0"
           style={{
