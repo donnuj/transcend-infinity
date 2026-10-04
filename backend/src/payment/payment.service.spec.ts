@@ -1,5 +1,6 @@
 import { UnauthorizedException } from '@nestjs/common';
 import { createHmac } from 'node:crypto';
+import * as mercadopago from 'mercadopago';
 import { PaymentService } from './payment.service';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -51,7 +52,7 @@ describe('PaymentService.handleWebhook', () => {
     const Payment = jest.fn().mockImplementation(() => ({
       get: mpGetMock,
     }));
-    jest.spyOn(require('mercadopago'), 'Payment').mockImplementation(Payment);
+    jest.spyOn(mercadopago, 'Payment').mockImplementation(Payment as never);
     mpGetMock.mockResolvedValue({ status: 'pending', external_reference: '1:monthly' });
 
     const result = await service.handleWebhook(

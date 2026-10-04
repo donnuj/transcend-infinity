@@ -6,6 +6,7 @@ import { AuthService } from './auth.service';
 import { AuthAttemptLimiter } from './auth-attempt-limiter';
 import { PrismaService } from '../prisma/prisma.service';
 import { createRefreshToken, hashRefreshToken } from './token-lifecycle';
+import { EmailService } from './email.service';
 
 jest.mock('bcrypt', () => ({
   hash: jest.fn(),
@@ -74,7 +75,7 @@ describe('AuthService refresh lifecycle', () => {
   const config = {
     getOrThrow: jest.fn().mockReturnValue('7d'),
   } as unknown as ConfigService;
-  const email = { sendPasswordReset: jest.fn() } as unknown as any;
+  const email = { sendPasswordReset: jest.fn() } as unknown as EmailService;
   const service = new AuthService(
     prisma,
     jwt,
