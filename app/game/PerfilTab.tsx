@@ -9,14 +9,7 @@ import type { Profile } from "./page";
 import { StatusBar } from "@/src/components/game/ui/StatusBar";
 import { LevelUpEffect } from "@/src/components/game/effects/LevelUpEffect";
 import { FloatingIcon, PulseGlow } from "@/src/components/game/effects/FloatingIcon";
-import { CharacterSprite } from "@/src/components/game/sprites/CharacterSprite";
 import { DamageNumber } from "@/src/components/game/effects/DamageNumber";
-
-const RPG_META = { frameWidth: 64, frameHeight: 64, columns: 4, rows: 4, scale: 2 };
-const RPG_ANIMS = {
-  idle: { row: 0, frames: 1, fps: 1, loop: true as const },
-  walk: { row: 0, frames: 4, fps: 8, loop: true as const },
-};
 
 const ease = [0.23, 1, 0.32, 1] as const;
 
@@ -84,26 +77,23 @@ export default function PerfilTab({
       {/* Avatar */}
       <div className="mb-5 flex flex-col items-center">
         <div className="relative mb-3" style={{ width: 88, height: 88 }}>
-          <PulseGlow color="rgba(200,155,60,0.3)" scale={1.05} duration={2.5}>
-            <FloatingIcon amplitude={3} period={3.5}>
+          <FloatingIcon amplitude={4} period={3.2}>
+            <PulseGlow color="rgba(200,155,60,0.35)" scale={1.06} duration={2.4}>
               <div
-                className="flex items-center justify-center rounded-full border-2 border-amber/50 overflow-hidden"
+                className="flex items-center justify-center rounded-full border-2 border-amber/50"
                 style={{
                   width: 88, height: 88,
-                  background: "linear-gradient(135deg, rgba(200,155,60,0.15) 0%, rgba(10,10,22,0.95) 100%)",
-                  boxShadow: "0 0 30px rgba(200,155,60,0.2)",
+                  background: "linear-gradient(135deg, rgba(200,155,60,0.2) 0%, rgba(10,10,22,0.95) 100%)",
+                  boxShadow: "0 0 32px rgba(200,155,60,0.25), 0 0 60px rgba(200,155,60,0.08)",
+                  fontFamily: "var(--font-cinzel)",
+                  fontSize: 36, fontWeight: 900,
+                  color: "rgb(232,217,160)",
                 }}
               >
-                <CharacterSprite
-                  src="/assets/game/characters/rpg-walk/rpg_sprite_walk.png"
-                  meta={RPG_META}
-                  animations={RPG_ANIMS}
-                  state="walk"
-                  style={{ width: 64, height: 64 }}
-                />
+                {(profile?.characterName ?? profile?.username ?? "?")[0].toUpperCase()}
               </div>
-            </FloatingIcon>
-          </PulseGlow>
+            </PulseGlow>
+          </FloatingIcon>
           <LevelUpEffect show={showLevelUp} onDone={() => setShowLevelUp(false)} />
           {dmgNums.map((d) => (
             <DamageNumber
