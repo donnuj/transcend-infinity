@@ -14,120 +14,127 @@ export function ForgeScene({ itemName, progressPct = 0.4, timeLabel }: Props) {
   return (
     <div style={{
       position: "relative", borderRadius: 16, overflow: "hidden",
-      background: "linear-gradient(160deg, rgba(8,4,2,0.99) 0%, rgba(20,8,2,0.98) 100%)",
-      border: "1px solid rgba(200,100,20,0.3)",
+      background: "linear-gradient(180deg, rgba(4,2,2,1) 0%, rgba(18,6,2,1) 100%)",
+      border: "1px solid rgba(220,100,20,0.3)",
       padding: "12px 16px 10px",
-      boxShadow: "0 4px 32px rgba(0,0,0,0.7)",
+      boxShadow: "0 4px 32px rgba(0,0,0,0.8)",
       minHeight: 130,
     }}>
-      {/* Furnace glow bg */}
-      <div style={{ position: "absolute", left: "10%", bottom: 0, width: 120, height: 120, borderRadius: "50%", background: "radial-gradient(ellipse, rgba(255,100,20,0.18) 0%, transparent 70%)", filter: "blur(8px)", pointerEvents: "none" }} />
 
-      {/* Furnace */}
-      <div style={{ position: "absolute", left: "8%", bottom: 28 }}>
-        <motion.div
-          animate={{ boxShadow: ["0 0 18px rgba(255,120,20,0.5)", "0 0 36px rgba(255,160,30,0.9)", "0 0 18px rgba(255,120,20,0.5)"] }}
-          transition={{ duration: 0.9, repeat: Infinity, ease: "easeInOut" }}
-          style={{ width: 44, height: 52, background: "linear-gradient(180deg, rgb(60,30,10) 0%, rgb(30,12,4) 100%)", borderRadius: "6px 6px 4px 4px", border: "2px solid rgba(180,80,10,0.6)", position: "relative", overflow: "hidden" }}
-        >
-          {/* Fire mouth */}
-          <motion.div
-            animate={{ opacity: [0.7, 1, 0.7], scaleY: [0.9, 1.1, 0.9] }}
-            transition={{ duration: 0.6, repeat: Infinity, ease: "easeInOut" }}
-            style={{ position: "absolute", bottom: 0, left: 4, right: 4, height: 24, borderRadius: "6px 6px 0 0", background: "radial-gradient(ellipse at 50% 100%, rgba(255,200,50,0.95) 0%, rgba(255,100,10,0.8) 50%, transparent 100%)" }}
-          />
-          {/* Sparks from furnace */}
-          {[0, 1, 2, 3].map(i => (
-            <motion.div key={i}
-              animate={{ y: [0, -40 - i * 8], x: [(i % 2 === 0 ? -8 : 8) * Math.random(), (i % 2 === 0 ? 12 : -12)], opacity: [1, 0] }}
-              transition={{ duration: 0.6 + i * 0.15, repeat: Infinity, delay: i * 0.2, ease: "easeOut" }}
-              style={{ position: "absolute", bottom: 18, left: 8 + i * 7, width: 3, height: 3, borderRadius: "50%", background: i % 2 === 0 ? "rgb(255,220,50)" : "rgb(255,140,20)" }}
-            />
-          ))}
-        </motion.div>
-        {/* Furnace legs */}
-        <div style={{ display: "flex", justifyContent: "space-between", paddingLeft: 6, paddingRight: 6 }}>
-          {[0, 1].map(i => <div key={i} style={{ width: 8, height: 8, background: "rgb(40,20,5)", borderRadius: "0 0 2px 2px" }} />)}
-        </div>
-      </div>
+      {/* Deep forge glow — base */}
+      <motion.div
+        animate={{ opacity: [0.5, 0.85, 0.5], scale: [0.95, 1.05, 0.95] }}
+        transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
+        style={{ position: "absolute", bottom: -20, left: "50%", transform: "translateX(-50%)", width: 220, height: 110, borderRadius: "50%", background: "radial-gradient(ellipse, rgba(255,90,10,0.55) 0%, rgba(200,40,5,0.25) 45%, transparent 75%)", filter: "blur(10px)", pointerEvents: "none" }}
+      />
 
-      {/* Anvil */}
-      <div style={{ position: "absolute", left: "38%", bottom: 28 }}>
-        {/* Glowing item on anvil */}
-        <motion.div
-          animate={{ boxShadow: ["0 0 8px rgba(255,200,50,0.4)", "0 0 20px rgba(255,200,50,0.9)", "0 0 8px rgba(255,200,50,0.4)"] }}
-          transition={{ duration: 0.7, repeat: Infinity }}
-          style={{ width: 8, height: 28, background: "linear-gradient(180deg, rgba(255,240,100,0.95), rgba(200,150,30,0.8))", borderRadius: 2, margin: "0 auto 2px", transformOrigin: "bottom center" }}
+      {/* Inner heat core */}
+      <motion.div
+        animate={{ opacity: [0.7, 1, 0.7], scale: [0.9, 1.1, 0.9] }}
+        transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }}
+        style={{ position: "absolute", bottom: 10, left: "50%", transform: "translateX(-50%)", width: 100, height: 60, borderRadius: "50%", background: "radial-gradient(ellipse, rgba(255,220,80,0.8) 0%, rgba(255,120,10,0.5) 50%, transparent 80%)", filter: "blur(6px)", pointerEvents: "none" }}
+      />
+
+      {/* Flame tongues */}
+      {[0, 1, 2, 3, 4].map(i => (
+        <motion.div key={i}
+          animate={{
+            scaleY: [0.6 + i * 0.1, 1.2 + i * 0.08, 0.6 + i * 0.1],
+            opacity: [0.6, 1, 0.6],
+            x: [0, (i % 2 === 0 ? 6 : -6), 0],
+          }}
+          transition={{ duration: 0.5 + i * 0.12, repeat: Infinity, ease: "easeInOut", delay: i * 0.1 }}
+          style={{
+            position: "absolute", bottom: 18,
+            left: `calc(50% + ${(i - 2) * 16}px)`,
+            transformOrigin: "bottom center",
+            width: 14 + i * 2,
+            height: 32 + i * 6,
+            borderRadius: "50% 50% 20% 20%",
+            background: i < 2
+              ? "radial-gradient(ellipse at 50% 80%, rgba(255,240,100,0.95), rgba(255,140,10,0.7) 60%, transparent)"
+              : i === 2
+              ? "radial-gradient(ellipse at 50% 80%, rgba(255,200,50,0.9), rgba(255,80,5,0.5) 60%, transparent)"
+              : "radial-gradient(ellipse at 50% 80%, rgba(255,120,20,0.7), rgba(180,40,5,0.3) 60%, transparent)",
+            filter: "blur(1.5px)",
+            pointerEvents: "none",
+          }}
         />
-        {/* Anvil top */}
-        <div style={{ width: 50, height: 12, background: "linear-gradient(180deg, rgb(80,80,90) 0%, rgb(50,50,60) 100%)", borderRadius: "3px 3px 0 0", boxShadow: "0 2px 8px rgba(0,0,0,0.5)" }} />
-        {/* Anvil horn */}
-        <div style={{ display: "flex", alignItems: "flex-end" }}>
-          <div style={{ width: 10, height: 8, background: "rgb(60,60,70)", borderRadius: "0 0 0 4px" }} />
-          <div style={{ width: 30, height: 14, background: "rgb(60,60,70)" }} />
-          <div style={{ width: 10, height: 8, background: "rgb(60,60,70)", borderRadius: "0 0 4px 0" }} />
-        </div>
-      </div>
+      ))}
 
-      {/* Hammer arm */}
-      <div style={{ position: "absolute", left: "calc(38% + 8px)", bottom: 52 }}>
-        <motion.div
-          animate={{ rotate: [-50, 10, -50] }}
-          transition={{ duration: 0.55, repeat: Infinity, ease: "easeInOut" }}
-          style={{ transformOrigin: "right top", display: "flex", flexDirection: "column", alignItems: "center" }}
-        >
-          {/* Handle */}
-          <div style={{ width: 5, height: 34, background: "rgb(120,80,30)", borderRadius: 3 }} />
-          {/* Head */}
-          <div style={{ width: 20, height: 14, background: "linear-gradient(180deg, rgb(130,130,140), rgb(80,80,90))", borderRadius: 3, marginTop: -2, boxShadow: "0 2px 6px rgba(0,0,0,0.5)" }} />
-        </motion.div>
-        {/* Spark burst on impact */}
-        <motion.div
-          animate={{ opacity: [0, 1, 0] }}
-          transition={{ duration: 0.55, repeat: Infinity, ease: "easeOut", times: [0.55, 0.6, 1] }}
-          style={{ position: "absolute", bottom: -4, left: -6 }}
-        >
-          {[0, 1, 2, 3, 4].map(i => (
-            <motion.div key={i}
-              animate={{ x: [0, (i - 2) * 12], y: [0, -16 - i * 3], opacity: [1, 0] }}
-              transition={{ duration: 0.35, repeat: Infinity, delay: 0.3 + i * 0.02, ease: "easeOut" }}
-              style={{ position: "absolute", width: 4, height: 4, borderRadius: "50%", background: i % 2 === 0 ? "rgb(255,220,50)" : "rgb(255,130,20)" }}
-            />
-          ))}
-        </motion.div>
-      </div>
+      {/* Embers rising */}
+      {[0, 1, 2, 3, 4, 5, 6].map(i => (
+        <motion.div key={i}
+          animate={{
+            y: [0, -(50 + i * 12)],
+            x: [0, (i % 2 === 0 ? 1 : -1) * (8 + i * 4)],
+            opacity: [0, 1, 1, 0],
+            scale: [0.5, 1, 0.8, 0.2],
+          }}
+          transition={{ duration: 1.2 + i * 0.2, repeat: Infinity, delay: i * 0.18, ease: "easeOut" }}
+          style={{
+            position: "absolute",
+            bottom: 30,
+            left: `calc(50% + ${(i - 3) * 10}px)`,
+            width: i % 3 === 0 ? 4 : 3,
+            height: i % 3 === 0 ? 4 : 3,
+            borderRadius: "50%",
+            background: i % 3 === 0 ? "rgb(255,230,80)" : i % 3 === 1 ? "rgb(255,150,20)" : "rgb(255,80,10)",
+            boxShadow: i % 3 === 0 ? "0 0 4px rgba(255,230,80,0.8)" : "0 0 3px rgba(255,120,20,0.6)",
+            pointerEvents: "none",
+          }}
+        />
+      ))}
 
-      {/* Smoke from furnace */}
+      {/* Glowing item being forged */}
+      <motion.div
+        animate={{ opacity: [0.7, 1, 0.7], scaleX: [0.92, 1.08, 0.92] }}
+        transition={{ duration: 0.9, repeat: Infinity, ease: "easeInOut" }}
+        style={{
+          position: "absolute",
+          bottom: 52,
+          left: "50%",
+          transform: "translateX(-50%)",
+          width: 6,
+          height: 30,
+          borderRadius: 3,
+          background: "linear-gradient(180deg, rgba(255,250,180,1) 0%, rgba(255,200,50,0.9) 50%, rgba(255,100,10,0.6) 100%)",
+          boxShadow: "0 0 12px rgba(255,220,80,0.9), 0 0 24px rgba(255,160,20,0.5)",
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* Smoke wisps */}
       {[0, 1, 2].map(i => (
         <motion.div key={i}
-          animate={{ y: [0, -50 - i * 10], x: [0, (i - 1) * 15], opacity: [0.5, 0], scale: [0.5, 1.5] }}
-          transition={{ duration: 1.8 + i * 0.4, repeat: Infinity, delay: i * 0.6, ease: "easeOut" }}
-          style={{ position: "absolute", left: `calc(8% + 18px)`, bottom: 80, width: 10, height: 10, borderRadius: "50%", background: "rgba(150,100,60,0.4)", pointerEvents: "none" }}
+          animate={{ y: [0, -(60 + i * 15)], x: [0, (i - 1) * 20], opacity: [0, 0.25, 0], scale: [0.3, 1.8] }}
+          transition={{ duration: 2.5 + i * 0.5, repeat: Infinity, delay: i * 0.8, ease: "easeOut" }}
+          style={{ position: "absolute", bottom: 70, left: `calc(50% + ${(i - 1) * 14}px)`, width: 16, height: 16, borderRadius: "50%", background: "rgba(120,80,60,0.5)", filter: "blur(4px)", pointerEvents: "none" }}
         />
       ))}
 
       {/* Header */}
       <div style={{ position: "absolute", top: 10, left: 16, right: 16, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.2em", color: "rgba(200,130,50,0.6)" }}>FORJANDO</span>
+        <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.2em", color: "rgba(220,120,40,0.65)" }}>FORJANDO</span>
         {timeLabel && (
-          <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ duration: 1.1, repeat: Infinity }}
-            style={{ fontSize: 13, fontWeight: 900, color: "rgb(200,155,60)", fontFamily: "var(--font-cinzel, serif)" }}>
+          <motion.span animate={{ opacity: [1, 0.55, 1] }} transition={{ duration: 1.1, repeat: Infinity }}
+            style={{ fontSize: 13, fontWeight: 900, color: "rgb(220,150,50)", fontFamily: "var(--font-cinzel, serif)" }}>
             {timeLabel}
           </motion.span>
         )}
       </div>
 
       {itemName && (
-        <div style={{ position: "absolute", bottom: 26, left: "38%", transform: "translateX(-50%)", fontSize: 9, color: "rgba(255,200,80,0.7)", fontWeight: 700, whiteSpace: "nowrap", letterSpacing: "0.1em" }}>
+        <div style={{ position: "absolute", bottom: 26, left: "50%", transform: "translateX(-50%)", fontSize: 9, color: "rgba(255,190,70,0.75)", fontWeight: 700, whiteSpace: "nowrap", letterSpacing: "0.12em" }}>
           {itemName}
         </div>
       )}
 
       {/* Progress bar */}
       <div style={{ position: "absolute", bottom: 10, left: 16, right: 16 }}>
-        <div style={{ height: 4, borderRadius: 2, background: "rgba(60,30,10,0.5)", overflow: "hidden" }}>
+        <div style={{ height: 4, borderRadius: 2, background: "rgba(60,20,5,0.6)", overflow: "hidden" }}>
           <motion.div animate={{ width: `${clampedPct * 100}%` }} transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
-            style={{ height: "100%", borderRadius: 2, background: "linear-gradient(90deg, rgba(200,100,20,0.8), rgb(255,180,30))", boxShadow: "0 0 8px rgba(255,160,20,0.8)" }} />
+            style={{ height: "100%", borderRadius: 2, background: "linear-gradient(90deg, rgba(200,80,10,0.9), rgb(255,200,30))", boxShadow: "0 0 8px rgba(255,160,20,0.9)" }} />
         </div>
       </div>
     </div>

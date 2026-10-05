@@ -14,111 +14,100 @@ export function ConstructionScene({ buildingName, progressPct = 0.4, timeLabel }
   return (
     <div style={{
       position: "relative", borderRadius: 16, overflow: "hidden",
-      background: "linear-gradient(160deg, rgba(4,8,4,0.99) 0%, rgba(8,16,6,0.98) 100%)",
-      border: "1px solid rgba(100,180,60,0.25)",
+      background: "linear-gradient(180deg, rgba(2,4,8,1) 0%, rgba(4,10,6,1) 100%)",
+      border: "1px solid rgba(80,180,60,0.25)",
       padding: "12px 16px 10px",
-      boxShadow: "0 4px 32px rgba(0,0,0,0.7)",
+      boxShadow: "0 4px 32px rgba(0,0,0,0.8)",
       minHeight: 130,
     }}>
-      {/* Sky glow */}
-      <div style={{ position: "absolute", right: "10%", top: 0, width: 140, height: 80, borderRadius: "50%", background: "radial-gradient(ellipse, rgba(100,200,60,0.08) 0%, transparent 70%)", filter: "blur(12px)", pointerEvents: "none" }} />
 
-      {/* Ground */}
-      <div style={{ position: "absolute", bottom: 28, left: 0, right: 0, height: 2, background: "rgba(80,120,40,0.3)" }} />
+      {/* Sky gradient */}
+      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(10,20,40,0.8) 0%, transparent 55%)", pointerEvents: "none" }} />
 
-      {/* Tower structure (right side) */}
-      <div style={{ position: "absolute", right: "12%", bottom: 30 }}>
-        {/* Top battlements */}
-        <div style={{ display: "flex", gap: 3, marginBottom: 0, paddingLeft: 4 }}>
-          {[0, 1, 2, 3].map(i => (
-            <div key={i} style={{ width: 8, height: 10, background: "rgb(80,100,60)", borderRadius: "2px 2px 0 0" }} />
-          ))}
-        </div>
-        {/* Tower body */}
-        <div style={{ width: 44, height: 50, background: "linear-gradient(180deg, rgb(70,90,55) 0%, rgb(50,65,40) 100%)", borderRadius: "2px 2px 0 0", border: "1px solid rgba(100,160,60,0.3)", position: "relative", overflow: "hidden" }}>
-          {/* Window */}
-          <div style={{ position: "absolute", top: 10, left: "50%", transform: "translateX(-50%)", width: 10, height: 14, borderRadius: "4px 4px 0 0", background: "rgba(200,220,100,0.15)", border: "1px solid rgba(100,160,60,0.4)" }} />
-          {/* Stone texture lines */}
-          {[0, 1, 2].map(i => (
-            <div key={i} style={{ position: "absolute", top: 16 + i * 11, left: 4, right: 4, height: 1, background: "rgba(60,80,40,0.6)" }} />
-          ))}
-        </div>
-        {/* Tower base */}
-        <div style={{ width: 50, height: 8, background: "rgb(55,70,40)", marginLeft: -3, borderRadius: "0 0 2px 2px" }} />
-      </div>
-
-      {/* Scaffolding */}
-      <div style={{ position: "absolute", right: "calc(12% - 10px)", bottom: 30 }}>
-        {/* Vertical poles */}
-        {[0, 1].map(i => (
-          <div key={i} style={{ position: "absolute", bottom: 0, left: i * 20, width: 3, height: 70, background: "rgb(100,80,40)", borderRadius: 2 }} />
-        ))}
-        {/* Horizontal planks */}
-        {[0, 1, 2].map(i => (
-          <div key={i} style={{ position: "absolute", bottom: 16 + i * 20, left: -2, width: 28, height: 3, background: "rgb(120,95,45)", borderRadius: 1 }} />
-        ))}
-      </div>
-
-      {/* Worker on scaffolding */}
-      <motion.div
-        animate={{ y: [0, -3, 0] }}
-        transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
-        style={{ position: "absolute", right: "calc(12% + 2px)", bottom: 90 }}
-      >
-        {/* Worker body */}
-        <div style={{ width: 10, height: 14, background: "rgb(80,120,180)", borderRadius: "3px 3px 0 0", position: "relative" }}>
-          {/* Head */}
-          <div style={{ position: "absolute", top: -8, left: 1, width: 8, height: 8, borderRadius: "50%", background: "rgb(200,160,100)" }} />
-          {/* Helmet */}
-          <div style={{ position: "absolute", top: -10, left: 0, width: 10, height: 5, borderRadius: "4px 4px 0 0", background: "rgb(220,160,20)" }} />
-        </div>
-        {/* Worker arm (hammering) */}
-        <motion.div
-          animate={{ rotate: [-30, 30, -30] }}
-          transition={{ duration: 0.5, repeat: Infinity, ease: "easeInOut" }}
-          style={{ transformOrigin: "top left", position: "absolute", top: 2, right: -8, width: 10, height: 3, background: "rgb(150,120,80)", borderRadius: 2 }}
-        />
-      </motion.div>
-
-      {/* Worker on ground */}
-      <motion.div
-        animate={{ x: [0, 8, 0] }}
-        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-        style={{ position: "absolute", left: "18%", bottom: 30 }}
-      >
-        <div style={{ width: 10, height: 16, background: "rgb(140,80,50)", borderRadius: "3px 3px 0 0", position: "relative" }}>
-          <div style={{ position: "absolute", top: -9, left: 1, width: 8, height: 8, borderRadius: "50%", background: "rgb(190,150,100)" }} />
-          <div style={{ position: "absolute", top: -11, left: 0, width: 10, height: 5, borderRadius: "4px 4px 0 0", background: "rgb(200,80,20)" }} />
-        </div>
-        {/* Carrying block */}
-        <motion.div
-          animate={{ y: [-1, 1, -1] }}
-          transition={{ duration: 0.8, repeat: Infinity }}
-          style={{ position: "absolute", top: 4, left: -10, width: 8, height: 8, background: "rgb(80,90,60)", borderRadius: 2, border: "1px solid rgba(100,130,70,0.6)" }}
-        />
-      </motion.div>
-
-      {/* Stone blocks pile */}
-      <div style={{ position: "absolute", left: "8%", bottom: 30, display: "flex", gap: 2 }}>
-        {[0, 1, 2].map((i) => (
-          <div key={i} style={{ width: 12, height: 10, background: `rgb(${70 + i * 8},${85 + i * 6},${60 + i * 4})`, borderRadius: 2, border: "1px solid rgba(80,100,60,0.4)" }} />
-        ))}
-      </div>
-
-      {/* Dust particles */}
-      {[0, 1, 2].map(i => (
+      {/* Stars */}
+      {[0,1,2,3,4,5,6].map(i => (
         <motion.div key={i}
-          animate={{ y: [0, -30 - i * 8], x: [(i - 1) * 10, (i - 1) * 18], opacity: [0.4, 0], scale: [0.6, 1.4] }}
-          transition={{ duration: 1.4 + i * 0.3, repeat: Infinity, delay: i * 0.5, ease: "easeOut" }}
-          style={{ position: "absolute", right: "calc(12% + 10px)", bottom: 100 + i * 6, width: 8, height: 8, borderRadius: "50%", background: "rgba(120,140,80,0.3)", pointerEvents: "none" }}
+          animate={{ opacity: [0.2, 0.9, 0.2] }}
+          transition={{ duration: 1.8 + i * 0.3, repeat: Infinity, delay: i * 0.25 }}
+          style={{ position: "absolute", top: 6 + (i % 3) * 10, left: `${8 + i * 12}%`, width: i % 3 === 0 ? 2 : 1.5, height: i % 3 === 0 ? 2 : 1.5, borderRadius: "50%", background: "white", pointerEvents: "none" }}
         />
       ))}
 
+      {/* Moon */}
+      <motion.div
+        animate={{ opacity: [0.8, 1, 0.8] }}
+        transition={{ duration: 3, repeat: Infinity }}
+        style={{ position: "absolute", top: 10, right: "12%", width: 18, height: 18, borderRadius: "50%", background: "rgb(230,220,190)", boxShadow: "0 0 14px rgba(230,220,190,0.35)", pointerEvents: "none" }}
+      />
+
+      {/* Tower silhouette — grows with progress */}
+      <div style={{ position: "absolute", bottom: 28, left: "50%", transform: "translateX(-50%)" }}>
+        {/* Base */}
+        <div style={{ position: "relative" }}>
+          {/* Tower body — height animated by clampedPct */}
+          <motion.div
+            animate={{ height: 20 + clampedPct * 48 }}
+            transition={{ duration: 1.2, ease: [0.23, 1, 0.32, 1] }}
+            style={{ width: 36, background: "linear-gradient(180deg, rgba(50,70,45,0.95) 0%, rgba(30,45,25,0.95) 100%)", borderRadius: "2px 2px 0 0", overflow: "hidden", position: "relative" }}
+          >
+            {/* Window glow */}
+            <motion.div
+              animate={{ opacity: [0.3, 0.9, 0.3] }}
+              transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+              style={{ position: "absolute", top: 6, left: "50%", transform: "translateX(-50%)", width: 8, height: 10, borderRadius: "3px 3px 0 0", background: "rgba(180,220,100,0.4)", boxShadow: "0 0 8px rgba(150,220,80,0.5)" }}
+            />
+          </motion.div>
+          {/* Battlements — appear at ~70% progress */}
+          <motion.div
+            animate={{ opacity: clampedPct > 0.7 ? 1 : 0, y: clampedPct > 0.7 ? 0 : 6 }}
+            transition={{ duration: 0.5 }}
+            style={{ display: "flex", gap: 3, marginBottom: 0, paddingLeft: 3 }}
+          >
+            {[0,1,2,3].map(i => (
+              <div key={i} style={{ width: 6, height: 8, background: "rgba(50,70,45,0.95)", borderRadius: "1px 1px 0 0" }} />
+            ))}
+          </motion.div>
+        </div>
+        {/* Foundation */}
+        <div style={{ width: 44, height: 6, background: "rgba(40,55,35,0.95)", borderRadius: "0 0 2px 2px", marginLeft: -4 }} />
+      </div>
+
+      {/* Construction energy particles rising */}
+      {[0,1,2,3,4].map(i => (
+        <motion.div key={i}
+          animate={{
+            y: [0, -(40 + i * 10)],
+            x: [(i - 2) * 6, (i - 2) * 14],
+            opacity: [0, 0.9, 0],
+            scale: [0.4, 1, 0.2],
+          }}
+          transition={{ duration: 1.6 + i * 0.2, repeat: Infinity, delay: i * 0.32, ease: "easeOut" }}
+          style={{
+            position: "absolute",
+            bottom: 40,
+            left: "50%",
+            width: 5,
+            height: 5,
+            borderRadius: "50%",
+            background: i % 2 === 0 ? "rgba(120,220,80,0.9)" : "rgba(80,200,140,0.85)",
+            boxShadow: i % 2 === 0 ? "0 0 6px rgba(100,200,60,0.8)" : "0 0 5px rgba(60,180,120,0.7)",
+            pointerEvents: "none",
+          }}
+        />
+      ))}
+
+      {/* Ground glow */}
+      <motion.div
+        animate={{ opacity: [0.3, 0.6, 0.3] }}
+        transition={{ duration: 2, repeat: Infinity }}
+        style={{ position: "absolute", bottom: 20, left: "50%", transform: "translateX(-50%)", width: 120, height: 30, borderRadius: "50%", background: "radial-gradient(ellipse, rgba(80,180,50,0.2) 0%, transparent 70%)", filter: "blur(6px)", pointerEvents: "none" }}
+      />
+
       {/* Header */}
       <div style={{ position: "absolute", top: 10, left: 16, right: 16, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.2em", color: "rgba(100,180,60,0.6)" }}>CONSTRUINDO</span>
+        <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.2em", color: "rgba(80,180,60,0.65)" }}>CONSTRUINDO</span>
         {timeLabel && (
-          <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ duration: 1.1, repeat: Infinity }}
+          <motion.span animate={{ opacity: [1, 0.55, 1] }} transition={{ duration: 1.1, repeat: Infinity }}
             style={{ fontSize: 13, fontWeight: 900, color: "rgb(100,200,80)", fontFamily: "var(--font-cinzel, serif)" }}>
             {timeLabel}
           </motion.span>
@@ -126,16 +115,16 @@ export function ConstructionScene({ buildingName, progressPct = 0.4, timeLabel }
       </div>
 
       {buildingName && (
-        <div style={{ position: "absolute", bottom: 26, left: "50%", transform: "translateX(-50%)", fontSize: 9, color: "rgba(120,200,80,0.7)", fontWeight: 700, whiteSpace: "nowrap", letterSpacing: "0.1em" }}>
+        <div style={{ position: "absolute", bottom: 26, left: "50%", transform: "translateX(-50%)", fontSize: 9, color: "rgba(100,200,80,0.75)", fontWeight: 700, whiteSpace: "nowrap", letterSpacing: "0.12em" }}>
           {buildingName}
         </div>
       )}
 
       {/* Progress bar */}
       <div style={{ position: "absolute", bottom: 10, left: 16, right: 16 }}>
-        <div style={{ height: 4, borderRadius: 2, background: "rgba(20,40,15,0.5)", overflow: "hidden" }}>
+        <div style={{ height: 4, borderRadius: 2, background: "rgba(10,25,8,0.6)", overflow: "hidden" }}>
           <motion.div animate={{ width: `${clampedPct * 100}%` }} transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
-            style={{ height: "100%", borderRadius: 2, background: "linear-gradient(90deg, rgba(60,150,30,0.8), rgb(120,220,60))", boxShadow: "0 0 8px rgba(100,200,50,0.8)" }} />
+            style={{ height: "100%", borderRadius: 2, background: "linear-gradient(90deg, rgba(40,140,20,0.9), rgb(120,230,60))", boxShadow: "0 0 8px rgba(80,200,40,0.9)" }} />
         </div>
       </div>
     </div>
