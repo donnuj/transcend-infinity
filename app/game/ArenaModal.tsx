@@ -35,7 +35,7 @@ type RealOpponent = {
 
 type Screen = "overview" | "choose-defender" | "challengers" | "result";
 
-export default function ArenaModal({ onClose }: { onClose: () => void }) {
+export default function ArenaModal({ onClose, embedded }: { onClose: () => void; embedded?: boolean }) {
   const [screen, setScreen] = useState<Screen>("overview");
   const [result, setResult] = useState<{ won: boolean; ratingChange: number; opponentName: string } | null>(null);
   const [realOpponents, setRealOpponents] = useState<RealOpponent[] | null>(null);

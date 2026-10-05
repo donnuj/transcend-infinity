@@ -11,9 +11,11 @@ const PROTECTED = ["/game", "/admin"];
 export function middleware(req: NextRequest) {
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
 
+  const isDev = process.env.NODE_ENV === "development";
+
   const csp = [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://static.cloudflareinsights.com`,
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDev ? " 'unsafe-eval'" : ""} https://static.cloudflareinsights.com`,
     "style-src 'self' 'unsafe-inline'",
     `connect-src 'self' ${API_ORIGIN} ${SENTRY_INGEST}`,
     "img-src 'self' data: blob:",
@@ -25,7 +27,7 @@ export function middleware(req: NextRequest) {
   const isProtected = PROTECTED.some((p) => req.nextUrl.pathname.startsWith(p));
   const hasSession = req.cookies.has("ti_session") || req.cookies.has("ti_offline");
 
-  if (isProtected && !hasSession) {
+  if (!isDev && isProtected && !hasSession) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
