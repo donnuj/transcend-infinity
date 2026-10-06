@@ -57,8 +57,8 @@ export function LevelUpEffect({ show, onDone }: Props) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    if (!show) { setMounted(false); return; }
     // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (!show) { setMounted(false); return; }
     setMounted(true);
     const t = setTimeout(() => { setMounted(false); onDone?.(); }, 1400);
     return () => clearTimeout(t);
