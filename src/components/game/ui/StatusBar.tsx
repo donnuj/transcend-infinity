@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useEffect, useRef, CSSProperties } from "react";
+import { useRef, CSSProperties } from "react";
 
 type BarType = "hp" | "mp" | "xp" | "rage" | "shield";
 
@@ -39,11 +39,12 @@ export function StatusBar({
   const cfg = BAR_CONFIG[type];
   const pct = max > 0 ? Math.min(1, Math.max(0, value / max)) : 0;
   const h = compact ? 4 : 7;
-  const prevPct = useRef(pct);
 
-  // flash red on damage
+  // flash red on damage — reading/writing ref during render is intentional (prev-value tracking)
   const prevValue = useRef(value);
+  // eslint-disable-next-line react-hooks/refs
   const damaged = value < prevValue.current;
+  // eslint-disable-next-line react-hooks/refs
   prevValue.current = value;
 
   return (

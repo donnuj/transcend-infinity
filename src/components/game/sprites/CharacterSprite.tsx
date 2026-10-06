@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, CSSProperties } from "react";
+import { useState, useMemo, CSSProperties } from "react";
 import { SpriteSheet, AnimationDef, SpriteSheetMeta } from "./SpriteSheet";
 
 export type CharacterState =
@@ -47,16 +47,10 @@ export function CharacterSprite({
   fallbackSrc,
 }: Props) {
   const [imgError, setImgError] = useState(false);
-  const [resolved, setResolved] = useState<CharacterState>("idle");
-
-  useEffect(() => {
-    if (animations[state]) {
-      setResolved(state);
-      return;
-    }
+  const resolved = useMemo<CharacterState>(() => {
+    if (animations[state]) return state;
     const chain = FALLBACK_CHAIN[state] ?? [];
-    const fallback = chain.find((s) => animations[s]) ?? "idle";
-    setResolved(fallback as CharacterState);
+    return (chain.find((s) => animations[s]) ?? "idle") as CharacterState;
   }, [state, animations]);
 
   const anim = animations[resolved];
