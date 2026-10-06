@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useMemo } from "react";
 
 interface Particle {
   id: number;
@@ -15,26 +14,27 @@ interface Particle {
 }
 
 const COLORS = [
-  "rgba(200,155,60,",   // amber
-  "rgba(170,130,255,",  // violet
-  "rgba(90,150,255,",   // blue
-  "rgba(255,255,200,",  // white-gold
-  "rgba(180,110,255,",  // purple
+  "rgba(200,155,60,",
+  "rgba(170,130,255,",
+  "rgba(90,150,255,",
+  "rgba(255,255,200,",
+  "rgba(180,110,255,",
 ];
 
+// Precomputed at module load to avoid Math.random() during render
+const PRESET_PARTICLES: Particle[] = Array.from({ length: 50 }, (_, i) => ({
+  id: i,
+  x: Math.random() * 100,
+  size: 1 + Math.random() * 2.5,
+  opacity: 0.12 + Math.random() * 0.28,
+  duration: 8 + Math.random() * 14,
+  delay: -Math.random() * 20,
+  drift: (Math.random() - 0.5) * 60,
+  color: COLORS[Math.floor(Math.random() * COLORS.length)],
+}));
+
 export function AmbientParticles({ count = 38 }: { count?: number }) {
-  const particles = useMemo<Particle[]>(() =>
-    Array.from({ length: count }, (_, i) => ({
-      id: i,
-      x: Math.random() * 100,
-      size: 1 + Math.random() * 2.5,
-      opacity: 0.12 + Math.random() * 0.28,
-      duration: 8 + Math.random() * 14,
-      delay: -Math.random() * 20,
-      drift: (Math.random() - 0.5) * 60,
-      color: COLORS[Math.floor(Math.random() * COLORS.length)],
-    }))
-  , [count]);
+  const particles = PRESET_PARTICLES.slice(0, count);
 
   return (
     <div

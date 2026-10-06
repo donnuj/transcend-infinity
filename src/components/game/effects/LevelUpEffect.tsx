@@ -8,14 +8,21 @@ interface Props {
   onDone?: () => void;
 }
 
+// Precomputed at module load to avoid Math.random() during render
+const PRESET_STARS = Array.from({ length: 20 }, () => ({
+  dist: 55 + Math.random() * 35,
+  size: 4 + Math.random() * 6,
+  dur: 0.7 + Math.random() * 0.3,
+  delay: Math.random() * 0.15,
+}));
+
 function StarBurst({ count = 10 }: { count?: number }) {
   return (
     <>
       {Array.from({ length: count }).map((_, i) => {
         const angle = (i / count) * 360;
-        const dist = 55 + Math.random() * 35;
+        const { dist, size, dur, delay } = PRESET_STARS[i];
         const rad = (angle * Math.PI) / 180;
-        const size = 4 + Math.random() * 6;
         return (
           <motion.div
             key={i}
@@ -38,7 +45,7 @@ function StarBurst({ count = 10 }: { count?: number }) {
               scale: [0, 1.3, 0],
               opacity: [1, 0.9, 0],
             }}
-            transition={{ duration: 0.7 + Math.random() * 0.3, ease: [0.23, 1, 0.32, 1], delay: Math.random() * 0.15 }}
+            transition={{ duration: dur, ease: [0.23, 1, 0.32, 1], delay }}
           />
         );
       })}
@@ -51,6 +58,7 @@ export function LevelUpEffect({ show, onDone }: Props) {
 
   useEffect(() => {
     if (!show) { setMounted(false); return; }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
     const t = setTimeout(() => { setMounted(false); onDone?.(); }, 1400);
     return () => clearTimeout(t);

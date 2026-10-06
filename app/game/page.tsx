@@ -154,6 +154,7 @@ export default function GamePage() {
     }
     if (!offline && !isAuthenticated()) { router.replace("/login"); return; }
     if (offline) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setUser({ id: "offline", username: "Viajante", email: "", level: 1 });
       return;
     }

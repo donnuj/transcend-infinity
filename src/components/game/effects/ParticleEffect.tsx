@@ -79,7 +79,7 @@ export function ParticleEffect({ type = "magic", x = 0, y = 0, onDone, style }: 
     const count = Math.round(rng(cfg.count[0], cfg.count[1]));
     return Array.from({ length: count }, (_, i) => ({
       id: i,
-      src: cfg.particles[Math.floor(Math.random() * cfg.particles.length)],
+      src: cfg.particles[Math.floor(rng(0, cfg.particles.length))],
       size: rng(cfg.size[0], cfg.size[1]),
       angle: rng(0, 360),
       dist: rng(cfg.spread * 0.3, cfg.spread),
