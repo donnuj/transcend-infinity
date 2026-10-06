@@ -1,4 +1,4 @@
-import type { PrimaryStats, SecondaryStats, HeroRank, HeroStars, ElementType } from "./types";
+import type { PrimaryStats, SecondaryStats, HeroRank, HeroStars, ElementType, HeroLevelSave, HeroProgressionSave } from "./types";
 
 const RANK_MULT: Record<HeroRank, number> = {
   F: 0.6, E: 0.7, D: 0.8, C: 0.9, B: 1.0,
@@ -63,6 +63,45 @@ export function elementMultiplier(attacker: ElementType, defender: ElementType):
   if (adv[attacker] === defender) return 1.5;
   if (adv[defender] === attacker) return 0.5;
   return 1;
+}
+
+// ── Team power & battle time reduction ───────────────────────────────────────
+
+const RANK_MULT_ARR = [0.6, 0.7, 0.8, 0.9, 1.0, 1.15, 1.35, 1.6, 2.0];
+const STAR_BONUS_ARR: Record<number, number> = { 1: 1.00, 2: 1.10, 3: 1.22, 4: 1.37, 5: 1.55 };
+
+/** Weighted power score for a team — level × rank_mult × star_bonus, averaged */
+export function calcTeamPower(
+  heroIds: string[],
+  heroLevels: HeroLevelSave[],
+  heroProgression: HeroProgressionSave[],
+): number {
+  if (heroIds.length === 0) return 0;
+  let total = 0;
+  for (const id of heroIds) {
+    const levelSave = heroLevels.find((h) => h.heroId === id);
+    const prog = heroProgression.find((h) => h.heroId === id);
+    const level = levelSave?.level ?? 1;
+    const rankIdx = Math.min(prog?.rank ?? 0, 8);
+    const rankMult = RANK_MULT_ARR[rankIdx] ?? 1.0;
+    const starBonus = STAR_BONUS_ARR[prog?.stars ?? 1] ?? 1.0;
+    total += level * rankMult * starBonus;
+  }
+  return total / heroIds.length;
+}
+
+/**
+ * Time multiplier [0.25, 1.0] based on how far the team's power exceeds the
+ * content's required level. At 100% power = no reduction; every 2.5% over =
+ * 1% faster, capped at 75% reduction.
+ */
+export function calcBattleTimeMultiplier(teamPower: number, requiredLevel: number): number {
+  if (requiredLevel <= 0 || teamPower <= 0) return 1.0;
+  const ratio = teamPower / requiredLevel;
+  if (ratio <= 1.0) return 1.0;
+  const excess = ratio - 1.0;
+  const reduction = Math.min(excess * 0.4, 0.75);
+  return 1.0 - reduction;
 }
 
 export const XP_PER_HERO_LEVEL = (level: number) => 100 + level * 50;

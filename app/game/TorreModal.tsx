@@ -14,6 +14,7 @@ import {
   rollTowerLoot,
   isBossFloor,
 } from "@/lib/game/data/towerData";
+import { calcTeamPower, calcBattleTimeMultiplier } from "@/lib/game/calc";
 
 const ease = [0.23, 1, 0.32, 1] as const;
 
@@ -396,13 +397,34 @@ export default function TorreModal({ onClose }: { onClose: () => void }) {
 
             {/* Dispatch bar */}
             <div className="border-t border-violet/10 px-4 py-3">
-              {targetFloor && team.length > 0 && (
-                <p className="mb-2 text-center text-[11px] text-violet/50">
-                  Tempo estimado: <span className="font-bold text-amber-400">
-                    {fmtDuration(calcTowerTimeSeconds(tower.bestFloor, targetFloor))}
-                  </span>
-                </p>
-              )}
+              {targetFloor && team.length > 0 && (() => {
+                const baseSecs = calcTowerTimeSeconds(tower.bestFloor, targetFloor);
+                const power = calcTeamPower(team, save.heroLevels, save.heroProgression);
+                const mult = calcBattleTimeMultiplier(power, targetFloor);
+                const effectiveSecs = Math.round(baseSecs * mult);
+                const hasBonus = mult < 0.999;
+                return (
+                  <div className="mb-2 text-center">
+                    <p className="text-[11px] text-violet/50">
+                      Tempo estimado:{" "}
+                      {hasBonus ? (
+                        <>
+                          <span className="line-through opacity-40">{fmtDuration(baseSecs)}</span>
+                          {" "}
+                          <span className="font-bold" style={{ color: "rgb(100,220,140)" }}>{fmtDuration(effectiveSecs)}</span>
+                        </>
+                      ) : (
+                        <span className="font-bold text-amber-400">{fmtDuration(baseSecs)}</span>
+                      )}
+                    </p>
+                    {hasBonus && (
+                      <p className="text-[10px]" style={{ color: "rgb(100,220,140)" }}>
+                        -{Math.round((1 - mult) * 100)}% por poder elevado
+                      </p>
+                    )}
+                  </div>
+                );
+              })()}
               <motion.button
                 onClick={team.length > 0 && targetFloor ? handleDispatch : undefined}
                 whileTap={team.length > 0 && targetFloor ? { scale: 0.97 } : undefined}

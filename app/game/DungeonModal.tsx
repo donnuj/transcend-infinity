@@ -7,6 +7,7 @@ import { HERO_MAP } from "@/lib/game/data/heroes";
 import { DUNGEONS } from "@/lib/game/data/world";
 import { scheduleSave } from "@/lib/game/save";
 import { DUNGEON_DURATIONS, DUNGEON_REWARDS, rollDungeonLoot } from "@/lib/game/data/towerData";
+import { calcTeamPower, calcBattleTimeMultiplier } from "@/lib/game/calc";
 import type { DungeonDef, DungeonDifficulty, HeroLevelSave, PendingDungeonRun } from "@/lib/game/types";
 import { DamageNumber } from "@/src/components/game/effects/DamageNumber";
 import { LevelUpEffect } from "@/src/components/game/effects/LevelUpEffect";
@@ -477,6 +478,14 @@ function TeamPicker({ dungeon, difficulty, team, busyIds, onTeamChange, onDispat
     : chancePct >= 30 ? "rgb(255,140,60)"
     : "rgb(255,80,80)";
 
+  const teamPower = team.length > 0
+    ? calcTeamPower(team, save.heroLevels, save.heroProgression)
+    : 0;
+  const requiredLevel = dungeon.recommendedLevel * DIFFICULTY_MULT[difficulty];
+  const timeMult = team.length > 0 ? calcBattleTimeMultiplier(teamPower, requiredLevel) : 1.0;
+  const effectiveDuration = Math.round(DUNGEON_DURATIONS[difficulty] * timeMult);
+  const hasTimeBonus = timeMult < 0.999;
+
   const heroes = useMemo(() => {
     const ids = new Set(save.collectedHeroIds.map((k) => k.split("|")[1]));
     return Array.from(ids).map((id) => HERO_MAP[id]).filter(Boolean);
@@ -505,7 +514,16 @@ function TeamPicker({ dungeon, difficulty, team, busyIds, onTeamChange, onDispat
             Time ({team.length}/{MAX_TEAM})
           </p>
           <span className="text-[11px] font-bold" style={{ color: diffColor }}>
-            {DIFFICULTY_LABELS[difficulty]} · {fmtDuration(DUNGEON_DURATIONS[difficulty])}
+            {DIFFICULTY_LABELS[difficulty]} ·{" "}
+            {hasTimeBonus ? (
+              <>
+                <span className="line-through opacity-40">{fmtDuration(DUNGEON_DURATIONS[difficulty])}</span>
+                {" "}
+                <span style={{ color: "rgb(100,220,140)" }}>{fmtDuration(effectiveDuration)}</span>
+              </>
+            ) : (
+              fmtDuration(DUNGEON_DURATIONS[difficulty])
+            )}
           </span>
         </div>
         <div className="mb-3 flex gap-2">
@@ -541,6 +559,14 @@ function TeamPicker({ dungeon, difficulty, team, busyIds, onTeamChange, onDispat
                 transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
               />
             </div>
+            {hasTimeBonus && (
+              <div className="mt-1.5 flex items-center justify-between">
+                <span className="text-[10px] uppercase tracking-[0.2em] text-violet/50">Bônus de poder</span>
+                <span className="text-[10px] font-bold" style={{ color: "rgb(100,220,140)" }}>
+                  -{Math.round((1 - timeMult) * 100)}% tempo
+                </span>
+              </div>
+            )}
           </div>
         )}
       </div>

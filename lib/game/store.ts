@@ -6,12 +6,19 @@ import { ACHIEVEMENTS } from "./data/achievements";
 import { DAILY_CHALLENGES } from "./data/challenges";
 import { calcTowerTimeSeconds, DUNGEON_DURATIONS } from "./data/towerData";
 import { COMPANION_MAP } from "./data/companions";
+import { calcTeamPower, calcBattleTimeMultiplier } from "./calc";
+import { HERO_MAP } from "./data/heroes";
+import { DUNGEONS } from "./data/world";
 
 // ── Bonus memo cache (avoids recomputing on every addCurrency call) ───────────
 
 type CompanionBonuses = { xpMult: number; atkMult: number; crystalMult: number; dropMult: number; ouroMult: number };
 type FactionBonuses   = { ouroMult: number; crystalMult: number; xpMult: number; caravanMult: number };
 type HousingBonuses   = { xpMult: number; dropMult: number };
+
+const DUNGEON_DIFFICULTY_MULT: Record<string, number> = {
+  easy: 0.5, normal: 1.0, hard: 1.5, epic: 2.0, legendary: 3.0,
+};
 
 const _bonusCache = {
   companionKey: "" as unknown,
@@ -639,7 +646,9 @@ export const useGameStore = create<GameStore>()(
         const fromFloor = state.save.tower.bestFloor;
         if (targetFloor <= fromFloor) return false;
 
-        const seconds = calcTowerTimeSeconds(fromFloor, targetFloor);
+        const teamPower = calcTeamPower(heroIds, state.save.heroLevels, state.save.heroProgression);
+        const timeMult = calcBattleTimeMultiplier(teamPower, targetFloor);
+        const seconds = Math.round(calcTowerTimeSeconds(fromFloor, targetFloor) * timeMult);
         const now = new Date();
         const endTime = new Date(now.getTime() + seconds * 1000);
 
@@ -677,7 +686,11 @@ export const useGameStore = create<GameStore>()(
         const state = get();
         const busy = state.getBusyHeroIds();
         if (heroIds.some((id) => busy.includes(id))) return null;
-        const seconds = DUNGEON_DURATIONS[difficulty];
+        const dungeon = DUNGEONS.find((d) => d.dungeonId === dungeonId);
+        const requiredLevel = (dungeon?.recommendedLevel ?? 1) * (DUNGEON_DIFFICULTY_MULT[difficulty] ?? 1.0);
+        const teamPower = calcTeamPower(heroIds, state.save.heroLevels, state.save.heroProgression);
+        const timeMult = calcBattleTimeMultiplier(teamPower, requiredLevel);
+        const seconds = Math.round(DUNGEON_DURATIONS[difficulty] * timeMult);
         const now = new Date();
         const runId = `${dungeonId}_${now.getTime()}`;
         const endTime = new Date(now.getTime() + seconds * 1000);
