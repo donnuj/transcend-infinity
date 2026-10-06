@@ -3,9 +3,9 @@
 import { motion } from "framer-motion";
 
 const HEROES = [
-  { id: "hero_mago",       left: "10%", size: 128 },
-  { id: "hero_gladiador",  left: "27%", size: 158 },
-  { id: "hero_curandeiro", left: "46%", size: 118 },
+  { id: "hero_mago",       left: "10%", size: 128, floatDuration: 2.8 },
+  { id: "hero_gladiador",  left: "27%", size: 158, floatDuration: 3.1 },
+  { id: "hero_curandeiro", left: "46%", size: 118, floatDuration: 2.6 },
 ];
 
 const ENEMIES = [
@@ -54,7 +54,7 @@ export default function GameField({ onClick }: { onClick?: () => void }) {
               mixBlendMode: "screen",
             }}
             animate={{ y: [0, -7, 0] }}
-            transition={{ duration: 2.8 + Math.random() * 0.6, ease: "easeInOut", repeat: Infinity, repeatType: "loop" }}
+            transition={{ duration: h.floatDuration, ease: "easeInOut", repeat: Infinity, repeatType: "loop" }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
