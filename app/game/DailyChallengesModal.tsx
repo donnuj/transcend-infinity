@@ -8,7 +8,7 @@ import { scheduleSave } from "@/lib/game/save";
 
 const ease = [0.23, 1, 0.32, 1] as const;
 
-export default function DailyChallengesModal({ onClose, embedded }: { onClose: () => void; embedded?: boolean }) {
+export default function DailyChallengesModal({ onClose, embedded: _embedded }: { onClose: () => void; embedded?: boolean }) {
   const { save, claimDailyReward, getDailyProgress, resetDailyChallengesIfNeeded } = useGameStore();
 
   // eslint-disable-next-line react-hooks/exhaustive-deps

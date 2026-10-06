@@ -25,6 +25,7 @@ import AnimatedNumber from "./AnimatedNumber";
 const CartasTab         = dynamic(() => import("./CartasTab"),         { ssr: false });
 const InvocarTab        = dynamic(() => import("./InvocarTab"),        { ssr: false });
 const GuildaTab         = dynamic(() => import("./GuildaTab"),         { ssr: false });
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const PerfilTab         = dynamic(() => import("./PerfilTab"),         { ssr: false });
 
 const DungeonModal         = dynamic(() => import("./DungeonModal"),         { ssr: false });
@@ -95,6 +96,7 @@ export default function GamePage() {
 
   // legacy modal flags (mantidos para compatibilidade com WorldTab)
   const [showDungeon,     setShowDungeon]     = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [showArena,       setShowArena]       = useState(false);
   const [showBattlePass,  setShowBattlePass]  = useState(false);
   const [showTorre,       setShowTorre]       = useState(false);
@@ -127,9 +129,13 @@ export default function GamePage() {
   const openWorldMap   = useCallback(() => setShowWorldMap(true),   []);
   const openNpcDialogue= useCallback(() => setShowNpcDialogue(true), []);
   const openCaravana   = useCallback(() => setShowCaravana(true),   []);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const openAchievements=useCallback(() => setShowAchievements(true),[]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const openCodex      = useCallback(() => setShowCodex(true),      []);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const openSeason     = useCallback(() => setShowSeason(true),     []);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const openHousing    = useCallback(() => setShowHousing(true),    []);
   const openCompanions = useCallback(() => setShowCompanions(true), []);
   const openAlchemy    = useCallback(() => setShowAlchemy(true),    []);

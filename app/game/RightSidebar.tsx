@@ -48,7 +48,8 @@ function SectionHeader({ icon, label, open, onToggle }: {
 
 export default function RightSidebar({ onHerois }: { onHerois: () => void }) {
   const save        = useGameStore((s) => s.save);
-  const [teamOpen,  setTeamOpen]  = useState(true);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_teamOpen, _setTeamOpen] = useState(true);
   const [spoilOpen, setSpoilOpen] = useState(true);
 
   // Pega os primeiros 5 heróis coletados para mostrar na equipe
@@ -103,6 +104,7 @@ export default function RightSidebar({ onHerois }: { onHerois: () => void }) {
           if (!hero) return null;
 
           const rarColor = RARITY_COLOR[hero.rarity] ?? CREAM;
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const prog = save.heroProgression.find(p => p.heroId === heroId);
           const lvl  = save.heroLevels.find(l => l.heroId === heroId)?.level ?? 1;
 

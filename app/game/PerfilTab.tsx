@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useGameStore } from "@/lib/game/store";
 import { ITEM_MAP, EQUIP_MAP, RUNE_MAP } from "@/lib/game/data/items";
 import { useSave } from "@/lib/game/save";

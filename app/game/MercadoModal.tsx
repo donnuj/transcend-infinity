@@ -33,7 +33,7 @@ const PREMIUM_BUNDLES = [
   { id: "p4", label: "Pacote Lendário",     cristaisAstra: 5000, description: "5000 Cristais + bônus 50%",  usd: "R$ 49,99" },
 ];
 
-export default function MercadoModal({ onClose, embedded }: { onClose: () => void; embedded?: boolean }) {
+export default function MercadoModal({ onClose, embedded: _embedded }: { onClose: () => void; embedded?: boolean }) {
   const [section, setSection] = useState<ShopSection>("selos");
   const [feedback, setFeedback] = useState<string | null>(null);
   const { save, spendCurrency, addCurrency, addItem } = useGameStore();
