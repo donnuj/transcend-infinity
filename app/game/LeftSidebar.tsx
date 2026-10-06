@@ -49,6 +49,7 @@ export default function LeftSidebar({ onMissoes }: { onMissoes: () => void }) {
   const [chatOpen,    setChatOpen]    = useState(true);
   const [chatMsg,     setChatMsg]     = useState("");
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const currentPhase = (save as any).currentPhase ?? 1;
 
   const FAKE_CHAT = [
